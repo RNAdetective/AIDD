@@ -37,15 +37,21 @@ http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
 
 8. Turn off the virtualbox and check the settings for system.  Make sure you have set aside enough RAM and CPU to run the machine you must select at least 4G of RAM and 1CPU to run at bare minimum.  (Although to run STAR aligner option you must select at least 30G of RAM).  Make sure you have attached you hard drive or shared folder (see the manual for instructions for this set up).
 
-9.  Then download TDPipelines.tar.gz, uncompress and move to /home/user the Pipelines folder
+9.  Once you load your new virtual box open command prompt and copy paste the following commands
+wget https://github.com/nplonsk2/RNAseqPipeline/raw/master/VMsetup.tar.gz
+tar -xvzf VMsetup.tar.gz
+bash /home/user/VMsetup/set_up.sh
 
-then copy and paste
-bash /home/user/Pipelines/set_upCode.sh
+10. The first prompt will ask you for the password which is password
+    The second prompt will ask to hit enter
+    The third prompt will ask for you to pick which verison of Java you would like to use the options are 0 1 2 you want to hit 2
+    The fourth prompt will ask for 
 
-You will be prompted through out this script running follow along with all prompts answering y when prompted y or n or enter when prompted to press enter however one of the first prompts will ask you to enter 0 1 or 2 you will enter 2 and near the end when it is updating R it will give you more options then just y or n at this point you will select n.  
-
-once the operating system and programs are ready copy and paste the following to run the R package setup
+11. once the operating system and programs are ready copy and paste the following to run the R package setup
 ##this first command runs command at the root
 sudo su
-##then enter password then copy and paste the following in the root directory prompt
+##then enter password which is password then copy and paste the following in the root directory prompt
 Rscript /home/user/Pipelines/Rscripts/install_packages.R
+##if the script runs into a error where it asks the user for input just exit out and run it again and that should fix the error.
+12. You know have a newly constructed VirtualBox capable of running our script for RNAseq transcriptome diversity discovery so copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
+bash /home/user/TDPipelines/RNAseq_pipeline.sh
