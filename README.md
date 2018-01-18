@@ -1,4 +1,4 @@
-# RNAseqPipeline
+# TDPipeline
 
 These are the directions to create a new vm image with biolinux8 and then how to use the script to update, download and install all necessary tools for RNAseq_TDPipeline.sh to run which is our RNAseq computational pipeline for transcriptome diversity discovery.
 
