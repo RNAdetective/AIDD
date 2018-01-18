@@ -21,6 +21,7 @@ http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
 3. When it asks where to load from click on bio linux 8 .iso file in your file system.
       This will then load the iso file and it is just like you are installing a new os.
       then install biolinux following prompts until it is done.
+      Hit Continue make sure you erase disk options and keep clicking continue
       Make sure you use username = user and password = password
       When you click restart wait about 15 seconds and you can close the virtualbox and click the option shutdown machine.
 
@@ -31,7 +32,7 @@ http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
 
 5. Restart for this to finish installation.  (shutdown virutalbox and then double click on it again to restart)
 
-6. When the virtualbox restarts it will prompt an upgrade select no upgrade.  (those upgrades do not work with the virtual box we will manually upgrade in the set-up.sh script.
+6. When the virtualbox restarts it will prompt an upgrade select no upgrade.  (those upgrades do not work with the virtual box we will manually upgrade in the set-up.sh script)
 
 7. You can Use rightCTRL C to switch between scale mode to be able to get the full screen view but you need to have scale mode turned off to see the top menu while in your virtualbox.  When you see the menu bar across the top then go to view menu and select the screen resolution
 
@@ -44,14 +45,17 @@ bash /home/user/VMsetup/set_up.sh
 
 10. The first prompt will ask you for the password which is password
     The second prompt will ask to hit enter
-    The third prompt will ask for you to pick which verison of Java you would like to use the options are 0 1 2 you want to hit 2
-    The fourth prompt will ask for 
+    The third prompt will ask which version you want to keep you want to keep current version you want the default hit n
+    The fourth promt It will prompt for the password again enter password
+    The fifth prompt will ask for you to pick which verison of Java you would like to use the options are 0 1 2 you want to hit 2
+    The sixth prompt will ask for you to hit enter again
 
 11. once the operating system and programs are ready copy and paste the following to run the R package setup
 ##this first command runs command at the root
 sudo su
-##then enter password which is password then copy and paste the following in the root directory prompt
-Rscript /home/user/Pipelines/Rscripts/install_packages.R
+##copy and paste the following in the root directory prompt
+Rscript /home/user/TDPipelines/Rscripts/install_packages.R
 ##if the script runs into a error where it asks the user for input just exit out and run it again and that should fix the error.
+
 12. You know have a newly constructed VirtualBox capable of running our script for RNAseq transcriptome diversity discovery so copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
 bash /home/user/TDPipelines/RNAseq_pipeline.sh
