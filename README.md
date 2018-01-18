@@ -45,10 +45,15 @@ tar -xvzf VMsetup.tar.gz
 bash /home/user/VMsetup/set_up.sh
 
 10. The first prompt will ask you for the password which is password
+
 a. The second prompt will ask to hit enter
+
 b. The third prompt will ask which version you want to keep you want to keep current version you want the default hit n
+
 c. The fourth promt It will prompt for the password again enter password
+
 d. The fifth prompt will ask for you to pick which verison of Java you would like to use the options are 0 1 2 you want to hit 2
+
 e. The sixth prompt will ask for you to hit enter again
 
 11. once the operating system and programs are ready copy and paste the following to run the R package setup
