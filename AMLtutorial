@@ -1,0 +1,19 @@
+Tutorial with smaller scale AML study
+This tutorial is designed to demonstrate capabilities of the default pipeline within the virtualbox.  
+For this tutorial we will use a subset of the dataset; SRR3895734, SRR3895735, SRR1575102, SRR1575103.
+1.)	Set up your shared folder.  In your host machine create a new folder named tutorial and make sure shared permission are on.
+2.)	Download and install virtual box and the RNAseqVirtualBox image.  
+3.)	Set virtual machine setting to at least 10G of RAM and 2 CPU.  And set up the shared folder by adding it to the virtual machine and select auto mount.
+4.)	Open your virtual machine and make sure your shared folder is accessable.
+5.)	Open command prompt and type bash /home/user/TDPipelines/RNAseq_pipeline.sh
+6.)	The script will start and ask for you to enter the path to your shared folder. /media/sf_tutorial/tutorial.
+7.)	Enter yes you would like to download your data.
+8.)	Enter the SRA numbers with one space inbetween SRR3895734 SRR3895735 SRR1575102 SRR1575103
+9.)	For the tutorial we will use GRCh37_snp_tran as the reference set
+10.)	 Our RNAseq is paired layout so enter paired
+11.)	We will use HISAT2 for alignment tool in the tutorial.
+12.)	We have a one condition design, AML compared to normal, so enter 1.
+13.)	We will do variant calling so enter yes.
+14.)	At this point the script will run until completion with no other user input necessary.  The results will be done for the gene and transcript level expression in approximately 12-14 hours with the computer hard ware allocations defined in step 3.  The variant calling results will be complete approximately 36-40 hours later for a total time of 48-54 hours for the entire pipeline to run.
+15.)	The pipeline will create a file in /home/user path named RNAseq.log if there were errors you will find them in here.  If the pipeline finished you should have a list of files it created at the end of this file.
+16.)	Once the pipeline runs the following files should be in each of these folders.
