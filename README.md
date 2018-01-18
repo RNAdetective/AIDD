@@ -6,7 +6,7 @@ These are the directions to create a new vm image with biolinux8 and then how to
 1. Download and set up oracle virtual box machine make sure you download and install http://download.virtualbox.org/virtualbox/5.2.2/Oracle_VM_VirtualBox_Extension_Pack-5.2.2-119230.vbox-extpack inorder to use USB3.0
 
 2. Next download and load our ready to go vm or if you prefer to make your own follow the instructions below.
-username = user and password=password
+username = user and password=password.
 
 YOU ONLY NEED THESE IF YOU WANT TO CREATE YOUR OWN VB NOT USE THE ONE ALREADY READY TO DOWNLOAD THESE ARE DIRECTIONS FOR WINDOWS HOST MACHINES
 
