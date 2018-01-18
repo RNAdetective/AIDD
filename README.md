@@ -65,3 +65,10 @@ Rscript /home/user/TDPipelines/Rscripts/install_packages.R
 
 12. You know have a newly constructed VirtualBox capable of running our script for RNAseq transcriptome diversity discovery so copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
 bash /home/user/TDPipelines/RNAseq_pipeline.sh
+
+13. if you can't see your shared folder you can try these next few steps to fix the guest additions error.
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install build-essential module-assistant
+sudo m-a prepare
+sudo sh /media/user/VBox_GAs_5.2.6/autorun.sh
