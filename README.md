@@ -1,4 +1,7 @@
 # RNAseqPipeline
+
+These are the directions to create a new vm image with biolinux8 and then how to use the script to update, download and install all necessary tools for RNAseq_TDPipeline.sh to run which is our RNAseq computational pipeline for transcriptome diversity discovery.
+
 YOU ONLY NEED THESE IF YOU WANT TO CREATE YOUR OWN VB NOT USE THE ONE ALREADY READY TO DOWNLOAD
 
 Download and set up oracle virtual box machine make sure you download and install http://download.virtualbox.org/virtualbox/5.2.2/Oracle_VM_VirtualBox_Extension_Pack-5.2.2-119230.vbox-extpack inorder to use USB3.0
