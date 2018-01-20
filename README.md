@@ -3,7 +3,7 @@
 These are the directions to create a new vm image with biolinux8 and then how to use the script to update, download and install all necessary tools for RNAseq_TDPipeline.sh to run which is our RNAseq computational pipeline for transcriptome diversity discovery.
 
 
-1. Download and set up oracle virtual box machine make sure you download and install http://download.virtualbox.org/virtualbox/5.2.2/Oracle_VM_VirtualBox_Extension_Pack-5.2.2-119230.vbox-extpack inorder to use USB3.0
+1. Download and set up oracle virtual box machine make sure you download and install https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_Pack-5.2.6-120293.vbox-extpack inorder to use USB3.0
 
 2. Next download and load our ready to go vm or if you prefer to make your own follow the instructions below.
 username = user and password=password.
@@ -13,9 +13,9 @@ YOU ONLY NEED THESE IF YOU WANT TO CREATE YOUR OWN VB NOT USE THE ONE ALREADY RE
 1. use the following link to download biolinux8 the .iso file not the .ova file for the vm.
 http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
 
-2. Go to create new machine in the oracle virtual machine window
+2. Go to create new machine in the oracle virtual machine window by clicking the new button
       select a name, put in linux and ubuntu 64 
-      then click VDH create virtual hard disk now and select at least 70G of storage space to create the hard disk.  
+      then click VDH create virtual hard disk now and select at least 40G of storage space to create the hard disk.  
       Click create
 
 3. When it asks where to load from click on bio linux 8 .iso file in your file system.
