@@ -57,18 +57,29 @@ d. The fifth prompt will ask for you to pick which verison of Java you would lik
 e. The sixth prompt will ask for you to hit enter again
 
 11. once the operating system and programs are ready copy and paste the following to run the R package setup
+
 ##this first command runs command at the root
+
 sudo su
+
 ##copy and paste the following in the root directory prompt
+
 Rscript /home/user/TDPipelines/Rscripts/install_packages.R
+
 ##if the script runs into a error where it asks the user for input just exit out and run it again and that should fix the error.
 
 12. You know have a newly constructed VirtualBox capable of running our script for RNAseq transcriptome diversity discovery so copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
+
 bash /home/user/TDPipelines/RNAseq_pipeline.sh
 
 13. if you can't see your shared folder you can try these next few steps to fix the guest additions error.
+
 sudo apt-get update
+
 sudo apt-get upgrade
+
 sudo apt-get install build-essential module-assistant
+
 sudo m-a prepare
+
 sudo sh /media/user/VBox_GAs_5.2.6/autorun.sh
