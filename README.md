@@ -1,14 +1,16 @@
-# TDPipeline
+# Automated Isoform Diversity Detective Pipeline
 
-These are the directions to create a new vm image with biolinux8 and then how to use the script to update, download and install all necessary tools for RNAseq_TDPipeline.sh to run which is our RNAseq computational pipeline for transcriptome diversity discovery.
+These are the directions to download the premade AIDDPipeline image or to create a new vm image with biolinux8 and how to use the script to update, download and install all necessary tools for AIDDPipeline.sh to run which is our RNAseq computational pipeline for transcriptome diversity discovery.
 
-
+Everyone starts here:
 1. Download and set up oracle virtual box machine https://www.virtualbox.org/wiki/Downloads make sure you also download and install https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_Pack-5.2.6-120293.vbox-extpack inorder for shared folders and other things to work.
 
 2. Next download and load our ready to go vm from "link is in progress" or if you prefer to make your own follow the instructions below.
 This is the account details for the vbox username = user and password=password.
 
-YOU ONLY NEED THESE IF YOU WANT TO CREATE YOUR OWN VB NOT USE THE ONE ALREADY READY TO DOWNLOAD THESE ARE DIRECTIONS FOR WINDOWS HOST MACHINES
+Those of you that wish to create your own VM instead of using the pre constructed one do these next steps.  Those of you who downloads the pre made version can skep these next steps.  Pick up were it says everyone do these step.
+
+Again YOU ONLY NEED THESE IF YOU WANT TO CREATE YOUR OWN VB NOT USE THE ONE ALREADY READY TO DOWNLOAD THESE ARE DIRECTIONS FOR WINDOWS HOST MACHINES
 
 1. use the following link to download biolinux8 the .iso file not the .ova file for the vm.
 http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
@@ -64,9 +66,12 @@ sudo su
 
 ##copy and paste the following in the root directory prompt
 
-Rscript /home/user/TDPipelines/Rscripts/install_packages.R
+Rscript /home/user/AIDD/Rscripts/install_packages.R
 
 ##if the script runs into a error where it asks the user for input just exit out and run it again and that should fix the error.
+
+Everyone regardless of how you set up your virtual image needs to do the following last two steps.
+
 12. Set up external, internal hard drive, or shared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the three options you have and instructions to create each of them.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.
 
 A.	If you choose the external drive make sure you set up the virtual box to recognize your drive.  Do this by going to the settings and selecting USB.  Make sure you have the right 2.0 or 3.0 option selected and click add device.  Then select the appropriate device from the menu.  Then apply changes and restart the virtualbox.  The final path should be /media/user/”whatever you named you external drive”
@@ -75,7 +80,7 @@ B.	If you choose the internal drive use these instructions to add an internal ha
 
 C.	The last option is to create a shared folder on your host system.  Create your folder on your host system and make sure you give it share permissions.  Go into the setting in the virtualbox and click on shared folders.  Click on the folder icon with the + sign on top of it.  This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  This will create a pop up window and you can select your new shared folder.  After you select the folder the pop up will close and you should make sure the auto-mount box is checked and make permanent box if you want the folder to stay shared for more then one session.  Then click ok.  Your new folder should show up on the list then click ok.  Now start the virtual box and you should see you new folder under devices in the folder menu.  Then use this path for the pipeline it should be /media/sf_”name of folder”.
 
-13. if you can't see your shared folder you can try these next few steps to fix the guest additions error.
+if you can't see your shared folder you can try these next few steps to fix the guest additions error.
 
 sudo apt-get update
 
@@ -89,4 +94,4 @@ sudo sh /media/user/VBox_GAs_5.2.6/autorun.sh
 
 14.You know have a newly constructed VirtualBox capable of running our script for RNAseq transcriptome diversity discovery so copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
 
-bash /home/user/TDPipelines/RNAseq_pipeline.sh
+bash /home/user/TDPipelines/AIDD.sh
