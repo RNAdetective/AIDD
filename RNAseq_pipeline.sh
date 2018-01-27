@@ -795,7 +795,14 @@ do
     
 done
 mkdir "$path/Results/RNAediting"
-mv "$path/Results/*.genes.txt" "$path/Results/RNAediting/*.genes.txt"
+for fn in $varname{1..18};
+do
+
+    samp=`basename ${fn}`
+    mv $path/${samp}/${samp}.genes.txt $path/Results/RNAediting/${samp}.genes.txt
+    
+done
+mv /home/user/AIDD/index/VCnames.csv $path/Results/RNAediting/VCnames.csv
 cd "$path/Results/RNAediting"
 Rscript /home/user/AIDD/Rscripts/variantcalling.R
 fi
