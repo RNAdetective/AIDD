@@ -1,4 +1,4 @@
-# Automated Isoform Diversity Detective Pipeline
+# Automated Isoform Diversity Detector Pipeline
 
 These are the directions to download the premade AIDDPipeline image or to create a new vm image with biolinux8 and how to use the script to update, download and install all necessary tools for AIDDPipeline.sh to run which is our RNAseq computational pipeline for transcriptome diversity discovery.
 
