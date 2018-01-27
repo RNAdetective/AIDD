@@ -61,6 +61,6 @@ biocLite("backports")
 biocLite("devtools")
 biocLite("hexbin")
 biocLite("gdata")
-
+biocLite("DEXseq")
 
 
