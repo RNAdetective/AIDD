@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 ## this allows user to access shared folders
+sudo apt-get --yes --force-yes update
+sudo apt-get --yes --force-yes upgrade
+sudo apt-get --yes --force-yes install virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
 sudo adduser user vboxsf
 ##this updates java for the picard tool
 sudo apt-add-repository ppa:openjdk-r/ppa
