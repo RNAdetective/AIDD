@@ -92,6 +92,6 @@ sudo sh /media/user/VBox_GAs_5.2.6/autorun.sh
 
 14.You know have a newly constructed VirtualBox capable of running our script for RNAseq transcriptome diversity discovery so copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
 
-bash /home/user/TDPipelines/AIDD.sh
+bash /home/user/AIDD/AIDD.sh
 
 

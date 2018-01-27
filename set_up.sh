@@ -72,7 +72,8 @@ mv /home/user/prepDE.py /home/user/AIDD/AIDD_tools/bin
 ##this gets gffcompare
 wget http://ccb.jhu.edu/software/stringtie/dl/gffcompare-0.10.1.Linux_x86_64.tar.gz -O gffcompare.tar.gz
 tar -vxzf gffcompare.tar.gz
-mv /home/user/gffcompare /home/user/AIDD/AIDD_tools
+rm gffcompare.tar.gz
+mv /home/user/gffcompare* /home/user/AIDD/AIDD_tools
 ##this installs cufflinks
 wget http://cole-trapnell-lab.github.io/cufflinks/assets/downloads/cufflinks-2.2.1.Linux_x86_64.tar.gz
 tar -vxzf cufflinks-2.2.1.Linux_x86_64.tar.gz
@@ -109,3 +110,7 @@ mv /home/user/clinEff /home/user/AIDD/AIDD_tools
 wget https://github.com/nplonsk2/RNAseqPipeline/raw/master/AIDDScripts.tar.gz
 tar -vxzf AIDDScripts.tar.gz
 mv /home/user/AIDDScripts/* /home/user/AIDD/
+## remove the files not needed
+rm /home/user/VMsetup.tar.gz
+rm /home/user/AIDDScripts.tar.gz
+
