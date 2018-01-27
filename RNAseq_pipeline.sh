@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 main_function() {
-echo "To run the pipeline simply answer the following few prompts and then the pipeline could take days to weeks to run depending on size and number of files used in experiment.  Please read the manual on the desktop of this virtual machine for more instructions, options, or detailed explanation on the steps involved in the pipeline. Please make sure you have filled out your experimental data in the /home/user/TDPipelines/index/PHENO_DATA.csv.  Simply go to the path and open  the file in the LibreOffice Calc or text and change the small scale AML tutorial example to your own data files.  Also remember this is the same order you must enter in the following prompts when it asks you for file names.  Make sure you also have your hard drive or shared folder set up prior to running the script.  See the manual for instructions how to set this up.  When this file is saved and all other optional changes have been made from the manual." 
+echo "To run the pipeline simply answer the following few prompts and then the pipeline could take days to weeks to run depending on size and number of files used in experiment.  Please read the manual on the desktop of this virtual machine for more instructions, options, or detailed explanation on the steps involved in the pipeline. Please make sure you have filled out your experimental data in the /home/user/AIDD/index/PHENO_DATA.csv.  Simply go to the path and open  the file in the LibreOffice Calc or text and change the small scale AML tutorial example to your own data files.  Also remember this is the same order you must enter in the following prompts when it asks you for file names.  Make sure you also have your hard drive or shared folder set up prior to running the script.  See the manual for instructions how to set this up.  When this file is saved and all other optional changes have been made from the manual." 
 
-export PATH=$PATH:/home/user/TDPipelines/HISAT2_pipeline/bin
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
 
 echo "Please enter the path to working directory (please see manual for instructions on creating your working directory) this working directory is recommended to be at least 500G for optiminal performance.  The small scale AML study tutorial used /media/sf_tutorial/tutorial."
 read path
@@ -38,7 +38,7 @@ read aligner
 echo "Choose one of the following DESeq2 design set-ups for more information on experimental design see DESeq2 manual at https://bioconductor.org/packages/release/bioc/html/DESeq2.html. 1.) if your PHENO_DATA index file you have created in previous set-up contains just one condition column enter (1) for example this set up is used in the small scale AML tutorial.  2.) if you PHENO table contains two conditions both condition1 and condition2 columns are present in the table then enter (2).  For example if you data set contains disease and normal and then three different cell lines this would be a two condition set up. Please enter 1 or 2"
 read design
 
-echo "Would you like to do variant calling at the same time as the gene and transcript level expression analysis? (the other option would be to run it at a later time with the command bash /home/user/TDPipelines/VariantCalling.sh instructions for this can also be found in the manual at a later time)  Please enter yes or no.  Please keep in mind only paired end reads are able to be used for variant calling analysis with the default code due to the high error rate of single end reads in variant calling for RNA editing."
+echo "Would you like to do variant calling at the same time as the gene and transcript level expression analysis? (the other option would be to run it at a later time with the command bash /home/user/AIDD/VariantCalling.sh instructions for this can also be found in the manual at a later time)  Please enter yes or no.  Please keep in mind only paired end reads are able to be used for variant calling analysis with the default code due to the high error rate of single end reads in variant calling for RNA editing."
 read variant
 
 if  [ "$data" == "yes" ]; then
@@ -77,7 +77,7 @@ echo "Uncompressing and moving primary assembly dna file for variant calling ste
 gunzip Homo_sapiens.GRCh38.89.dna.primary_assembly.fa.gz
 mv $path/*.primary_assembly.fa $path/ref1.fa
 perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
-java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
+java -jar /home/user/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
 echo "using samtools to create an index file of the previously designed references"
 samtools faidx $path/ref2.fa
 wget -q https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.89.zip
@@ -115,7 +115,7 @@ echo "Uncompressing and moving primary assembly dna file for variant calling ste
 gunzip Homo_sapiens.GRCh38.89.dna.primary_assembly.fa.gz
 mv $path/*.primary_assembly.fa $path/ref1.fa
 perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
-java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
+java -jar /home/user/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
 echo "using samtools to create an index file of the previously designed references"
 samtools faidx $path/ref2.fa
 wget -q https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.89.zip
@@ -153,7 +153,7 @@ echo "Uncompressing and moving primary assembly dna file for variant calling ste
 gunzip Homo_sapiens.GRCh38.89.dna.primary_assembly.fa.gz
 mv $path/*.primary_assembly.fa $path/ref1.fa
 perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
-java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
+java -jar /home/user/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
 echo "using samtools to create an index file of the previously designed references"
 samtools faidx $path/ref2.fa
 wget -q https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.89.zip
@@ -191,7 +191,7 @@ echo "Uncompressing and moving primary assembly dna file for variant calling ste
 gunzip Homo_sapiens.GRCh38.89.dna.primary_assembly.fa.gz
 mv $path/*.primary_assembly.fa $path/ref1.fa
 perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
-java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
+java -jar /home/user/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
 echo "using samtools to create an index file of the previously designed references"
 samtools faidx $path/ref2.fa
 wget -q https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.89.zip
@@ -229,7 +229,7 @@ echo "Uncompressing and moving primary assembly dna file for variant calling ste
 gunzip Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
 mv $path/*.primary_assembly.fa $path/ref1.fa
 perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
-java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
+java -jar /home/user/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
 echo "using samtools to create an index file of the previously designed references"
 samtools faidx $path/ref2.fa
 wget -q https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh37.75.zip
@@ -266,7 +266,7 @@ echo "Uncompressing and moving primary assembly dna file for variant calling ste
 gunzip Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
 mv $path/*.primary_assembly.fa $path/ref1.fa
 perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
-java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
+java -jar /home/user/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
 echo "using samtools to create an index file of the previously designed references"
 samtools faidx $path/ref2.fa
 wget -q https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh37.75.zip
@@ -304,7 +304,7 @@ echo "Uncompressing and moving primary assembly dna file for variant calling ste
 gunzip Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
 mv $path/*.primary_assembly.fa $path/ref1.fa
 perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
-java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
+java -jar /home/user/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
 echo "using samtools to create an index file of the previously designed references"
 samtools faidx $path/ref2.fa
 wget -q https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh37.75.zip
@@ -342,7 +342,7 @@ echo "Uncompressing and moving primary assembly dna file for variant calling ste
 gunzip Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
 mv $path/*.primary_assembly.fa $path/ref1.fa
 perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
-java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
+java -jar /home/user/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
 echo "using samtools to create an index file of the previously designed references"
 samtools faidx $path/ref2.fa
 wget -q https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh37.75.zip
@@ -366,6 +366,8 @@ do
 
     fastq-dump ${fn}/${samp}.sra \
       -O $path/${samp}
+    
+    rm $path/${samp}/${samp}.sra
 done
 
 
@@ -378,6 +380,8 @@ echo "Running HISAT2 alignment for single layout and with previously downloaded 
 hisat2 -q -x $path/genome -p3 --dta-cufflinks \
          -U ${fn}/${samp}.fastq \
          -t --summary-file $path/${samp}/${samp}.txt -S $path/${samp}/${samp}.sam
+
+rm $path/${samp}/${samp}.fastq
 
 done
 fi
@@ -394,6 +398,7 @@ echo "Running fastq dump to convert .sra file to 2 mate .fastq files for ${samp}
 fastq-dump ${fn}/${samp}.sra \
       -I --split-files \
       -O $path/${samp}
+rm $path/${samp}/${samp}.sra
 done
 
 
@@ -407,6 +412,8 @@ hisat2 -q -x $path/genome -p3 --dta-cufflinks \
          -1 ${fn}/${samp}_1.fastq \
          -2 ${fn}/${samp}_2.fastq \
          -t --summary-file $path/${samp}/${samp}.txt -S $path/${samp}/${samp}.sam
+rm $path/${samp}/${samp}_1.fastq
+rm $path/${samp}/${samp}_2.fastq
 
 done
 fi
@@ -416,7 +423,9 @@ do
 
     samp=`basename ${fn}`
     echo "Starting sorting with picard tool to convert .sam to .bam for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar SortSam INPUT=$path/${samp}/${samp}.sam OUTPUT=$path/${samp}/${samp}.bam SORT_ORDER=coordinate
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar SortSam INPUT=$path/${samp}/${samp}.sam OUTPUT=$path/${samp}/${samp}.bam SORT_ORDER=coordinate
+    
+    rm $path/${samp}/${samp}.sam
     
 done
 ##this process starts moving index files and creating the Results directory
@@ -429,10 +438,10 @@ done
 for i in DESeq2_gene DESeq2_pathway DESeq2_transcript ; do
     mkdir $path/Results/$i/
 done
-cp -a /home/user/TDPipelines/index/. $path/Results/DESeq2_gene/
-cp -a /home/user/TDPipelines/index/. $path/Results/DESeq2_transcript/
-cp -a /home/user/TDPipelines/gene_list/. $path/Results/DESeq2_gene/
-cp -a /home/user/TDPipelines/gene_list/. $path/Results/DESeq2_transcript/
+cp -a /home/user/AIDD/index/. $path/Results/DESeq2_gene/
+cp -a /home/user/AIDD/index/. $path/Results/DESeq2_transcript/
+cp -a /home/user/AIDD/gene_list/. $path/Results/DESeq2_gene/
+cp -a /home/user/AIDD/gene_list/. $path/Results/DESeq2_transcript/
 ## this next step runs stringtie for transcriptome assembly
 for fn in $path/$varname{1..18};
 do
@@ -455,12 +464,12 @@ done
 ##echo "Starting python script to find exon counts for DEXSeq2"
 ##for i in 0{1..9} {10..18}
 ##do
-## python /home/user/TDPipelines/HISAT2_pipeline/bin/dexseq_prepare_annotation.py $path/ballgown/${samp}.gtf $path/DEXSeq/${samp}.gff
+## python /home/user/AIDD/AIDD_tools/bin/dexseq_prepare_annotation.py $path/ballgown/${samp}.gtf $path/DEXSeq/${samp}.gff
 ##done
 ##echo "Starting python script to find exon counts for DEXSeq2"
 ##for i in 0{1..9} {10..18}
 ##do
- ##  python /home/user/TDPipelines/HISAT2_pipeline/bin/dexseq_count.py $path/ballgown/${samp}.gff $path/${samp}/${samp}.sam $path/DEXSeq/${samp}
+ ##  python /home/user/AIDD/AIDD_tools/bin/dexseq_count.py $path/ballgown/${samp}.gff $path/${samp}/${samp}.sam $path/DEXSeq/${samp}
 ##done
 mv $path/ballgown_in/$varname1 $path/ballgown2/sample01/
 mv $path/ballgown_in/$varname2 $path/ballgown2/sample02/
@@ -503,39 +512,39 @@ find . -empty -type d -delete
 
 ##this is the python script to transform all gtf count files into one matrix file for usage in R analysis.
 echo "Starting python script to find gene and transcript counts"
-python /home/user/TDPipelines/HISAT2_pipeline/bin/prepDE.py -g $path/Results/DESeq2_gene/gene_count_matrix.csv -t $path/Results/DESeq2_transcript/transcript_count_matrix.csv
+python /home/user/AIDD/AIDD_tools/bin/prepDE.py -g $path/Results/DESeq2_gene/gene_count_matrix.csv -t $path/Results/DESeq2_transcript/transcript_count_matrix.csv
 
 ##this says if you picked design with one condition it will move all index files were they need to be to conduct R analysis and then the Rscript with start
 if  [ "$design" == "1" ]; then
 echo "Starting Rscript for Gene Level Differential expression analysis"
 cd "$path/Results/DESeq2_gene"
 ## this is the command to run the gene level differential analysis in R using DESeq2 as the main package for analysis
-Rscript /home/user/TDPipelines/Rscripts/GLDE.R
+Rscript /home/user/AIDD/Rscripts/GLDE.R
 ##now the transcript level R script will run after changing working directories to transcript folders
 cd "$path/Results/DESeq2_transcript"
-Rscript /home/user/TDPipelines/Rscripts/TLDE.R
+Rscript /home/user/AIDD/Rscripts/TLDE.R
 ##this moves index files for topGO_gene and moves the input files into working directory for R
 mkdir $path/Results/topGO_gene
-cp "/home/user/TDPipelines/index/annotations2.csv" "$path/Results/topGO_gene/annotations2.csv"
+cp "/home/user/AIDD/index/annotations2.csv" "$path/Results/topGO_gene/annotations2.csv"
 cp "$path/Results/DESeq2_gene/Upreg.csv" "$path/Results/topGO_gene/Upreg.csv"
 cp "$path/Results/DESeq2_gene/Downreg.csv" "$path/Results/topGO_gene/Downreg.csv"
 cd "$path/Results/topGO_gene"
-Rscript /home/user/TDPipelines/Rscripts/topGO.R
+Rscript /home/user/AIDD/Rscripts/topGO.R
 fi
 ##this says if you picked design with two seperate conditions it will move all index files were they need to be to conduct R analysis and then the Rscript with start still working on the index files for this.
 if  [ "$design" == "2" ]; then
 echo "moving index files for R analysis"
 ## this is the command to run the gene level differential analysis in R using DESeq2 as the main package for analysis
-Rscript /home/user/TDPipelines/Rscripts/GLDE_k3.R
+Rscript /home/user/AIDD/Rscripts/GLDE_k3.R
 ##now the transcript level R script will run after changing working directories to transcript folders
 cd "$path/Results/DESeq2_transcript"
-Rscript /home/user/TDPipelines/Rscripts/TLDE_k3.R
+Rscript /home/user/AIDD/Rscripts/TLDE_k3.R
 ##this moves index files for topGO_gene and moves the input files into working directory for R
-cp "/home/user/TDPipelines/index/annotations2.csv" "$path/Results/topGO_gene/annotations2.csv"
+cp "/home/user/AIDD/index/annotations2.csv" "$path/Results/topGO_gene/annotations2.csv"
 cp "$path/Results/DESeq2_gene/Upreg.csv" "$path/Results/topGO_gene/Upreg.csv"
 cp "$path/Results/DESeq2_gene/Downreg.csv" "$path/Results/topGO_gene/Downreg.csv"
 cd "$path/Results/topGO_gene"
-Rscript /home/user/TDPipelines/Rscripts/topGO.R
+Rscript /home/user/AIDD/Rscripts/topGO.R
 fi
 ##this is the variant calling steps to follow if the answer yes run variant calling is selected in the beginning.
 ## this removes all index files and other unused files from results folders leaving only useable files to sort through at the gene level.
@@ -556,7 +565,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running java picard AddorReplaceReadGroups with RGID=4 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=20 for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar AddOrReplaceReadGroups I=$path/${samp}/${samp}.bam O=$path/${samp}/${samp}2.bam RGID=4 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=20
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar AddOrReplaceReadGroups I=$path/${samp}/${samp}.bam O=$path/${samp}/${samp}2.bam RGID=4 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=20
     
 done
 ##the part reorders the reads to match the reference file provided which is in the correct chromosomal order for GATK haplotype caller.  It converts it to karyotypic order because the reference file was reordered this way with the python script during the bulk download step.
@@ -565,7 +574,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running java picard ReorderSam and creating an index for the new order for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar ReorderSam I=$path/${samp}/${samp}2.bam O=$path/${samp}/${samp}3.bam R=$path/ref2.fa CREATE_INDEX=TRUE
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar ReorderSam I=$path/${samp}/${samp}2.bam O=$path/${samp}/${samp}3.bam R=$path/ref2.fa CREATE_INDEX=TRUE
     
 done
 ##This step is again specific to illumina data and creates a detailed text file about alignment quality and threshold filters.  This is used by GATK when variant calling.
@@ -574,7 +583,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running java picard CollectAlignmentSummaryMetrics to create text file for downstream variant calling for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar CollectAlignmentSummaryMetrics R=$path/ref2.fa I=$path/${samp}/${samp}3.bam O=$path/${samp}/${samp}_alignment_metrics.txt
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar CollectAlignmentSummaryMetrics R=$path/ref2.fa I=$path/${samp}/${samp}3.bam O=$path/${samp}/${samp}_alignment_metrics.txt
 
 done
 ##This step creates another text file used by GATK which validates the library construction insert distribution and more.
@@ -583,7 +592,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running java picard CollectInsertSizeMetrics to creat both a text file and pdf file summarizing insert size for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar CollectInsertSizeMetrics INPUT=$path/${samp}/${samp}3.bam OUTPUT=$path/${samp}/${samp}_insert_metrics.txt HISTOGRAM_FILE=$path/${samp}/${samp}_insert_size_histogram.pdf
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar CollectInsertSizeMetrics INPUT=$path/${samp}/${samp}3.bam OUTPUT=$path/${samp}/${samp}_insert_metrics.txt HISTOGRAM_FILE=$path/${samp}/${samp}_insert_size_histogram.pdf
 
 done
 ##Samtools is used to filter out short or cutoff reads in the bam file to insure accuracy in GATK variant calling and adding headers necessary for GATK.
@@ -610,7 +619,7 @@ do
 
     samp=`basename ${fn}`
     echo "java picard MarkDuplicates to annotate PCR duplicates for more accurate variant calling in RNA editing experiments for ${samp}"
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=$path/tmp -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar MarkDuplicates INPUT=$path/${samp}/${samp}4.bam OUTPUT=$path/${samp}/${samp}dedup_reads.bam METRICS_FILE=$path/${samp}/${samp}metrics.txt TMP_DIR=$path/tmp
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=$path/tmp -jar /home/user/AIDD/AIDD_tools/picard.jar MarkDuplicates INPUT=$path/${samp}/${samp}4.bam OUTPUT=$path/${samp}/${samp}dedup_reads.bam METRICS_FILE=$path/${samp}/${samp}metrics.txt TMP_DIR=$path/tmp
 
 done
 ##this creates an index of your bam file for faster look up during GATK haplotype calling.
@@ -619,7 +628,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running java picard to build Bam index for downstream variant calling for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/picard.jar BuildBamIndex INPUT=$path/${samp}/${samp}dedup_reads.bam
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar BuildBamIndex INPUT=$path/${samp}/${samp}dedup_reads.bam
     
 done
 ##this minimizes the number of artifical mismatches created by the the presence of indels in an individuals genome compared to the reference genome by locally realignment.  This is used here with haplocaller because we are trying to detect RNA editing which requires even more accuracy during alignment to show true editing events.
@@ -628,7 +637,7 @@ do
 
     samp=`basename ${fn}`
     echo "Starting realigners using java GATK with reference sequences previously downloads for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T RealignerTargetCreator -R $path/ref2.fa --filter_reads_with_N_cigar -I $path/${samp}/${samp}dedup_reads.bam -o $path/${samp}/${samp}realignment_targets.list
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T RealignerTargetCreator -R $path/ref2.fa --filter_reads_with_N_cigar -I $path/${samp}/${samp}dedup_reads.bam -o $path/${samp}/${samp}realignment_targets.list
     
 done
 ##this is another step of the local realignment to reduce false positives.  Again this is being done with Haplotype caller to imporve accuracy during RAN editing events.
@@ -637,7 +646,7 @@ do
 
     samp=`basename ${fn}`
     echo "Re aligning indels with java GATK with same reference sequences as previous step for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T IndelRealigner -R $path/ref2.fa --filter_reads_with_N_cigar -I $path/${samp}/${samp}dedup_reads.bam -targetIntervals $path/${samp}/${samp}realignment_targets.list -o $path/${samp}/${samp}realigned_reads.bam
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T IndelRealigner -R $path/ref2.fa --filter_reads_with_N_cigar -I $path/${samp}/${samp}dedup_reads.bam -targetIntervals $path/${samp}/${samp}realignment_targets.list -o $path/${samp}/${samp}realigned_reads.bam
     
 done
 ##HaplotypeCaller is used because it is a more sensitive and accurate tool and is more suited to detect RNA editing in RNAseq data.  When encountering highly variable regions it re-maps the region denovo allowing for more accuracy then position based callers.  This also allows for proper handling of splice junctions which is critical for proper RNA editing detection.  Also annotating with a known snp database will reduce the number of false positives allows for those variants to be discarded later as genomic and not part of RNA editing.  For more information on how Haplotype caller works see https://software.broadinstitute.org/gatk/documentation/tooldocs/current/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php . stand_call_conf is the minimum phred-scaled confidence threshold at which variants should be called with the default of 10 we set it a 20 a more strict threshold lower number of false positives.   
@@ -646,7 +655,7 @@ do
 
     samp=`basename ${fn}`
     echo "Starting GATK HaplotypeCaller using reference sequences from the previous step and known snp sites with special options for RNA editing detection for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T HaplotypeCaller -R $path/ref2.fa -I $path/${samp}/${samp}realigned_reads.bam --dbsnp $path/dbsnp.vcf -dontUseSoftClippedBases -stand_call_conf 20.0 -o $path/${samp}/${samp}raw_variants.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T HaplotypeCaller -R $path/ref2.fa -I $path/${samp}/${samp}realigned_reads.bam --dbsnp $path/dbsnp.vcf -dontUseSoftClippedBases -stand_call_conf 20.0 -o $path/${samp}/${samp}raw_variants.vcf
     
 done
 ##this next two step select for a type of variant the first snp and second indel.  Both these files are needed even if only snp are used for RNA editing for base recalibration step.  
@@ -655,7 +664,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running GATK Select Variants to create vcf file of raw snps for filtering for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T SelectVariants -R $path/ref2.fa -V $path/${samp}/${samp}raw_variants.vcf -selectType SNP -o $path/${samp}/${samp}raw_snps.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R $path/ref2.fa -V $path/${samp}/${samp}raw_variants.vcf -selectType SNP -o $path/${samp}/${samp}raw_snps.vcf
     
 done
 
@@ -664,7 +673,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running GATK Select Variants to create vcf file of raw indels for filtering for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T SelectVariants -R $path/ref2.fa -V $path/${samp}/${samp}raw_variants.vcf -selectType INDEL -o $path/${samp}/${samp}raw_indels.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R $path/ref2.fa -V $path/${samp}/${samp}raw_variants.vcf -selectType INDEL -o $path/${samp}/${samp}raw_indels.vcf
     
 done
 ##These next two steps are filtering steps for the variants.  this is where thresholds are set for the FILTER field and are need to PASS these inorder to be listed in the output vcf file.  QualByDepth is QD and standard is < 2.0.  FisherStrand is FS greater then 60 which is a standard value.  This is a measure of strand bias and 60 is used because it doesn't sacrafice losing true positives while still maintaining a lower number of false positives.  MQ is RMSMappingQuality this is square root of mapping quality at any given site and 40 is standard recommendation to increase true positives. MQRankSum compares mapping qualities of reads supporting reference allele and alternate allele.  Positive values are those matching alternative allele.  MQRankSum is -12.5 as the recommended hard filter.  ReadPosRankSum this is rank sum test for site position within reads.  Which is found at ends of reads with same positive and neg as with MQRankSum -8.0 is recommended hard filter.  SOR is StrandOddsRatio this is another measure of strand bias that takes into account reads at ends of exons which tend to be only covered in one direction.
@@ -673,7 +682,7 @@ do
 
     samp=`basename ${fn}`
     echo "Starting first filtering step for raw snps using GATK for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T VariantFiltration -R $path/ref2.fa -V $path/${samp}/${samp}raw_snps.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0 || SOR > 4.0' --filterName "basic_snp_filter" -o $path/${samp}/${samp}filtered_snps.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R $path/ref2.fa -V $path/${samp}/${samp}raw_snps.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0 || SOR > 4.0' --filterName "basic_snp_filter" -o $path/${samp}/${samp}filtered_snps.vcf
     
 done
 ## this is the same as for the previous step but for indels instead of snp.  All of the parameters selected are the recommended hard filters for more details about these filterExpression options see https://software.broadinstitute.org/gatk/documentation/article?id=6925 
@@ -682,7 +691,7 @@ do
 
     samp=`basename ${fn}`
     echo "Starting second filtering step for raw indels using GATK for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T VariantFiltration -R $path/ref2.fa -V $path/${samp}/${samp}raw_indels.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0 || SOR > 10.0' --filterName "basic_indel_filter" -o $path/${samp}/${samp}filtered_indels.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R $path/ref2.fa -V $path/${samp}/${samp}raw_indels.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0 || SOR > 10.0' --filterName "basic_indel_filter" -o $path/${samp}/${samp}filtered_indels.vcf
     
 done
 ##BQSR is base quality score recalibration apply machine learning to model errors and adjust score accordingly to reduce systematic technical error during variant calling algorithms quality scoring.  Builds a model of covariation based on known data then adjusts based on that model.
@@ -691,7 +700,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running GATK baseRecalibrator to incorporate snp and indels from first variant calling step into a table to use for second variant calling for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T BaseRecalibrator -R $path/ref2.fa -I $path/${samp}/${samp}realigned_reads.bam -knownSites $path/${samp}/${samp}filtered_snps.vcf -knownSites $path/${samp}/${samp}filtered_indels.vcf -o $path/${samp}/${samp}recal_data.table
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R $path/ref2.fa -I $path/${samp}/${samp}realigned_reads.bam -knownSites $path/${samp}/${samp}filtered_snps.vcf -knownSites $path/${samp}/${samp}filtered_indels.vcf -o $path/${samp}/${samp}recal_data.table
     
 done
 ##base recalibration is ran a second time taking into account the first run to determine more accurate results.  Then creates a table for use in downstream steps.
@@ -700,7 +709,7 @@ do
 
     samp=`basename ${fn}`
     echo "Rerunniing GATK basRecalibrator as in the previous step but with BQSR option for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T BaseRecalibrator -R $path/ref2.fa -I $path/${samp}/${samp}realigned_reads.bam -knownSites $path/${samp}/${samp}filtered_snps.vcf -knownSites $path/${samp}/${samp}filtered_indels.vcf -BQSR $path/${samp}/${samp}recal_data.table -o $path/${samp}/${samp}post_recal_data.table
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R $path/ref2.fa -I $path/${samp}/${samp}realigned_reads.bam -knownSites $path/${samp}/${samp}filtered_snps.vcf -knownSites $path/${samp}/${samp}filtered_indels.vcf -BQSR $path/${samp}/${samp}recal_data.table -o $path/${samp}/${samp}post_recal_data.table
     
 done
 ##this creates a plot to visualize base recalibration results.
@@ -709,7 +718,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running GATK AnalyzeCovariates to visulaize base recalibration results ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T AnalyzeCovariates -R $path/ref2.fa -before $path/${samp}/${samp}recal_data.table -after $path/${samp}/${samp}post_recal_data.table -plots $path/${samp}/${samp}recalibration_plots.pdf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T AnalyzeCovariates -R $path/ref2.fa -before $path/${samp}/${samp}recal_data.table -after $path/${samp}/${samp}post_recal_data.table -plots $path/${samp}/${samp}recalibration_plots.pdf
     
 done
 ##This is the last part of the base quality recalibration where the reads are printed in a new bam file where the new covariates table is used to score the base quality.
@@ -718,7 +727,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running GATK printreads to collect the previous filtering and annotations into the new .bam file for the last variant calling step for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T PrintReads -R $path/ref2.fa -I $path/${samp}/${samp}realigned_reads.bam -BQSR $path/${samp}/${samp}recal_data.table -o $path/${samp}/${samp}recal_reads.bam
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T PrintReads -R $path/ref2.fa -I $path/${samp}/${samp}realigned_reads.bam -BQSR $path/${samp}/${samp}recal_data.table -o $path/${samp}/${samp}recal_reads.bam
     
 done
 ##This is the second round of variant calling using same commands and options as before but this time taking into account the first round of variant calling and new base calibration covariation tables.  
@@ -727,7 +736,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running GATK HaplotypeCaller for a second time with previous discovered variants already annotated in the starting bam file for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T HaplotypeCaller -R $path/ref2.fa --dbsnp $path/dbsnp.vcf -dontUseSoftClippedBases -stand_call_conf 20.0 -I $path/${samp}/${samp}recal_reads.bam -o $path/${samp}/${samp}raw_variants_recal.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T HaplotypeCaller -R $path/ref2.fa --dbsnp $path/dbsnp.vcf -dontUseSoftClippedBases -stand_call_conf 20.0 -I $path/${samp}/${samp}recal_reads.bam -o $path/${samp}/${samp}raw_variants_recal.vcf
     
 done
 
@@ -736,7 +745,7 @@ do
 
     samp=`basename ${fn}`
     echo "Using GATK to select snps for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T SelectVariants -R $path/ref2.fa -V $path/${samp}/${samp}raw_variants_recal.vcf -selectType SNP -o $path/${samp}/${samp}raw_snps_recal.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R $path/ref2.fa -V $path/${samp}/${samp}raw_variants_recal.vcf -selectType SNP -o $path/${samp}/${samp}raw_snps_recal.vcf
     
 done
 
@@ -745,7 +754,7 @@ do
 
     samp=`basename ${fn}`
     echo "Using GATK to select indels for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T SelectVariants -R $path/ref2.fa -V $path/${samp}/${samp}raw_variants_recal.vcf -selectType INDEL -o $path/${samp}/${samp}raw_indels_recal.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R $path/ref2.fa -V $path/${samp}/${samp}raw_variants_recal.vcf -selectType INDEL -o $path/${samp}/${samp}raw_indels_recal.vcf
     
 done
 
@@ -754,7 +763,7 @@ do
 
     samp=`basename ${fn}`
     echo "Filtering raw snp from the second variant calling step for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T VariantFiltration -R $path/ref2.fa -V $path/${samp}/${samp}raw_snps_recal.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0 || SOR > 4.0' --filterName "basic_snp_filter" -o $path/${samp}/${samp}filtered_snps_final.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R $path/ref2.fa -V $path/${samp}/${samp}raw_snps_recal.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0 || SOR > 4.0' --filterName "basic_snp_filter" -o $path/${samp}/${samp}filtered_snps_final.vcf
     
 done
 
@@ -763,7 +772,7 @@ do
 
     samp=`basename ${fn}`
     echo "Filtering raw indels from the second variant calling step for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/GenomeAnalysisTK.jar -T VariantFiltration -R $path/ref2.fa -V $path/${samp}/${samp}raw_indels_recal.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0 || SOR > 10.0' --filterName "basic_indel_filter" -o $path/${samp}/${samp}filtered_indels_recal.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R $path/ref2.fa -V $path/${samp}/${samp}raw_indels_recal.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0 || SOR > 10.0' --filterName "basic_indel_filter" -o $path/${samp}/${samp}filtered_indels_recal.vcf
     
 done
 ## This step runs snpEff to predict protein function and structure predictions 
@@ -772,7 +781,7 @@ do
 
     samp=`basename ${fn}`
     echo "Running snpEff to predict effects of RNA editing events found in the variant calling on the protein stucture and function for ${samp}"
-    java -jar /home/user/TDPipelines/HISAT2_pipeline/snpEff.jar -v GRCh37.75 $path/${samp}/${samp}filtered_snps_final.vcf > $path/${samp}/${samp}filtered_snps_final.ann.vcf
+    java -jar /home/user/AIDD/AIDD_tools/snpEff.jar -v GRCh37.75 $path/${samp}/${samp}filtered_snps_final.vcf > $path/${samp}/${samp}filtered_snps_final.ann.vcf
     mv $path/snpEff_* $path/${samp}
     
 done
@@ -788,7 +797,7 @@ done
 mkdir "$path/Results/RNAediting"
 mv "$path/Results/*.genes.txt" "$path/Results/RNAediting/*.genes.txt"
 cd "$path/Results/RNAediting"
-Rscript /home/user/TDPipelines/Rscripts/variantcalling.R
+Rscript /home/user/AIDD/Rscripts/variantcalling.R
 fi
 echo "contents of $path"
 ls $path
@@ -801,4 +810,5 @@ ls $path/Results/DESeq2_transcript
 echo "contents of $path/Results/topGO_gene"
 ls $path/Results/topGO_gene
 }
-main_function 2>&1 | tee -a RNAseq.log
+main_function 2>&1 | tee -a $path/AIDDrun.log
+
