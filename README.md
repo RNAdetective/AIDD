@@ -30,8 +30,11 @@ http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
 4. Make sure you have set aside enough RAM and CPU to run the machine you must select at least 4G of RAM and 1CPU to run at bare minimum.  (Although to run STAR aligner option you must select at least 30G of RAM).  Check the settings system.  Then check motherboard and processor make sure all the blue markers are in the green for your machine.  
 
 5.  Once you load your new virtual box open command prompt and copy paste the following commands
+
 wget https://github.com/nplonsk2/AIDD/raw/master/VMsetup.tar.gz
+
 tar -xvzf VMsetup.tar.gz
+
 bash /home/user/VMsetup/set_up.sh
 
 6. The first prompt will ask you for the password which is password
@@ -57,7 +60,9 @@ sudo su
 Rscript /home/user/AIDD/Rscripts/install_packages.R
 
 ##if the script runs into a error where it asks the user for input just exit out and run it again and that should fix the error.
-Once the Rscript is done running.  Close the virtualbox and restart again.  Now you should be able to click on view and click on the last option virtual screen 1.  A side bar will pop up and you can select the proper screen resolution for your computer.  Then have to shut down the machine again and follow the following steps to set up you hard drive.
+Once the Rscript is done running.  Close the virtualbox and restart again.  Now you should be able to click on view and click on the last option virtual screen 1.  A side bar will pop up and you can select the proper screen resolution for your computer. You can hold right ctrl and press c to adjust to fill mode then make the window larger.  This right ctrl + c with toggle between these two views.
+
+Then have to shut down the machine again and follow the following steps to set up you hard drive.
 
 EVERYONE REGARDLESS OF WHICH OPTION TO GET THE VIRTUALBOX YOU TOOK.
 
