@@ -42,7 +42,7 @@ http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
 8. Turn off the virtualbox and check the settings for system.  Make sure you have set aside enough RAM and CPU to run the machine you must select at least 4G of RAM and 1CPU to run at bare minimum.  (Although to run STAR aligner option you must select at least 30G of RAM).  Make sure you have attached you hard drive or shared folder (see the manual for instructions for this set up).
 
 9.  Once you load your new virtual box open command prompt and copy paste the following commands
-wget https://github.com/nplonsk2/RNAseqPipeline/raw/master/VMsetup.tar.gz
+wget https://github.com/nplonsk2/AIDD/raw/master/VMsetup.tar.gz
 tar -xvzf VMsetup.tar.gz
 bash /home/user/VMsetup/set_up.sh
 
@@ -94,4 +94,4 @@ sudo sh /media/user/VBox_GAs_5.2.6/autorun.sh
 
 14.You know have a newly constructed VirtualBox capable of running our script for RNAseq transcriptome diversity discovery so copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
 
-bash /home/user/TDPipelines/AIDD.sh
+bash /home/user/AIDD/AIDD.sh
