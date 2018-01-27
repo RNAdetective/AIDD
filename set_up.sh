@@ -106,6 +106,6 @@ cp /home/user/snpEff/snpEff.config /home/user/AIDD/AIDD_tools/snpEff.config
 mv /home/user/snpEff /home/user/AIDD/AIDD_tools
 mv /home/user/clinEff /home/user/AIDD/AIDD_tools
 ##this will get pipeline scripts
-wget https://github.com/nplonsk2/RNAseqPipeline/raw/master/TDScripts.tar.gz
-tar -vxzf TDScripts.tar.gz
-mv /home/user/TDScripts/* /home/user/AIDD/
+wget https://github.com/nplonsk2/RNAseqPipeline/raw/master/AIDDScripts.tar.gz
+tar -vxzf AIDDScripts.tar.gz
+mv /home/user/AIDDScripts/* /home/user/AIDD/
