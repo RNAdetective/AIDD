@@ -57,6 +57,7 @@ sudo su
 Rscript /home/user/AIDD/Rscripts/install_packages.R
 
 ##if the script runs into a error where it asks the user for input just exit out and run it again and that should fix the error.
+Once the Rscript is done running.  Close the virtualbox and restart again.  Now you should be able to click on view and click on the last option virtual screen 1.  A side bar will pop up and you can select the proper screen resolution for your computer.  Then have to shut down the machine again and follow the following steps to set up you hard drive.
 
 EVERYONE REGARDLESS OF WHICH OPTION TO GET THE VIRTUALBOX YOU TOOK.
 
@@ -68,18 +69,6 @@ B.	If you choose the internal drive use these instructions to add an internal ha
 
 C.	The last option is to create a shared folder on your host system.  Create your folder on your host system and make sure you give it share permissions.  Go into the setting in the virtualbox and click on shared folders.  Click on the folder icon with the + sign on top of it.  This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  This will create a pop up window and you can select your new shared folder.  After you select the folder the pop up will close and you should make sure the auto-mount box is checked and make permanent box if you want the folder to stay shared for more then one session.  Then click ok.  Your new folder should show up on the list then click ok.  Now start the virtual box and you should see you new folder under devices in the folder menu.  Then use this path for the pipeline it should be /media/sf_”name of folder”.
 
-##if you can't see your shared folder you can try these next few steps to fix the guest additions error.
-
-sudo apt-get update
-
-sudo apt-get upgrade
-
-sudo apt-get install build-essential module-assistant
-
-sudo m-a prepare
-
-sudo sh /media/user/VBox_GAs_5.2.6/autorun.sh
-
-9.You know have a newly constructed VirtualBox capable of running our script for RNAseq transcriptome diversity discovery so copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
+9.You know have a newly constructed (or downloaded) VirtualBox capable of running AIDD for RNAseq transcriptome diversity discovery so copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
 
 bash /home/user/AIDD/AIDD.sh
