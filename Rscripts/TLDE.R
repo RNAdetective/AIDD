@@ -15,7 +15,7 @@ table2 <- read.csv("t_names.csv")
 table3 <- merge(table2, table1, by="t_id")
 table4 <- table3$t_id <- NULL
 Data <- read.csv("PHENO_DATA.csv", row.names=1)
-table5 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
+table5 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
 write.csv(table3, "transcript_count_matrixedited.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("transcript_count_matrixedited.csv", row.names="t_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -139,7 +139,7 @@ write.csv(tableC3, "resultsADAR1_trans_counts.csv", row.names=FALSE)
 Data <- read.csv("bargraphindextrans.csv")
 tablebargraph <- t(tableC3)
 colnames(tablebargraph) <- tableC3[,1]
-tablebargraph2 <- tablebargraph[-c(1, 18, 19, 20, 21, 22, 23), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
 tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
@@ -174,7 +174,7 @@ table43 <- table33$t_id <- NULL
 tableC33 <- merge(table33, tableB1, by="t_name")
 tablebargraph <- t(tableC33)
 colnames(tablebargraph) <- tableC33[,1]
-tablebargraph2 <- tablebargraph[-c(1, 18, 19, 20, 21, 22, 23), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
 tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
@@ -212,7 +212,7 @@ tableC31 <- merge(table31, tableB1, by="t_name")
 write.csv(tableC31, "resultsADARB1_trans_counts.csv", row.names=FALSE)
 tablebargraph <- t(tableC31)
 colnames(tablebargraph) <- tableC31[,1]
-tablebargraph2 <- tablebargraph[-c(1, 18, 19, 20, 21, 22, 23), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
 tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
@@ -247,7 +247,7 @@ tableC32 <- merge(table32, tableB1, by="t_name")
 write.csv(tableC32, "resultsADARB2_trans_counts.csv", row.names=FALSE)
 tablebargraph <- t(tableC32)
 colnames(tablebargraph) <- tableC32[,1]
-tablebargraph2 <- tablebargraph[-c(1, 18, 19, 20, 21, 22, 23), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
 tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
@@ -282,7 +282,7 @@ tableC33 <- merge(table33, tableB1, by="t_name")
 write.csv(tableC33, "resultsVEGFA_trans_counts.csv", row.names=FALSE)
 tablebargraph <- t(tableC33)
 colnames(tablebargraph) <- tableC33[,1]
-tablebargraph2 <- tablebargraph[-c(1, 18, 19, 20, 21, 22, 23), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
 tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
@@ -316,7 +316,7 @@ table43 <- table33$t_id <- NULL
 tableC33 <- merge(table33, tableB1, by="t_name")
 tablebargraph <- t(tableC33)
 colnames(tablebargraph) <- tableC33[,1]
-tablebargraph2 <- tablebargraph[-c(1, 18, 19, 20, 21, 22, 23), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
 tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
@@ -354,7 +354,7 @@ tableC34 <- merge(table34, tableB1, by="t_name")
 write.csv(tableC34, "resultsVEGFB_trans_counts.csv", row.names=FALSE)
 tablebargraph <- t(tableC34)
 colnames(tablebargraph) <- tableC34[,1]
-tablebargraph2 <- tablebargraph[-c(1, 18, 19, 20, 21, 22, 23), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
 tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
@@ -388,7 +388,7 @@ table43 <- table33$t_id <- NULL
 tableC33 <- merge(table33, tableB1, by="t_name")
 tablebargraph <- t(tableC33)
 colnames(tablebargraph) <- tableC33[,1]
-tablebargraph2 <- tablebargraph[-c(1, 18, 19, 20, 21, 22, 23), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
 tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
