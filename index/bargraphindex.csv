@@ -1,8 +1,8 @@
 sample,gene_name
-sample01,Normal
-sample02,Normal
-sample03,Normal
-sample04,Normal
+sample01,AML
+sample02,AML
+sample03,AML
+sample04,AML
 sample05,AML
 sample06,AML
 sample07,AML
@@ -11,7 +11,7 @@ sample09,AML
 sample10,AML
 sample11,AML
 sample12,AML
-sample13,AML
-sample14,AML
-sample15,AML
-sample16,AML
+sample13,Normal
+sample14,Normal
+sample15,Normal
+sample16,Normal

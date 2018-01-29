@@ -14,7 +14,7 @@ table2 <- read.csv("g_names.csv")
 Data <- read.csv("PHENO_DATA.csv", row.names=1)
 table3 <- merge(table2, table1, by="gene_id")
 table4 <- table3$gene_id <- NULL
-table5 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table5 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table3, "gene_count_matrixedited.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("gene_count_matrixedited.csv", row.names="gene_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -85,7 +85,7 @@ dev.off()
 print("Running DESeq2 command")
 dds <- DESeq(dds)
 res <- results(dds)
-res <- results(dds, contrast=c("condition","AML","Normal"))
+res <- results(dds, contrast=c("condition","$"$con1"","$"$con2""))
 mcols(res, use.names = TRUE)
 print("summary of new results file")
 summary(res)
@@ -95,7 +95,7 @@ table(res.05$padj < 0.05)
 resLFC1 <- results(dds, lfcThreshold=1)
 print("table of log fold change greater then 1 with a padj of less then 0.1")
 table(resLFC1$padj < 0.1) 
-results <- results(dds, contrast = c("condition", "AML", "Normal"))
+results <- results(dds, contrast = c("condition", "$"$con1"", "$"$con2""))
 write.csv(results, "resultsall.csv")
 print("number of genes that are below pvalue 0.05")
 sum(res$pvalue < 0.05, na.rm=TRUE)
@@ -126,17 +126,17 @@ tiff("ADAR1counts4.tiff")
 ggplot(geneCounts, aes(x = condition, y = count, color = condition, label=rownames(pcaData))) + scale_y_log10() +  geom_beeswarm(cex = 3) + geom_line() +geom_text(aes(label=rownames(pcaData))) + geom_point(size = 0)
 dev.off()
 tiff("ADAR2counts.tiff")
-plotCounts(dds, gene = "ADARB1", intgroup=c("condition"))
+plotCounts(dds, gene = "ADAR$B1", intgroup=c("condition"))
 dev.off()
-geneCounts <- plotCounts(dds, gene = "ADARB1", intgroup = c("condition"), returnData = TRUE)
+geneCounts <- plotCounts(dds, gene = "ADAR$B1", intgroup = c("condition"), returnData = TRUE)
 tiff("ADAR2counts2.tiff")
 ggplot(geneCounts, aes(x = condition, y = count, color = condition, shape = condition)) + scale_y_log10() +  geom_beeswarm(cex = 3) + geom_point(size = 3)
 dev.off()
-geneCounts <- plotCounts(dds, gene = "ADARB1", intgroup = c("condition"), returnData = TRUE)
+geneCounts <- plotCounts(dds, gene = "ADAR$B1", intgroup = c("condition"), returnData = TRUE)
 tiff("ADAR2counts3.tiff")
 ggplot(geneCounts, aes(x = condition, y = count, color = condition, label=rownames(pcaData))) + scale_y_log10() +  geom_beeswarm(cex = 3) + geom_line() +geom_text(aes(label=rownames(pcaData))) + geom_point(size = 0)
 dev.off()
-geneCounts <- plotCounts(dds, gene = "ADARB1", intgroup = c("condition"), returnData = TRUE)
+geneCounts <- plotCounts(dds, gene = "ADAR$B1", intgroup = c("condition"), returnData = TRUE)
 tiff("ADAR2counts4.tiff")
 ggplot(geneCounts, aes(x = condition, y = count, color = condition, label=rownames(pcaData))) + scale_y_log10() +  geom_beeswarm(cex = 3) +geom_text(aes(label=rownames(pcaData))) + geom_point(size = 0)
 dev.off()
@@ -185,7 +185,7 @@ geneCounts <- plotCounts(dds, gene = "VEGFB", intgroup = c("condition"), returnD
 tiff("VEGFBcounts4.tiff")
 ggplot(geneCounts, aes(x = condition, y = count, color = condition, label=rownames(pcaData))) + scale_y_log10() +  geom_beeswarm(cex = 3) + geom_line() +geom_text(aes(label=rownames(pcaData))) + geom_point(size = 0)
 dev.off()
-res <- lfcShrink(dds, contrast=c("condition","AML","Normal"), res=res)
+res <- lfcShrink(dds, contrast=c("condition","$"$con1"","$"$con2""), res=res)
 tiff("MAplot.tiff")
 plotMA(res, ylim = c(-5, 5))
 dev.off()
@@ -206,19 +206,19 @@ table1 <- read.csv("gene_count_matrix.csv")
 table2 <- read.csv("g_names.csv")
 table3 <- merge(table2, table1, by="gene_id")
 table4 <- table3$gene_id <- NULL
-table5 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table5 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table3, "gene_count_matrixedited.csv", row.names=FALSE)
 ##make VEGFpathway way final table and heat map
 table1 <- read.csv("gene_count_matrixedited.csv")
 table2 <- read.csv("VEGFpathway_genes.csv")
 table3 <- merge(table2, table1, by="gene_name")
 table4 <- table3$t_id <- NULL
-table5 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table5 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table3, "VEGFpathwayedited_counts.csv", row.names=FALSE)
-tableB1 <- read.csv("resultsall.csv")
-table5 <- colnames(tableB1)[c(1)] <- c("gene_name")
-head(tableB1)
-tableC3 <- merge(table3, tableB1, by="gene_name")
+table$B1 <- read.csv("resultsall.csv")
+table5 <- colnames(table$B1)[c(1)] <- c("gene_name")
+head(table$B1)
+tableC3 <- merge(table3, table$B1, by="gene_name")
 write.csv(tableC3, "resultsall_VEGFpathwayediting_counts.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("VEGFpathwayedited_counts.csv", row.names="gene_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -248,9 +248,9 @@ table12 <- read.csv("gene_count_matrixedited.csv")
 table22 <- read.csv("pns_deve_genes.csv")
 table32 <- merge(table22, table12, by="gene_name")
 table42 <- table32$t_id <- NULL
-table52 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table52 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table32, "pns_deve_genesedited_counts.csv", row.names=FALSE)
-tableC32 <- merge(table32, tableB1, by="gene_name")
+tableC32 <- merge(table32, table$B1, by="gene_name")
 write.csv(tableC32, "resultsall_pns_deveediting_counts.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("pns_deve_genesedited_counts.csv", row.names="gene_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -280,9 +280,9 @@ table13 <- read.csv("gene_count_matrixedited.csv")
 table23 <- read.csv("neuro_genes.csv")
 table33 <- merge(table23, table13, by="gene_name")
 table43 <- table33$t_id <- NULL
-table53 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table53 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table33, "neuro_genesedited_counts.csv", row.names=FALSE)
-tableC33 <- merge(table33, tableB1, by="gene_name")
+tableC33 <- merge(table33, table$B1, by="gene_name")
 write.csv(tableC33, "resultsall_neuro_editing_counts.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("neuro_genesedited_counts.csv", row.names="gene_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -312,9 +312,9 @@ table14 <- read.csv("gene_count_matrixedited.csv")
 table24 <- read.csv("neuro_deve_genes.csv")
 table34 <- merge(table24, table14, by="gene_name")
 table44 <- table34$t_id <- NULL
-table54 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table54 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table34, "neuro_deve_genesedited_counts.csv", row.names=FALSE)
-tableC34 <- merge(table34, tableB1, by="gene_name")
+tableC34 <- merge(table34, table$B1, by="gene_name")
 write.csv(tableC34, "resultsall_neuro_deveediting_counts.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("neuro_deve_genesedited_counts.csv", row.names="gene_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -344,9 +344,9 @@ table15 <- read.csv("gene_count_matrixedited.csv")
 table25 <- read.csv("cns_deve_genes.csv")
 table35 <- merge(table25, table15, by="gene_name")
 table45 <- table35$t_id <- NULL
-table55 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table55 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table35, "cns_deve_genesedited_counts.csv", row.names=FALSE)
-tableC35 <- merge(table35, tableB1, by="gene_name")
+tableC35 <- merge(table35, table$B1, by="gene_name")
 write.csv(tableC35, "resultsall_cns_deve_genesediting_counts.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("cns_deve_genesedited_counts.csv", row.names="gene_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -376,9 +376,9 @@ table16 <- read.csv("gene_count_matrixedited.csv")
 table26 <- read.csv("brain_deve_genes.csv")
 table36 <- merge(table26, table16, by="gene_name")
 table46 <- table36$t_id <- NULL
-table56 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table56 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table36, "brain_deve_genesedited_counts.csv", row.names=FALSE)
-tableC36 <- merge(table36, tableB1, by="gene_name")
+tableC36 <- merge(table36, table$B1, by="gene_name")
 write.csv(tableC36, "resultsall_brain_deveediting_counts.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("brain_deve_genesedited_counts.csv", row.names="gene_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -408,9 +408,9 @@ table16 <- read.csv("gene_count_matrixedited.csv")
 table26 <- read.csv("pos_myeloid_diff_genes.csv")
 table36 <- merge(table26, table16, by="gene_name")
 table46 <- table36$t_id <- NULL
-table56 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table56 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table36, "pos_myeloid_diff_genesedited_counts.csv", row.names=FALSE)
-tableC36 <- merge(table36, tableB1, by="gene_name")
+tableC36 <- merge(table36, table$B1, by="gene_name")
 write.csv(tableC36, "resultsall_pos_myeloid_diffediting_counts.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("pos_myeloid_diff_genesedited_counts.csv", row.names="gene_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -440,9 +440,9 @@ table16 <- read.csv("gene_count_matrixedited.csv")
 table26 <- read.csv("neg_myeloid_diff_genes.csv")
 table36 <- merge(table26, table16, by="gene_name")
 table46 <- table36$t_id <- NULL
-table56 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table56 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table36, "neg_myeloid_diff_genesedited_counts.csv", row.names=FALSE)
-tableC36 <- merge(table36, tableB1, by="gene_name")
+tableC36 <- merge(table36, table$B1, by="gene_name")
 write.csv(tableC36, "resultsall_neg_myeloid_diffediting_counts.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("neg_myeloid_diff_genesedited_counts.csv", row.names="gene_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -472,9 +472,9 @@ table16 <- read.csv("gene_count_matrixedited.csv")
 table26 <- read.csv("myeloid_homo_genes.csv")
 table36 <- merge(table26, table16, by="gene_name")
 table46 <- table36$t_id <- NULL
-table56 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+table56 <- colnames(table3)[c(2:17)] <- rownames(Data)[c(1:16)]
 write.csv(table36, "myeloid_homo_genesedited_counts.csv", row.names=FALSE)
-tableC36 <- merge(table36, tableB1, by="gene_name")
+tableC36 <- merge(table36, table$B1, by="gene_name")
 write.csv(tableC36, "resultsall_myeloid_homoediting_counts.csv", row.names=FALSE)
 countData <- as.matrix(read.csv("myeloid_homo_genesedited_counts.csv", row.names="gene_name"))
 colData <- read.csv("PHENO_DATA.csv", row.names=1)
@@ -503,14 +503,14 @@ dev.off()
 table1 <- read.csv("gene_count_matrixedited.csv")
 table2 <- read.csv("VEGFgene.csv")
 table3 <- merge(table2, table1, by="gene_name")
-tableB12 <- read.csv("resultsall.csv")
-table5 <- colnames(tableB12)[c(1)] <- c("gene_name")
-head(tableB12)
-tableC6 <- merge(table3, tableB12, by="gene_name")
+table$B12 <- read.csv("resultsall.csv")
+table5 <- colnames(table$B12)[c(1)] <- c("gene_name")
+head(table$B12)
+tableC6 <- merge(table3, table$B12, by="gene_name")
 write.csv(tableC6, "resultsVEGF_gene_counts.csv", row.names=FALSE)
 tablebargraph <- t(tableC6)
 colnames(tablebargraph) <- tableC6[,1]
-tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
+tablebargraph2 <- tablebargraph[-c(1, 18, 19, 20, 21, 22, 23), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
 tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
@@ -543,14 +543,14 @@ table2 <- read.csv("ADARgene.csv")
 Data <- read.csv("bargraphindex.csv")
 table3 <- merge(table2, table1, by="gene_name")
 table4 <- table3$gene_id <- NULL
-tableC3 <- merge(table3, tableB12, by="gene_name")
+tableC3 <- merge(table3, table$B12, by="gene_name")
 write.csv(tableC3, "resultsADAR_gene_counts.csv", row.names=FALSE)
 tablebargraph <- t(tableC3)
 colnames(tablebargraph) <- tableC3[,1]
-tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
+tablebargraph2 <- tablebargraph[-c(1, 18, 19, 20, 21, 22, 23), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample")
 tablebargraph2
 Data <- read.csv("bargraphindex.csv")
 tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
