@@ -26,6 +26,21 @@ read file1 file2 file3 file4 file5 file6 file7 file8 file9 file10 file11 file12 
 fi
 ##this is where you will enter your own data's file names.  If you have single end reads just put the file name without the extension (.fastq) and your files must be in fastq form not fastq.gz you must uncompress them first.  If you have paired end reads they must also be in .fastq format and to distinguish the pairs it should be in XXXXX_1.fastq XXXXX_2.fastq where XXXXX is your file name.  Then simply enter the list XXXXX XXXXX XXXXXX with a space inbetween the name of each file.  Remember it is also important to enter them in the same order as you entered them in the PHENO_DATA index file.
 
+##this will change Rscripts for your samples counts
+
+echo "Please enter how many samples you have in your experiment.  Enter a number 4-18."
+read sample
+for i in GLDE.R TLDE.R ; do
+if  [ "$sample" == "16" ]; then 
+sed -i 's/2:5/2:17/g' /home/user/AIDD/Rscripts/GLDE.R
+sed -i 's/1:4/1:16/g' /home/user/AIDD/Rscripts/GLDE.R
+sed -i 's/1, 6, 7, 8, 9, 10, 11/1, 18, 19, 20, 21, 22, 23/g' /home/user/AIDD/Rscripts/GLDE.R
+sed -i 's/2:5/2:17/g' /home/user/AIDD/Rscripts/TLDE.R
+sed -i 's/1:4/1:16/g' /home/user/AIDD/Rscripts/TLDE.R
+sed -i 's/1, 6, 7, 8, 9, 10, 11/1, 18, 19, 20, 21, 22, 23/g' /home/user/AIDD/Rscripts/TLDE.R
+fi
+done
+
 echo "Please enter HISAT2 index file choice from one of the following options: GRCh37, GRCh37_snp, GRCh37_tran, GRCh37_snp_tran, GRCh38, GRCh38_snp, GRCh38_tran, GRCh38_snp_tran.  For the tutorial with the small AML set we use GRCh37_snp_tran as the default setting. If you have mouse data you can enter one of the following   For more information on these chooses see the www.ensembl.org for more information."
 read variable 
 

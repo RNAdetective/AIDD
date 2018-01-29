@@ -510,35 +510,31 @@ tableC6 <- merge(table3, tableB12, by="gene_name")
 write.csv(tableC6, "resultsVEGF_gene_counts.csv", row.names=FALSE)
 tablebargraph <- t(tableC6)
 colnames(tablebargraph) <- tableC6[,1]
-tablebargraph2 <- tablebargraph[-c(1,6, 7, 8, 9, 10, 11), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "gene_name"
-tablebargraphY <- colnames(tablebargraph2)[2] <- "VEGFA"
-tablebargraphY <- colnames(tablebargraph2)[3] <- "VEGFB"
-tablebargraphY <- colnames(tablebargraph2)[4] <- "VEGFC"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
 tablebargraph2
 Data <- read.csv("bargraphindex.csv")
-tables <- colnames(Data)[c(2)] <- c("gene_name")
-tablebargraph3 <- merge(Data, tablebargraph2, by="gene_name")
-tablebargraph4 <- aggregate(tablebargraph3[, 3:5], list(tablebargraph3$sample), mean)
+tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
+tablebargraph4 <- aggregate(tablebargraph3[, 3:5], list(tablebargraph3$gene_name), mean)
 tablebargraph5 <- t(tablebargraph4)
 tablebargraph5 <- tablebargraph5[-c(1),]
 write.csv(tablebargraph5, "5.csv")
 write.csv(tablebargraph5, "6.csv")
 tablebargraph5 <- read.csv("5.csv")
-tablebargraphF <- colnames(tablebargraph5)[1] <- "gene_name"
-tablebargraphF <- colnames(tablebargraph5)[2] <- "counts"
+colnames(tablebargraph5)[1] <- "gene_name"
 tablebargraphG <- tablebargraph5$V2 <- NULL
+colnames(tablebargraph5)[2] <- "counts"
 tablebargraph6 <- read.csv("6.csv")
-tablebargraphE <- colnames(tablebargraph6)[1] <- "gene_name"
+colnames(tablebargraph6)[1] <- "gene_name"
 tablebargraphH <- tablebargraph6$V1 <- NULL
-tablebargraphI <- colnames(tablebargraph6)[2] <- "counts"
+colnames(tablebargraph6)[2] <- "counts"
 tablebargraph5["condition"] <- "AML"
 tablebargraph6["condition"] <- "Normal"
 final <- rbind(tablebargraph5, tablebargraph6)
 tiff("VEGFbargraph.tiff")
-ggplot(final, aes(x=gene_name, y=AML, fill=condition)) +
+ggplot(final, aes(x=gene_name, y=counts, fill=condition)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black")
 dev.off()
 ##ADAR final count table
@@ -551,22 +547,22 @@ tableC3 <- merge(table3, tableB12, by="gene_name")
 write.csv(tableC3, "resultsADAR_gene_counts.csv", row.names=FALSE)
 tablebargraph <- t(tableC3)
 colnames(tablebargraph) <- tableC3[,1]
-tablebargraph2 <- tablebargraph[-c(1,6, 7, 8, 9, 10, 11), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "gene_name"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
 tablebargraph2
 Data <- read.csv("bargraphindex.csv")
-tables <- colnames(Data)[c(2)] <- c("gene_name")
-tablebargraph3 <- merge(Data, tablebargraph2, by="gene_name")
-tablebargraph4 <- aggregate(tablebargraph3[, 3:5], list(tablebargraph3$sample), mean)
+tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
+tablebargraph4 <- aggregate(tablebargraph3[, 3:5], list(tablebargraph3$gene_name), mean)
 tablebargraph5 <- t(tablebargraph4)
 tablebargraph5 <- tablebargraph5[-c(1),]
 write.csv(tablebargraph5, "5.csv")
 write.csv(tablebargraph5, "6.csv")
 tablebargraph5 <- read.csv("5.csv")
-tablebargraphF <- colnames(tablebargraph5)[1] <- "gene_name"
+colnames(tablebargraph5)[1] <- "gene_name"
 tablebargraphG <- tablebargraph5$V2 <- NULL
+colnames(tablebargraph5)[2] <- "counts"
 tablebargraph6 <- read.csv("6.csv")
 tablebargraphE <- colnames(tablebargraph6)[1] <- "gene_name"
 tablebargraphH <- tablebargraph6$V1 <- NULL
@@ -575,7 +571,7 @@ tablebargraph5["condition"] <- "AML"
 tablebargraph6["condition"] <- "Normal"
 final <- rbind(tablebargraph5, tablebargraph6)
 tiff("ADARbargraph.tiff")
-ggplot(final, aes(x=gene_name, y=V1, fill=condition)) +
+ggplot(final, aes(x=gene_name, y=counts, fill=condition)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black")
 dev.off()
 tableAA <- rbind(tableC3, tableC6)

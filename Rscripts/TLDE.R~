@@ -126,6 +126,7 @@ tiff("top60heatmap_trans.tiff")
 pheatmap(mat, annotation_col = anno, annotation_legend=FALSE, fontsize_row=6)
 dev.off()
 ##these make final tables for VEGF and ADAR transcripts
+##ADAR1
 table1 <- read.csv("transcript_count_matrixedited.csv")
 table2 <- read.csv("ADAR1transcript.csv")
 table3 <- merge(table2, table1, by="t_name")
@@ -136,27 +137,28 @@ head(tableB1)
 tableC3 <- merge(table3, tableB1, by="t_name")
 write.csv(tableC3, "resultsADAR1_trans_counts.csv", row.names=FALSE)
 Data <- read.csv("bargraphindextrans.csv")
-Data2 <- colnames(Data)[2] <- ""
 tablebargraph <- t(tableC3)
 colnames(tablebargraph) <- tableC3[,1]
-tablebargraph2 <- tablebargraph[-c(1,6, 7, 8, 9, 10, 11), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "isoform_name"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
 tablebargraph2
-tablebargraph3 <- merge(Data, tablebargraph2, by="isoform_name")
-tablebargraph4 <- aggregate(tablebargraph3[, 3:13], list(tablebargraph3$sample), mean)
+Data <- read.csv("bargraphindextrans.csv")
+tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
+tablebargraph4 <- aggregate(tablebargraph3[, 3:13], list(tablebargraph3$isoform_name), mean)
 tablebargraph5 <- t(tablebargraph4)
 tablebargraph5 <- tablebargraph5[-c(1),]
 write.csv(tablebargraph5, "5.csv")
 write.csv(tablebargraph5, "6.csv")
 tablebargraph5 <- read.csv("5.csv")
-tablebargraphF <- colnames(tablebargraph5)[1] <- "isoform_name"
+colnames(tablebargraph5)[1] <- "isoform_name"
 tablebargraphG <- tablebargraph5$V2 <- NULL
+colnames(tablebargraph5)[2] <- "counts"
 tablebargraph6 <- read.csv("6.csv")
-tablebargraphE <- colnames(tablebargraph6)[1] <- "isoform_name"
+colnames(tablebargraph6)[1] <- "isoform_name"
 tablebargraphH <- tablebargraph6$V1 <- NULL
-tablebargraphI <- colnames(tablebargraph6)[2] <- "counts"
+colnames(tablebargraph6)[2] <- "counts"
 tablebargraph5["condition"] <- "AML"
 tablebargraph6["condition"] <- "Normal"
 final <- rbind(tablebargraph5, tablebargraph6)
@@ -164,7 +166,7 @@ tiff("ADAR1isoformbar1.tiff")
 ggplot(final, aes(x=isoform_name, y=counts, fill=condition)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black")
 dev.off()
-
+##ADAR1 transcripts that are biologically relevant
 table13 <- read.csv("transcript_count_matrixedited.csv")
 table23 <- read.csv("ADAR1transcriptimp.csv")
 table33 <- merge(table23, table13, by="t_name")
@@ -172,24 +174,25 @@ table43 <- table33$t_id <- NULL
 tableC33 <- merge(table33, tableB1, by="t_name")
 tablebargraph <- t(tableC33)
 colnames(tablebargraph) <- tableC33[,1]
-tablebargraph2 <- tablebargraph[-c(1,6, 7, 8, 9, 10, 11), ]
+tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "isoform_name"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
 tablebargraph2
-tablebargraph3 <- merge(Data, tablebargraph2, by="isoform_name")
-tablebargraph4 <- aggregate(tablebargraph3[, 3:4], list(tablebargraph3$sample), mean)
+tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
+tablebargraph4 <- aggregate(tablebargraph3[, 3:4], list(tablebargraph3$isoform_name), mean)
 tablebargraph5 <- t(tablebargraph4)
 tablebargraph5 <- tablebargraph5[-c(1),]
 write.csv(tablebargraph5, "5.csv")
 write.csv(tablebargraph5, "6.csv")
 tablebargraph5 <- read.csv("5.csv")
-tablebargraphF <- colnames(tablebargraph5)[1] <- "isoform_name"
+colnames(tablebargraph5)[1] <- "isoform_name"
 tablebargraphG <- tablebargraph5$V2 <- NULL
+colnames(tablebargraph5)[2] <- "counts"
 tablebargraph6 <- read.csv("6.csv")
-tablebargraphE <- colnames(tablebargraph6)[1] <- "isoform_name"
+colnames(tablebargraph6)[1] <- "isoform_name"
 tablebargraphH <- tablebargraph6$V1 <- NULL
-tablebargraphI <- colnames(tablebargraph6)[2] <- "counts"
+colnames(tablebargraph6)[2] <- "counts"
 tablebargraph5["condition"] <- "AML"
 tablebargraph6["condition"] <- "Normal"
 names1 <- read.csv("ADAR1transcriptimp_names.csv")
@@ -197,10 +200,10 @@ tablebargraph5 <- merge(tablebargraph5, names1, by="isoform_name")
 tablebargraph6 <- merge(tablebargraph6, names1, by="isoform_name")
 final <- rbind(tablebargraph5, tablebargraph6)
 tiff("ADAR1isoformimpbar1.tiff")
-ggplot(final, aes(x=isoform, y=V1, fill=condition)) +
+ggplot(final, aes(x=isoform_name, y=counts, fill=condition)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black")
 dev.off()
-
+##ADARB1
 table11 <- read.csv("transcript_count_matrixedited.csv")
 table21 <- read.csv("ADARB1transcript.csv")
 table31 <- merge(table21, table11, by="t_name")
@@ -212,21 +215,22 @@ colnames(tablebargraph) <- tableC31[,1]
 tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "isoform_name"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
 tablebargraph2
-tablebargraph3 <- merge(Data, tablebargraph2, by="isoform_name")
-tablebargraph4 <- aggregate(tablebargraph3[, 3:11], list(tablebargraph3$sample), mean)
+tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
+tablebargraph4 <- aggregate(tablebargraph3[, 3:11], list(tablebargraph3$isoform_name), mean)
 tablebargraph5 <- t(tablebargraph4)
 tablebargraph5 <- tablebargraph5[-c(1),]
 write.csv(tablebargraph5, "5.csv")
 write.csv(tablebargraph5, "6.csv")
 tablebargraph5 <- read.csv("5.csv")
-tablebargraphF <- colnames(tablebargraph5)[1] <- "isoform_name"
+colnames(tablebargraph5)[1] <- "isoform_name"
 tablebargraphG <- tablebargraph5$V2 <- NULL
+colnames(tablebargraph5)[2] <- "counts"
 tablebargraph6 <- read.csv("6.csv")
-tablebargraphE <- colnames(tablebargraph6)[1] <- "isoform_name"
+colnames(tablebargraph6)[1] <- "isoform_name"
 tablebargraphH <- tablebargraph6$V1 <- NULL
-tablebargraphI <- colnames(tablebargraph6)[2] <- "counts"
+colnames(tablebargraph6)[2] <- "counts"
 tablebargraph5["condition"] <- "AML"
 tablebargraph6["condition"] <- "Normal"
 final <- rbind(tablebargraph5, tablebargraph6)
@@ -234,8 +238,7 @@ tiff("ADARB1isoformbar1.tiff")
 ggplot(final, aes(x=isoform_name, y=counts, fill=condition)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black")
 dev.off()
-
-
+##ADARB2 
 table12 <- read.csv("transcript_count_matrixedited.csv")
 table22 <- read.csv("ADARB2transcript.csv")
 table32 <- merge(table22, table12, by="t_name")
@@ -247,29 +250,30 @@ colnames(tablebargraph) <- tableC32[,1]
 tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "isoform_name"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
 tablebargraph2
-tablebargraph3 <- merge(Data, tablebargraph2, by="isoform_name")
-tablebargraph4 <- aggregate(tablebargraph3[, 3:4], list(tablebargraph3$sample), mean)
+tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
+tablebargraph4 <- aggregate(tablebargraph3[, 3:4], list(tablebargraph3$isoform_name), mean)
 tablebargraph5 <- t(tablebargraph4)
 tablebargraph5 <- tablebargraph5[-c(1),]
 write.csv(tablebargraph5, "5.csv")
 write.csv(tablebargraph5, "6.csv")
 tablebargraph5 <- read.csv("5.csv")
-tablebargraphF <- colnames(tablebargraph5)[1] <- "isoform_name"
+colnames(tablebargraph5)[1] <- "isoform_name"
 tablebargraphG <- tablebargraph5$V2 <- NULL
+colnames(tablebargraph5)[2] <- "count"
 tablebargraph6 <- read.csv("6.csv")
-tablebargraphE <- colnames(tablebargraph6)[1] <- "isoform_name"
+colnames(tablebargraph6)[1] <- "isoform_name"
 tablebargraphH <- tablebargraph6$V1 <- NULL
-tablebargraphI <- colnames(tablebargraph6)[2] <- "count"
+colnames(tablebargraph6)[2] <- "count"
 tablebargraph5["condition"] <- "AML"
 tablebargraph6["condition"] <- "Normal"
 final <- rbind(tablebargraph5, tablebargraph6)
 tiff("ADARB2isoformbar1.tiff")
-ggplot(final, aes(x=isoform_name, y=count, fill=condition)) +
+ggplot(final, aes(x=isoform_name, y=counts, fill=condition)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black")
 dev.off()
-
+##VEGFA
 table13 <- read.csv("transcript_count_matrixedited.csv")
 table23 <- read.csv("VEGFAtranscript.csv")
 table33 <- merge(table23, table13, by="t_name")
@@ -281,29 +285,30 @@ colnames(tablebargraph) <- tableC33[,1]
 tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "isoform_name"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
 tablebargraph2
-tablebargraph3 <- merge(Data, tablebargraph2, by="isoform_name")
-tablebargraph4 <- aggregate(tablebargraph3[, 3:23], list(tablebargraph3$sample), mean)
+tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
+tablebargraph4 <- aggregate(tablebargraph3[, 3:23], list(tablebargraph3$isoform_name), mean)
 tablebargraph5 <- t(tablebargraph4)
 tablebargraph5 <- tablebargraph5[-c(1),]
 write.csv(tablebargraph5, "5.csv")
 write.csv(tablebargraph5, "6.csv")
 tablebargraph5 <- read.csv("5.csv")
-tablebargraphF <- colnames(tablebargraph5)[1] <- "isoform_name"
+colnames(tablebargraph5)[1] <- "isoform_name"
 tablebargraphG <- tablebargraph5$V2 <- NULL
+colnames(tablebargraph5)[2] <- "counts"
 tablebargraph6 <- read.csv("6.csv")
-tablebargraphE <- colnames(tablebargraph6)[1] <- "isoform_name"
+colnames(tablebargraph6)[1] <- "isoform_name"
 tablebargraphH <- tablebargraph6$V1 <- NULL
-tablebargraphI <- colnames(tablebargraph6)[2] <- "counts"
+colnames(tablebargraph6)[2] <- "counts"
 tablebargraph5["condition"] <- "AML"
 tablebargraph6["condition"] <- "Normal"
 final <- rbind(tablebargraph5, tablebargraph6)
 tiff("VEGFAisoformbar1.tiff")
-ggplot(final, aes(x=isoform_name, y=count, fill=condition)) +
+ggplot(final, aes(x=isoform_name, y=counts, fill=condition)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black")
 dev.off()
-
+##VEGFA biologically relevant
 table13 <- read.csv("transcript_count_matrixedited.csv")
 table23 <- read.csv("VEGFAtranscriptimp.csv")
 table33 <- merge(table23, table13, by="t_name")
@@ -314,21 +319,22 @@ colnames(tablebargraph) <- tableC33[,1]
 tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "isoform_name"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
 tablebargraph2
-tablebargraph3 <- merge(Data, tablebargraph2, by="isoform_name")
-tablebargraph4 <- aggregate(tablebargraph3[, 3:6], list(tablebargraph3$sample), mean)
+tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
+tablebargraph4 <- aggregate(tablebargraph3[, 3:6], list(tablebargraph3$isoform_name), mean)
 tablebargraph5 <- t(tablebargraph4)
 tablebargraph5 <- tablebargraph5[-c(1),]
 write.csv(tablebargraph5, "5.csv")
 write.csv(tablebargraph5, "6.csv")
 tablebargraph5 <- read.csv("5.csv")
-tablebargraphF <- colnames(tablebargraph5)[1] <- "isoform_name"
+colnames(tablebargraph5)[1] <- "isoform_name"
 tablebargraphG <- tablebargraph5$V2 <- NULL
+colnames(tablebargraph5)[2] <- "counts"
 tablebargraph6 <- read.csv("6.csv")
-tablebargraphE <- colnames(tablebargraph6)[1] <- "isoform_name"
+colnames(tablebargraph6)[1] <- "isoform_name"
 tablebargraphH <- tablebargraph6$V1 <- NULL
-tablebargraphI <- colnames(tablebargraph6)[2] <- "counts"
+colnames(tablebargraph6)[2] <- "counts"
 tablebargraph5["condition"] <- "AML"
 tablebargraph6["condition"] <- "Normal"
 names1 <- read.csv("VEGFAtranscriptimp_names.csv")
@@ -336,10 +342,10 @@ tablebargraph5 <- merge(tablebargraph5, names1, by="isoform_name")
 tablebargraph6 <- merge(tablebargraph6, names1, by="isoform_name")
 final <- rbind(tablebargraph5, tablebargraph6)
 tiff("VEGFAisoformimpbar1.tiff")
-ggplot(final, aes(x=isoform, y=V1, fill=condition)) +
+ggplot(final, aes(x=isoform_name, y=counts, fill=condition)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black")
 dev.off()
-
+##VEGFB
 table14 <- read.csv("transcript_count_matrixedited.csv")
 table24 <- read.csv("VEGFBtranscript.csv")
 table34 <- merge(table24, table1, by="t_name")
@@ -351,21 +357,22 @@ colnames(tablebargraph) <- tableC34[,1]
 tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "isoform_name"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
 tablebargraph2
-tablebargraph3 <- merge(Data, tablebargraph2, by="isoform_name")
-tablebargraph4 <- aggregate(tablebargraph3[, 3:6], list(tablebargraph3$sample), mean)
+tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
+tablebargraph4 <- aggregate(tablebargraph3[, 3:6], list(tablebargraph3$isoform_name), mean)
 tablebargraph5 <- t(tablebargraph4)
 tablebargraph5 <- tablebargraph5[-c(1),]
 write.csv(tablebargraph5, "5.csv")
 write.csv(tablebargraph5, "6.csv")
 tablebargraph5 <- read.csv("5.csv")
-tablebargraphF <- colnames(tablebargraph5)[1] <- "isoform_name"
+colnames(tablebargraph5)[1] <- "isoform_name"
 tablebargraphG <- tablebargraph5$V2 <- NULL
+colnames(tablebargraph5)[2] <- "counts"
 tablebargraph6 <- read.csv("6.csv")
-tablebargraphE <- colnames(tablebargraph6)[1] <- "isoform_name"
+colnames(tablebargraph6)[1] <- "isoform_name"
 tablebargraphH <- tablebargraph6$V1 <- NULL
-tablebargraphI <- colnames(tablebargraph6)[2] <- "counts"
+colnames(tablebargraph6)[2] <- "counts"
 tablebargraph5["condition"] <- "AML"
 tablebargraph6["condition"] <- "Normal"
 final <- rbind(tablebargraph5, tablebargraph6)
@@ -373,7 +380,7 @@ tiff("VEGFBisoformbar1.tiff")
 ggplot(final, aes(x=isoform_name, y=counts, fill=condition)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black")
 dev.off()
-
+##VEGFB biologically relevant
 table13 <- read.csv("transcript_count_matrixedited.csv")
 table23 <- read.csv("VEGFBtranscriptimp.csv")
 table33 <- merge(table23, table13, by="t_name")
@@ -384,21 +391,22 @@ colnames(tablebargraph) <- tableC33[,1]
 tablebargraph2 <- tablebargraph[-c(1, 6, 7, 8, 9, 10, 11), ]
 write.csv(tablebargraph2, "tablebargraph2.csv")
 tablebargraph2 <- read.csv("tablebargraph2.csv")
-tablebargraphY <- colnames(tablebargraph2)[1] <- "isoform_name"
+tablebargraphY <- colnames(tablebargraph2)[1] <- "sample"
 tablebargraph2
-tablebargraph3 <- merge(Data, tablebargraph2, by="isoform_name")
-tablebargraph4 <- aggregate(tablebargraph3[, 3:4], list(tablebargraph3$sample), mean)
+tablebargraph3 <- merge(Data, tablebargraph2, by="sample")
+tablebargraph4 <- aggregate(tablebargraph3[, 3:4], list(tablebargraph3$isoform_name), mean)
 tablebargraph5 <- t(tablebargraph4)
 tablebargraph5 <- tablebargraph5[-c(1),]
 write.csv(tablebargraph5, "5.csv")
 write.csv(tablebargraph5, "6.csv")
 tablebargraph5 <- read.csv("5.csv")
-tablebargraphF <- colnames(tablebargraph5)[1] <- "isoform_name"
+colnames(tablebargraph5)[1] <- "isoform_name"
 tablebargraphG <- tablebargraph5$V2 <- NULL
+colnames(tablebargraph5)[2] <- "counts"
 tablebargraph6 <- read.csv("6.csv")
-tablebargraphE <- colnames(tablebargraph6)[1] <- "isoform_name"
+colnames(tablebargraph6)[1] <- "isoform_name"
 tablebargraphH <- tablebargraph6$V1 <- NULL
-tablebargraphI <- colnames(tablebargraph6)[2] <- "counts"
+colnames(tablebargraph6)[2] <- "counts"
 tablebargraph5["condition"] <- "AML"
 tablebargraph6["condition"] <- "Normal"
 names1 <- read.csv("VEGFBtranscriptimp_names.csv")
@@ -406,7 +414,7 @@ tablebargraph5 <- merge(tablebargraph5, names1, by="isoform_name")
 tablebargraph6 <- merge(tablebargraph6, names1, by="isoform_name")
 final <- rbind(tablebargraph5, tablebargraph6)
 tiff("VEGFBisoformimpbar1.tiff")
-ggplot(final, aes(x=isoform, y=V1, fill=condition)) +
+ggplot(final, aes(x=isoform_name, y=counts, fill=condition)) +
     geom_bar(stat="identity", position=position_dodge(), colour="black")
 dev.off()
 sessionInfo()
