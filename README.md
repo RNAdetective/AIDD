@@ -136,19 +136,19 @@ If you prefer to create your own virtualbox instead of downloading the premade i
 http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
 ```
 2. Go to create new machine in the oracle virtual machine window by clicking the new button
-      ```
-      select a name, put in linux and ubuntu 64 
-      then click VDH create virtual hard disk now and select at least 40G of storage space to create the hard disk.  
-      Click create
 ```
+select a name, put in linux and ubuntu 64 
+then click VDH create virtual hard disk now and select at least 40G of storage space to create the hard disk.  
+ Click create
+ ```
 3. When it asks where to load from click on bio linux 8 .iso file in your file system.
-```
-      This will then load the iso file and it is just like you are installing a new os.
-      then install biolinux following prompts until it is done.
-      Hit Continue make sure you erase disk options and keep clicking continue
-      Make sure you use username = user and password = password
-      When you click restart wait about 15 seconds and you can close the virtualbox and click the option shutdown machine.
-```
+ ```
+ This will then load the iso file and it is just like you are installing a new os.
+ then install biolinux following prompts until it is done.
+ Hit Continue make sure you erase disk options and keep clicking continue
+ Make sure you use username = user and password = password
+ When you click restart wait about 15 seconds and you can close the virtualbox and click the option shutdown machine.
+ ```
 4. Make sure you have set aside enough RAM and CPU to run the machine you must select at least 4G of RAM and 1CPU to run at bare minimum.  
 ```
 (Although to run STAR aligner option you must select at least 30G of RAM).  
