@@ -1,6 +1,11 @@
 # Automated Isoform Diversity Detector
 
-
+The pipeline incorporates open source tools into one easy to use virtual machine pipeline.  
+The user has the option to run the script to run the pipeline in limited user input options. 
+The user is also free to run the code themselves from the command prompt.  
+There are also additional tools added to the virtualbox but that are not used in the default pipeline.  
+The user is free to use these for the optional steps indicated below.  
+The program and code used in the pipeline are described in detail below including the default pipeline steps and optional additions.
 
 ## Getting Started
 
@@ -198,10 +203,47 @@ You now have a newly constructed copy of AIDDv1.0virtualbox and you must conitnu
 
 ## Running AIDD
 
-To Run AIDD for RNAseq transcriptome diversity discovery copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
+To Run AIDD for RNAseq transcriptome diversity discovery copy and paste the following command and follow the on screen prompts.  For detailed instructions as well as ways to edit the script for even more options see the manual.
+
+Step 1: Make sure AIDD virutalbox is up an running following the steps outlined above.
+
+Step 2: Create your experimental index file. 
+```
+Go to /home/user/AIDD/index/PHENO_DATA.csv 
+fill this in with your correct experimental information 
+then save and close the file.
+```
+
+Step 3: copy and paste the following command into the command prompt
 ```
 bash /home/user/AIDD/AIDD.sh
 ```
+
+Step 4: User prompts will direct the user to enter the specifics for your experiment
+
+a. Enter the path for you folder to store the data.
+
+b. Answer yes if you want to download sequences and no if you have the data already on your hard drive.  
+Answer no if you have experimental files of your own and make sure they are in the correct path 
+
+/home/user/ncbi/public/sra 
+
+c. You will be asked to enter SRA numbers next.  If you are downloading sequences these would be the numbers NCBI uses to identify them
+in the SRA database and if you have your own files enter those file names instead of SRA numbers when prompted.
+
+d. It will then ask how many samples you have enter how ever many sra numbers you have (4-18)
+
+e. Enter your option for indexes we suggest GRCh37_snp_tran
+
+f. Enter whether your sequences are single or paired
+
+g Pick which aligner you would like to use currently only HISAT2 default option.  In order to run the others you need to edit the script 
+
+h. Choose which data type you have for statistical analysis bivariate or multivariate
+
+i. Then enter if you would like to do variant calling now or at a later time.
+
+AIDD will then run telling what it is doing at each step along the way.  When it is complete it will print out a list of files in the Results folder.  
 
 ## Deployment
 
