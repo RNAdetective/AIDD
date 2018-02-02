@@ -1,21 +1,40 @@
 Supplemental Manual:
-The pipeline incorporates open source tools into one easy to use virtual machine pipeline.  The user has the option to run the script to run the pipeline in limited user input options. The user is also free to run the code themselves from the command prompt.  There are also additional tools added to the virtualbox but that are not used in the default pipeline.  The user is free to use these for the optional steps indicated below.  The program and code used in the pipeline are described in detail below including the default pipeline steps and optional additions.
+The pipeline incorporates open source tools into one easy to use virtual machine pipeline.  
+The user has the option to run the script to run the pipeline in limited user input options. 
+The user is also free to run the code themselves from the command prompt.  
+There are also additional tools added to the virtualbox but that are not used in the default pipeline.  
+The user is free to use these for the optional steps indicated below.  
+The program and code used in the pipeline are described in detail below including the default pipeline steps and optional additions.
 
-Step 1: The user can download the virtualbox image and load it into their virtual machine on their local machine following oracle virtualbox set up instructions.  This is ready to use and you don’t need to do the optional setup instructions.
-Optional Step 1: The user can download the set_up_instructions and follow to create their own virtualbox following the instructions provided.
-Optional Step 1: You can use the docker image set up instead of virtual box see the docker instructions at the end of this manual.
+Step 1: Make sure AIDD virutalbox is up an running following the steps outlined on github.
 
-Step 2: Set up external, internal hard drive, or shared folder path.  
-A.	If you choose the external drive make sure you set up the virtual box to recognize your drive.  Do this by going to the settings and selecting USB.  Make sure you have the right 2.0 or 3.0 option selected and click add device.  Then select the appropriate device from the menu.  Then apply changes and restart the virtualbox.  The final path should be /media/user/”whatever you named you external drive”
-B.	If you choose the internal drive use these instructions to add an internal hard drive space.  Click settings and then select Storage.  Highlight Controller: SATA and then at the bottom there is a blue drive button with a green plus select this one.  Two options will appear select the add hard disk option.  Click create new disk and in the new window select VHD (virtual hard disk) then click Next.  Select Dynamically allocated up to appropriate size for your project and machine we suggest no smaller then 500GB.  The new drive should appear in the list.  Now you can open the virtual machine and you will have to format the new disk before you can use it.  Go to search computer and type in disks.  Click on the disks icon that appears.  A new window will pop up and on the left will be a list of disks.  Select your new hard drive and then click on the circle icon in the upper right corner which is the settings menu.  Select format from this menu.  In the new window select quick overwrite and click format.  Once this is done select the + icon near the middle of the window.  In the new pop up window don’t change any options just add a name in the name box.  Once this is done close click the triangle “play” button to mount the drive and close the windows.  Your new drive should appear below computer in the folder menu.  Supply this path to the first prompt in the pipeline.  The final path should be /media/user/”whatever you named it”
-C.	The last option is to create a shared folder on your host system.  Create your folder on your host system and make sure you give it share permissions.  Go into the setting in the virtualbox and click on shared folders.  Click on the folder icon with the + sign on top of it.  This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  This will create a pop up window and you can select your new shared folder.  After you select the folder the pop up will close and you should make sure the auto-mount box is checked and make permanent box if you want the folder to stay shared for more then one session.  Then click ok.  Your new folder should show up on the list then click ok.  Now start the virtual box and you should see you new folder under devices in the folder menu.  Then use this path for the pipeline it should be /media/sf_”name of folder”.
+Step 2: Create your experimental index file.  
+Go to /home/user/AIDD/index/PHENO_DATA.csv 
+fill this in with your correct experimental information 
+then save and close the file.
 
-Step 3: Create your experimental index file.  Go to /home/user/Pipelines/index/PHENO_DATA.csv and fill this in with your correct experimental information then save and close the file and run the RNAseq pipeline script provided in the virtualbox.
-Optional Step 3: Follow the following script prompts and manually run the installed tools using either provided scripts or your own code.
+Step 3: copy and paste the following command into the command prompt
 
-Step 4: User prompts will direct the user to enter the path to an external storage with at least 500G, SRA numbers, which references they would prefer to use from the options, whether the datasets are single or paired, which type of design will be used i.e. how many conditions your experimental design has, and lastly whether or not to run variant calling part of the pipeline.  See code below for specifics
-Optional Step 4: The user can by pass the SRA download by simply placing there experimental files into the correct path /home/user/ncbi/public/sra and then entering those file names instead of SRA numbers when prompted.
-Code:
+bash /home/user/AIDD/AIDD.sh
+
+Step 4: User prompts will direct the user to enter the specifics for your experiment
+
+a. Enter the path for you folder to store the data.
+b. Answer yes if you want to download sequences and no if you have the data already on your hard drive.  
+Answer no if you have experimental files of your own and make sure they are in the correct path 
+
+/home/user/ncbi/public/sra 
+
+c. You will be asked to enter SRA numbers next.  If you are downloading sequences these would be the numbers NCBI uses to identify them
+in the SRA database and if you have your own files enter those file names instead of SRA numbers when prompted.
+d. It will then ask how many samples you have enter how ever many sra numbers you have (4-18)
+e. Enter your option for indexes we suggest GRCh37_snp_tran
+f. Enter whether your sequences are single or paired
+g Pick which aligner you would like to use currently only HISAT2 default option.  In order to run the others you need to edit the script 
+h. Choose which data type you have for statistical analysis bivariate or multivariate
+i. Then enter if you would like to do variant calling now or at a later time.
+
+CODE:
 echo "Please enter the path to external hard drive with at least 1 terabyte of space if you want to run all 18 files"
 ##this path can be to any hard drive including an external drive which can be added through USB drive.  
 read path
@@ -32,9 +51,21 @@ read design
 echo "Would you like to do variant calling?"
 read variant
 
-Step 5: This is the step where the pipeline will download all necessary reference files for the pipeline.  The user input will be the instructions for which set of references and indexes to download.  See the code below for more details.
-Optional Step 5: If the user prefers to use their own or need something other then human reference files these reference can be downloads separately however we do not recommend using anything other then ensembl indexes and references because the downstream tools are designed to take ensembl annotated data and the other references and indexes need extra organizing and filtering steps not provided in this pipeline. Once you have downloads and followed the following code to properly organize these files they should be moved to the working directory selected in the first prompt.
-Code:
+Step 5: This is the step where AIDD will download all necessary reference files for the tools.  
+The user input for index choice will be the instructions for which set of references and indexes to download. 
+See the code below for more details.  It downloads all SRA sequences and moves then to the correct working directory
+The rest of the index files are from other sources and need to be converted to the correct format based on the tool used.
+This can be seen in the code below.
+
+Optional Step 5: If the user prefers to use their own or need something other then human reference files these reference can be downloads separately 
+however we do not recommend using anything other then ensembl indexes and references 
+because the downstream tools are designed to take ensembl annotated data and the other references 
+and indexes need extra organizing and filtering steps not provided in this pipeline. 
+Once you have downloads and followed the following code to properly organize these files they 
+should be moved to the working directory selected in the first prompt.  And make sure they have the same neames
+used in the code below.
+
+CODE:
 echo "Now Downloading sra files and moving them to $path" 
 prefetch $varname1 $varname2 $varname3 $varname4 $varname5 $varname6 $varname7 $varname8 $varname9 $varname10 $varname11 $varname12 $varname13 $varname14 $varname15 $varname16 $varname17 $varname18
 for file in /home/user/ncbi/public/sra/*sra
@@ -71,10 +102,15 @@ gunzip dbsnp_138.b37.vcf.gz
 mv dbsnp_138.b37.vcf dbsnp.vcf
 fi
 
-Step 6: Conversion of SRA files to fastq files and alignment using HISAT2.  There is a user defined option at the beginning asked for paired or single end reads.  At this time the default pipeline is set to paired end reads and only paired end reads can be used for variant calling for the default pipeline.  Single end reads do not have the accuracy needed during alignment and re-mapping during variant calling to be accurate enough for RNA editing detection.
+Step 6: Conversion of SRA files to fastq files and alignment using HISAT2.  
+There is a user defined option at the beginning asked for paired or single end reads.  
+At this time the default pipeline is set to paired end reads and only paired end reads can be used for variant calling for the default pipeline.  
+Single end reads do not have the accuracy needed during alignment and re-mapping during variant calling to be accurate enough for RNA editing detection.
 Optional Step 6A: If you already have fastq files these can manually be moved into the working directory in a folder with that samples name containing all fastq files associated with that sample name. 
-Optional Step 6B: If you prefer to use STAR as an aligner this is tool is included as well as Salmon but these are not recommended in this pipeline.  STAR requires at least 30G of RAM to use human reference genomes which most computers do not have access to and Salmon does not provide an accurate reliable alignment especially for single end reads for further downstream processing (supplemental figure X).
-Code:
+Optional Step 6B: If you prefer to use STAR as an aligner this is tool is included as well as Salmon but these are not recommended in this pipeline.  
+STAR requires at least 30G of RAM to use human reference genomes which most computers do not have access to and Salmon does not provide an accurate reliable alignment especially for single end reads for further downstream processing.
+
+CODE:
 if  [ "$library" == "single" ]; then
 for fn in $varname{1..18};
 do
@@ -116,7 +152,8 @@ fi
 Step 7: The next steps are conversion from sam files to bam files using picard java tool.  These bam files are then used for the transcriptome assembly and counting step.  Stringtie is the tool used for transcriptome assembly because it simulataneous counts and assembles the transcript creating a more accurate count of individual transcripts due to a more accurate assembly of different isoforms.
 Optional Step 7A: The user can choose to convert sam files to bam files using samtools which is installed in the virtualbox but not utilized in the pipeline.
 Optional Step 7B: The user can choose to use another assembly tool such as cuffdiff which is included in the virtualbox but not used in the current pipeline due to recommended use of stringtie with HISAT2 alignment tool.
-Code:
+
+CODE:
 for fn in $varname{1..18};
 do
     samp=`basename ${fn}`
