@@ -5,7 +5,7 @@ These are the directions to download the premade AIDDPipeline image or to create
 Everyone starts here:
 1. Download and set up oracle virtual box machine https://www.virtualbox.org/wiki/Downloads make sure you also download and install https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_Pack-5.2.6-120293.vbox-extpack inorder for shared folders and other things to work.
 
-2. Next download and load our ready to go vm from "link is in progress" or if you prefer to make your own follow the instructions below.
+2. Next download and load our ready to go vm from https://drive.google.com/open?id=1Wj6H0a1K57gmox50YAVQdGcNFPjN-5sa or if you prefer to make your own follow the instructions below.
 This is the account details for the vbox username = user and password=password.
 
 Those of you that wish to create your own VM instead of using the pre constructed one do these next steps.  Those of you who downloads the pre made version can skep these next steps.  Pick up were it says everyone do these step.
