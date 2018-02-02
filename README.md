@@ -24,28 +24,108 @@ https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_
 https://drive.google.com/open?id=1Wj6H0a1K57gmox50YAVQdGcNFPjN-5sa
 ```
 4. Uncompress files.
-```
-Give examples
-```
+
 5. Open Virtualbox manager and under the menu Machine select add.  A new pop window will allow you to find the file you just uncompressed.  Then click open.  AIDDv1.0 will now appear on your list of virtualboxes.
 
 6. Make sure you check your setting for the machine and you have the correct amount of resources allocated to the virtualbox from teh host machine.
 ```
-You do this by selecting a virtualbox then clicking on settings.  Under the option in the menu on the right select systems. there are two tabs you need to check on the right.  Under motherboard make sure the blue marker is in the green portion of the bar for how much RAM to allocate to the virtual box.  Do the same under the tab processors.  The top green bar is how much CPU to give to virtualbox and this needs to be in the green as well. 
+You do this by selecting a virtualbox then clicking on settings.  
+
+Under the option in the menu on the right select systems. 
+
+There are two tabs you need to check on the right.  
+
+Under motherboard make sure the blue marker is in the green portion of 
+
+the bar for how much RAM to allocate to the virtual box.  
+
+Do the same under the tab processors.  
+
+The top green bar is how much CPU to give to virtualbox 
+
+and this needs to be in the green as well. 
 ```
 7. Set up external, internal hard drive, or shared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the three options you have and instructions to create each of them.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.
 
 A.	If you choose the external drive make sure you set up the virtual box to recognize your drive.  
 ```
-Do this by going to the settings and selecting USB.  Make sure you have the right 2.0 or 3.0 option selected and click add device.  Then select the appropriate device from the menu.  Then apply changes and restart the virtualbox.  The final path should be /media/user/”whatever you named you external drive”
+Do this by going to the settings and selecting USB.  
+
+Make sure you have the right 2.0 or 3.0 option selected and click add device.  
+
+Then select the appropriate device from the menu.  
+
+Then apply changes and restart the virtualbox.  
+
+The final path should be /media/user/”whatever you named you external drive”
 ```
 B.	If you choose the internal drive use these instructions to add an internal hard drive space. 
 ```
-Click settings and then select Storage.  Highlight Controller: SATA and then at the bottom there is a blue drive button with a green plus select this one.  Two options will appear select the add hard disk option.  Click create new disk and in the new window select VHD (virtual hard disk) then click Next.  Select Dynamically allocated up to appropriate size for your project and machine we suggest no smaller then 500GB.  The new drive should appear in the list.  Now you can open the virtual machine and you will have to format the new disk before you can use it.  Go to search computer and type in disks.  Click on the disks icon that appears.  A new window will pop up and on the left will be a list of disks.  Select your new hard drive and then click on the circle icon in the upper right corner which is the settings menu.  Select format from this menu.  In the new window select quick overwrite and click format.  Once this is done select the + icon near the middle of the window.  In the new pop up window don’t change any options just add a name in the name box.  Once this is done close click the triangle “play” button to mount the drive and close the windows.  Your new drive should appear below computer in the folder menu.  Supply this path to the first prompt in the pipeline.  The final path should be /media/user/”whatever you named it”
+Click settings and then select Storage.  
+
+Highlight Controller: SATA and then at the bottom there is a 
+
+blue drive button with a green plus select this one.  
+
+Two options will appear select the add hard disk option.  
+
+Click create new disk and in the new window select VHD (virtual hard disk) then click Next.  
+
+Select Dynamically allocated up to appropriate size for your project and machine we suggest no smaller then 500GB.  
+
+The new drive should appear in the list.  
+
+Now you can open the virtual machine and you will have to format the new disk before you can use it.  
+
+Go to search computer and type in disks. 
+
+Click on the disks icon that appears. 
+
+A new window will pop up and on the left will be a list of disks.  
+
+Select your new hard drive and then click on the circle icon in the upper right corner which is the settings menu.  
+
+Select format from this menu.  
+
+In the new window select quick overwrite and click format. 
+
+Once this is done select the + icon near the middle of the window.  
+
+In the new pop up window don’t change any options just add a name in the name box.  
+
+Once this is done close click the triangle “play” button to mount the drive and close the windows.  
+
+Your new drive should appear below computer in the folder menu.  
+
+Supply this path to the first prompt in the pipeline.  
+
+The final path should be /media/user/”whatever you named it”
 ```
 C.	The last option is to create a shared folder on your host system.  
 ```
-Create your folder on your host system and make sure you give it share permissions.  Go into the setting in the virtualbox and click on shared folders.  Click on the folder icon with the + sign on top of it.  This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  This will create a pop up window and you can select your new shared folder.  After you select the folder the pop up will close and you should make sure the auto-mount box is checked and make permanent box if you want the folder to stay shared for more then one session.  Then click ok.  Your new folder should show up on the list then click ok.  Now start the virtual box and you should see you new folder under devices in the folder menu.  Then use this path for the pipeline it should be /media/sf_”name of folder”.
+Create your folder on your host system and make sure you give it share permissions.  
+
+Go into the setting in the virtualbox and click on shared folders. 
+
+Click on the folder icon with the + sign on top of it.  
+
+This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  
+
+This will create a pop up window and you can select your new shared folder. 
+
+After you select the folder the pop up will close and you 
+
+should make sure the auto-mount box is checked and make permanent 
+
+box if you want the folder to stay shared for more then one session.  
+
+Then click ok.  
+
+Your new folder should show up on the list then click ok.  
+
+Now start the virtual box and you should see you new folder under devices in the folder menu.  
+
+Then use this path for the pipeline it should be /media/sf_”name of folder”.
 ```
 ### Creating VM
 
@@ -71,7 +151,11 @@ http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
 ```
 4. Make sure you have set aside enough RAM and CPU to run the machine you must select at least 4G of RAM and 1CPU to run at bare minimum.  
 ```
-(Although to run STAR aligner option you must select at least 30G of RAM).  Check the settings system.  Then check motherboard and processor make sure all the blue markers are in the green for your machine.  
+(Although to run STAR aligner option you must select at least 30G of RAM).  
+
+Check the settings system.  
+
+Then check motherboard and processor make sure all the blue markers are in the green for your machine.  
 ```
 5.  Once you load your new virtual box open command prompt and copy paste the following commands
 ```
@@ -118,23 +202,30 @@ To Run AIDD for RNAseq transcriptome diversity discovery copy and paste the foll
 ```
 bash /home/user/AIDD/AIDD.sh
 ```
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
 
 ## Deployment
 
 
 
 ## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+*[SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
+*[Samtools] (http://samtools.sourceforge.net/)
+*[HISAT2] (https://ccb.jhu.edu/software/hisat2/index.shtml)
+*[Picard] (http://broadinstitute.github.io/picard/)
+*[Stringtie] (https://ccb.jhu.edu/software/stringtie/)
+*[STAR] (https://github.com/alexdobin/STAR)
+*[Cuffdiff/Cufflinks] (http://cole-trapnell-lab.github.io/cufflinks/cuffdiff/)
+*[Kallisto] (https://pachterlab.github.io/kallisto/about)
+*[Salmon] (http://salmon.readthedocs.io/en/latest/salmon.html)
+*[Bioconductor packages] (https://www.bioconductor.org/)
+R packages
+*[DESeq2] (https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
+*[DEXseq] (http://bioconductor.org/packages/release/bioc/html/DEXSeq.html)
+*[Ballgown] (http://bioconductor.org/packages/release/bioc/html/ballgown.html)
+*[Ggplot2] (https://cran.r-project.org/web/packages/ggplot2/index.html)
+*[topGO] (http://bioconductor.org/packages/release/bioc/html/topGO.html)
+*[GATK] (https://software.broadinstitute.org/gatk/)
+*[snpEff] (http://snpeff.sourceforge.net/)
 
 ## Contributing
 
