@@ -1,5 +1,5 @@
-# Automated Isoform Diversity Detector: AIDD
 ![Screenshot](AIDD2.jpg)
+# Automated Isoform Diversity Detector: AIDD
 * AIDD incorporates open source tools into one virtualbox to ensure reproducability.  
 * There is a bash script that completely automates the pipeline making it ease to use. 
 * The manual also instructs the more advanced user how to change the script to add more individual options.  
