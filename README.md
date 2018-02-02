@@ -1,11 +1,14 @@
-# Automated Isoform Diversity Detector
+# Automated Isoform Diversity Detector: AIDD
 
-The pipeline incorporates open source tools into one easy to use virtual machine pipeline.  
-The user has the option to run the script to run the pipeline in limited user input options. 
-The user is also free to run the code themselves from the command prompt.  
-There are also additional tools added to the virtualbox but that are not used in the default pipeline.  
-The user is free to use these for the optional steps indicated below.  
-The program and code used in the pipeline are described in detail below including the default pipeline steps and optional additions.
+* AIDD incorporates open source tools into one virtualbox to ensure reproducability.  
+* There is a bash script that completely automates the pipeline making it ease to use. 
+* The manual also instructs the more advanced user how to change the script to add more individual options.  
+* There is the ability to run both bivariate and multivariate data in statistical analysis.
+* It is capable of looking at the transcriptome and editome in both global and local environments.
+* There is an ability to explore expressional trends for entire pathways of genes at once with heatmaps and PCA plots.
+* There is an options to look at just one gene at time and it's isoform expression as well.
+* Variant Calling is used to find evidence of RNA editing and predict the impact effects of those substutions.
+* Gene enrichment analysis is used on gene and isoform differential expression and on genes with high impact RNA editing sites.
 
 ## Getting Started
 
@@ -250,41 +253,26 @@ AIDD will then run telling what it is doing at each step along the way.  When it
 
 
 ## Built With
-*[SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
-
-*[Samtools] (http://samtools.sourceforge.net/)
-
-*[HISAT2] (https://ccb.jhu.edu/software/hisat2/index.shtml)
-
-*[Picard] (http://broadinstitute.github.io/picard/)
-
-*[Stringtie] (https://ccb.jhu.edu/software/stringtie/)
-
-*[STAR] (https://github.com/alexdobin/STAR)
-
-*[Cuffdiff/Cufflinks] (http://cole-trapnell-lab.github.io/cufflinks/cuffdiff/)
-
-*[Kallisto] (https://pachterlab.github.io/kallisto/about)
-
-*[Salmon] (http://salmon.readthedocs.io/en/latest/salmon.html)
-
-*[Bioconductor packages] (https://www.bioconductor.org/)
+* [SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
+* [Samtools] (http://samtools.sourceforge.net/)
+* [HISAT2] (https://ccb.jhu.edu/software/hisat2/index.shtml)
+* [Picard] (http://broadinstitute.github.io/picard/)
+* [Stringtie] (https://ccb.jhu.edu/software/stringtie/)
+* [STAR] (https://github.com/alexdobin/STAR)
+* [Cuffdiff/Cufflinks] (http://cole-trapnell-lab.github.io/cufflinks/cuffdiff/)
+* [Kallisto] (https://pachterlab.github.io/kallisto/about)
+* [Salmon] (http://salmon.readthedocs.io/en/latest/salmon.html)
+* [Bioconductor packages] (https://www.bioconductor.org/)
 
 R packages
 
-*[DESeq2] (https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
-
-*[DEXseq] (http://bioconductor.org/packages/release/bioc/html/DEXSeq.html)
-
-*[Ballgown] (http://bioconductor.org/packages/release/bioc/html/ballgown.html)
-
-*[Ggplot2] (https://cran.r-project.org/web/packages/ggplot2/index.html)
-
-*[topGO] (http://bioconductor.org/packages/release/bioc/html/topGO.html)
-
-*[GATK] (https://software.broadinstitute.org/gatk/)
-
-*[snpEff] (http://snpeff.sourceforge.net/)
+* [DESeq2] (https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
+* [DEXseq] (http://bioconductor.org/packages/release/bioc/html/DEXSeq.html)
+* [Ballgown] (http://bioconductor.org/packages/release/bioc/html/ballgown.html)
+* [Ggplot2] (https://cran.r-project.org/web/packages/ggplot2/index.html)
+* [topGO] (http://bioconductor.org/packages/release/bioc/html/topGO.html)
+* [GATK] (https://software.broadinstitute.org/gatk/)
+* [snpEff] (http://snpeff.sourceforge.net/)
 
 ## Contributing
 
