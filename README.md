@@ -209,22 +209,39 @@ bash /home/user/AIDD/AIDD.sh
 
 ## Built With
 *[SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
+
 *[Samtools] (http://samtools.sourceforge.net/)
+
 *[HISAT2] (https://ccb.jhu.edu/software/hisat2/index.shtml)
+
 *[Picard] (http://broadinstitute.github.io/picard/)
+
 *[Stringtie] (https://ccb.jhu.edu/software/stringtie/)
+
 *[STAR] (https://github.com/alexdobin/STAR)
+
 *[Cuffdiff/Cufflinks] (http://cole-trapnell-lab.github.io/cufflinks/cuffdiff/)
+
 *[Kallisto] (https://pachterlab.github.io/kallisto/about)
+
 *[Salmon] (http://salmon.readthedocs.io/en/latest/salmon.html)
+
 *[Bioconductor packages] (https://www.bioconductor.org/)
+
 R packages
+
 *[DESeq2] (https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
+
 *[DEXseq] (http://bioconductor.org/packages/release/bioc/html/DEXSeq.html)
+
 *[Ballgown] (http://bioconductor.org/packages/release/bioc/html/ballgown.html)
+
 *[Ggplot2] (https://cran.r-project.org/web/packages/ggplot2/index.html)
+
 *[topGO] (http://bioconductor.org/packages/release/bioc/html/topGO.html)
+
 *[GATK] (https://software.broadinstitute.org/gatk/)
+
 *[snpEff] (http://snpeff.sourceforge.net/)
 
 ## Contributing
