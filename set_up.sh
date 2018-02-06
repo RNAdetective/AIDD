@@ -116,4 +116,4 @@ mv /home/user/AIDDScripts/* /home/user/AIDD/
 ## remove the files not needed
 rm /home/user/VMsetup.tar.gz
 rm /home/user/AIDDScripts.tar.gz
-
+gsettings set org.gnome.desktop.background picture-uri file:////home/user/AIDDScripts/AIDDlogo.jpg
