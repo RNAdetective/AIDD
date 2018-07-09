@@ -1,18 +1,17 @@
 ![Screenshot](AIDD2.jpg)
 # Automated Isoform Diversity Detector: AIDD
-* AIDD incorporates open source tools into one virtualbox to ensure reproducability.  
+* AIDD incorporates open source tools into a static virtualbox to ensure reproducability.  
 * There is a bash script that completely automates the pipeline making it ease to use. 
 * The manual also instructs the more advanced user how to change the script to add more individual options.  
-* There is the ability to run both bivariate and multivariate data in statistical analysis.
 * It is capable of looking at the transcriptome and editome in both global and local environments.
-* There is an ability to explore expressional trends for entire pathways of genes at once with heatmaps and PCA plots.
+* There is an ability to explore differential expression trends for entire pathways of genes at once with heatmaps and PCA plots.
 * There is an options to look at just one gene at time and it's isoform expression as well.
-* Variant Calling is used to find evidence of RNA editing and predict the impact effects of those substutions.
-* Gene enrichment analysis is used on gene and isoform differential expression and on genes with high impact RNA editing sites.
+* Variant Calling is used to find evidence of RNA editing and predict the impact effects of those variants.
+* Gene enrichment analysis is to highlight pathways affected by variants.
 
 ## Getting Started
 
-These are the directions to download the premade AIDDPipeline image or to create a new vm image with biolinux8 and how to use the script to update, download and install all necessary tools for AIDD.sh to run which is our RNAseq computational pipeline for transcriptome diversity discovery.
+These are the directions to download the premade AIDD virtualbox or to create a new vm image with biolinux8 and how to use the script to update, download and install all necessary tools for AIDD to run the RNAseq computational pipeline for transcriptome diversity discovery.  We will soon add the ability to use docker.
 
 ### Prerequisites
 
@@ -35,7 +34,7 @@ https://drive.google.com/open?id=1Wj6H0a1K57gmox50YAVQdGcNFPjN-5sa
 
 5. Open Virtualbox manager and under the menu Machine select add.  A new pop window will allow you to find the file you just uncompressed.  Then click open.  AIDDv1.0 will now appear on your list of virtualboxes.
 
-6. Make sure you check your setting for the machine and you have the correct amount of resources allocated to the virtualbox from teh host machine.
+6. Make sure you check your setting for the machine and you have the correct amount of resources allocated to the virtualbox including RAM and CPU.
 
 * You do this by selecting a virtualbox then clicking on settings.  
 * Under the option in the menu on the right select systems. 
@@ -44,7 +43,7 @@ https://drive.google.com/open?id=1Wj6H0a1K57gmox50YAVQdGcNFPjN-5sa
 * Do the same under the tab processors.  
 * The top green bar is how much CPU to give to virtualbox and this needs to be in the green as well. 
 
-7. Set up external, internal hard drive, or shared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the three options you have and instructions to create each of them.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.
+7. Set up external, internal hard drive, or shared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the three options you have and instructions to create each of them.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.  The pipeline is designed to run automated from a shared folder so if you choose to run the automated script you need to have set up option C.
 
 A.	If you choose the external drive make sure you set up the virtual box to recognize your drive.  
 
@@ -157,44 +156,29 @@ To Run AIDD for RNAseq transcriptome diversity discovery copy and paste the foll
 
 Step 1: Make sure AIDD virutalbox is up an running following the steps outlined above.
 
-Step 2: Create your experimental index file. 
+Step 2: Follow the instructions on the desktop.
+* 1.) Open PHENO_DATA.csv on the desktop and fill out for your experiment.
 
-* Go to /home/user/AIDD/index/PHENO_DATA.csv 
-* fill this in with your correct experimental information 
-* then save and close the file.
+* 2.) Insert any gene lists of interest into the insert_gene_of_interest folder on the desk top.  Make .csv files with the first column numbered 1-X.  Then in the second column list your genes you want on one bar graph.  Also open GOI.csv and add to the list of genes any you want line graph count graphs for as well as a included in the table of gene of interest results.
 
+* 3.) Do the same for transcript lists of interest into the insert_transcript_of_interest fold making sure you add your transcript of interest to the TOI.csv file.
 
+* 4.) Add any pathway lists to the insert_gene_lists_for_pathways folder on the desktop.  Make a csv file that contains the first column labeled gene numbered 1-X.  Then in the second column labeled gene_name enter as many genes you want to include in that pathway.  Then name the file XXXXXXXX.csv (the name of your pathway) then add this name to the csv file pathway_list in the same format as the others on the list.
+
+* 5.) repeat this same procedure but for the insert_transcript_lists_for_pathways folder on the desktop.  Making sure to add you pathway names to the csv file names pathwayT_list.
+
+* 6.) When you are done entering the specifics for your experiment then copy and paste this into the command line and then follow on screen prompts.
+```
+bash /home/user/AIDD/AIDD.sh
+```
 Step 3: copy and paste the following command into the command prompt
 
 ```
 bash /home/user/AIDD/AIDD.sh
 ```
+Step 4: Follow on screen prompts asking a few more detail about your specific experiment.  If you would like to run with our predefined defaults select that in the beginning.
 
-Step 4: User prompts will direct the user to enter the specifics for your experiment
-
-* Enter the path for you folder to store the data.
-
-* Answer yes if you want to download sequences and no if you have the data already on your hard drive.  
-Answer no if you have experimental files of your own and make sure they are in the correct path 
-
-/home/user/ncbi/public/sra 
-
-* You will be asked to enter SRA numbers next.  If you are downloading sequences these would be the numbers NCBI uses to identify them
-in the SRA database and if you have your own files enter those file names instead of SRA numbers when prompted.
-
-* It will then ask how many samples you have enter how ever many sra numbers you have (4-18)
-
-* Enter your option for indexes we suggest GRCh37_snp_tran
-
-* Enter whether your sequences are single or paired
-
-* Pick which aligner you would like to use currently only HISAT2 default option.  In order to run the others you need to edit the script 
-
-* Choose which data type you have for statistical analysis bivariate or multivariate
-
-* Then enter if you would like to do variant calling now or at a later time.
-
-AIDD will then run telling what it is doing at each step along the way.  When it is complete it will print out a list of files in the Results folder.  
+AIDD will then run telling what it is doing at each step along the way.  When it is complete it will have all results in your shared folder organized by type of data.  See the manual for more information about folder system structure.  
 
 ## Built With
 * [SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
