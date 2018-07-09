@@ -206,21 +206,16 @@ AIDD will then run telling what it is doing at each step along the way.  When it
 * [Cuffdiff/Cufflinks] (http://cole-trapnell-lab.github.io/cufflinks/cuffdiff/)
 * [Kallisto] (https://pachterlab.github.io/kallisto/about)
 * [Salmon] (http://salmon.readthedocs.io/en/latest/salmon.html)
-* [Bioconductor packages] (https://www.bioconductor.org/)
+* [GATK] (https://software.broadinstitute.org/gatk/)
+* [snpEff] (http://snpeff.sourceforge.net/)
+
 
 R packages
-
+* [Bioconductor packages] (https://www.bioconductor.org/)
 * [DESeq2] (https://bioconductor.org/packages/release/bioc/html/DESeq2.html)
 * [DEXseq] (http://bioconductor.org/packages/release/bioc/html/DEXSeq.html)
 * [Ballgown] (http://bioconductor.org/packages/release/bioc/html/ballgown.html)
 * [Ggplot2] (https://cran.r-project.org/web/packages/ggplot2/index.html)
 * [topGO] (http://bioconductor.org/packages/release/bioc/html/topGO.html)
-* [GATK] (https://software.broadinstitute.org/gatk/)
-* [snpEff] (http://snpeff.sourceforge.net/)
 
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## License
 
