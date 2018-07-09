@@ -62,5 +62,8 @@ biocLite("devtools")
 biocLite("hexbin")
 biocLite("gdata")
 biocLite("DEXSeq")
+biocLite("cluster")
+biocLite("vcfR")
+
 
 

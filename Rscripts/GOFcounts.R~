@@ -1,0 +1,53 @@
+##gene count tables
+results <- read.csv("resultsall.csv")
+colnames(results)[c(1)] <- c("gene_name")
+GCMedit <- read.csv("gene_count_matrixedited.csv")
+folder <- getwd()     
+file_list <- list.files(path=folder, pattern="*.csv")
+data <- 
+do.call("rbind", 
+          lapply(file_list, 
+                 function(x) 
+                 read.csv(paste(folder, x, sep=''), 
+                 stringsAsFactors = FALSE)))
+table <- merge(data, GCMedit, by="gene_name")
+RGtable <- merge(table, results, by="gene_name")
+RGtable2 <- t(RGtable)
+colnames(RGtable2) <- RGtable[,1]
+RGtable3 <- RGtable2[-c(1, 6, 7, 8, 9, 10, 11), ]
+write.csv(RGtable3, "RGtable3.csv")
+RGtable3 <- read.csv("RGtable3.csv")
+colnames(RGtable3)[1] <- "sample"
+Data <- read.csv("PHENO_DATA.csv")
+RGtable4 <- merge(Data, RGtable3, by="sample")
+##this does both known genes
+ALL <- aggregate(RGtable4[, 6:11], list(RGtable4$condition), mean)
+ALL1 <- t(ALL)
+ALL2 <- ALL1[-c(1),]
+write.csv(ALL2, "5.csv")
+write.csv(ALL2, "6.csv")
+ALL5 <- read.csv("5.csv")
+colnames(ALL5)[1] <- "gene_name"
+ALLG <- ALL5$V2 <- NULL
+colnames(ALL5)[2] <- "counts"
+ALL6 <- read.csv("6.csv")
+ALLE <- colnames(ALL6)[1] <- "gene_name"
+ALLH <- ALL6$V1 <- NULL
+ALLI <- colnames(ALL6)[2] <- "counts"
+ALL5["condition"] <- "AML"
+ALL6["condition"] <- "Normal"
+final <- rbind(ALL5, ALL6)
+tiff("ALLbargraph.tiff")
+ggplot(final, aes(x=gene_name, y=counts, fill=condition)) +
+    geom_bar(stat="identity", position=position_dodge(), colour="black")
+dev.off()
+colnames(ALL5)[2] <- "MeanAML"
+colnames(ALL6)[2] <- "MeanNormal"
+ALL5$condition <- NULL
+ALL6$condition <- NULL
+mergetable <- merge(ALL5, ALL6, by="gene_name")
+allfinal <- merge(mergetable, RGtable, by="gene_name")
+allfinal2 <- allfinal[,-c(4:7)]
+write.csv(allfinal2, "GeneOfInterestResults.csv", row.names=FALSE)
+sessionInfo()
+

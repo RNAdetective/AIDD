@@ -1,0 +1,195 @@
+##make VEGFpathway way final table and heat map
+table1 <- read.csv("gene_count_matrixedited.csv")
+table2 <- read.csv("VEGFpathway_genes.csv")
+table3 <- merge(table2, table1, by="gene_name")
+table4 <- table3$t_id <- NULL
+table5 <- colnames(table3)[c(2:19)] <- rownames(Data)[c(1:18)]
+write.csv(table3, "VEGFpathwayedited_counts.csv", row.names=FALSE)
+tableB1 <- read.csv("resultsall.csv")
+table5 <- colnames(tableB1)[c(1)] <- c("gene_name")
+head(tableB1)
+tableC3 <- merge(table3, tableB1, by="gene_name")
+write.csv(tableC3, "resultsall_VEGFpathwayediting_counts.csv", row.names=FALSE)
+countData <- as.matrix(read.csv("VEGFpathwayedited_counts.csv", row.names="gene_name"))
+colData <- read.csv("PHENO_DATAk3.csv", row.names=1)
+print("do all your row names and colnames match with the PHENO_DATA file")
+all(rownames(colData) %in% colnames(countData))
+countData <- countData[, rownames(colData)]
+print("after renaming columns with PHENO_DATA file do they still match")
+all(rownames(colData) == colnames(countData))
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition + cell + condition:cell)
+nrow(dds)
+dds <- dds[ rowSums(counts(dds)) > 1, ]
+nrow(dds)
+rld <- rlog(dds, blind = FALSE)
+tiff("VEGFpathwayPCAplot2.tiff")
+ggplot(pcaData, aes(x = PC1, y = PC2, color = cell, shape = condition, label=rownames(pcaData))) + geom_point(size = 3) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed()
+dev.off()
+mat  <- assay(rld)
+mat  <- mat - rowMeans(mat)
+anno <- as.data.frame(colData(rld)[, c("condition")])
+rownames(anno) <- colData[,5]
+colnames(anno) <- "gene_name"
+tiff("VEGFpathwayheatmap.tiff")
+pheatmap(mat, annotation_col = anno, annotation_legend=FALSE, show_rownames = FALSE)
+dev.off()
+##make PNS developmental genes final table and heat map
+table12 <- read.csv("gene_count_matrixedited.csv")
+table22 <- read.csv("pns_deve_genes.csv")
+table32 <- merge(table22, table12, by="gene_name")
+table42 <- table32$t_id <- NULL
+table52 <- colnames(table32)[c(2:19)] <- rownames(Data)[c(1:18)]
+write.csv(table32, "pns_deve_genesedited_counts.csv", row.names=FALSE)
+tableC32 <- merge(table32, tableB1, by="gene_name")
+write.csv(tableC32, "resultsall_pns_deveediting_counts.csv", row.names=FALSE)
+countData <- as.matrix(read.csv("pns_deve_genesedited_counts.csv", row.names="gene_name"))
+colData <- read.csv("PHENO_DATAk3.csv", row.names=1)
+print("do all your row names and colnames match with the PHENO_DATA file")
+all(rownames(colData) %in% colnames(countData))
+countData <- countData[, rownames(colData)]
+print("after renaming columns with PHENO_DATA file do they still match")
+all(rownames(colData) == colnames(countData))
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition + cell + condition:cell)
+nrow(dds)
+dds <- dds[ rowSums(counts(dds)) > 1, ]
+nrow(dds)
+rld <- rlog(dds, blind = FALSE)
+tiff("pns_deve_genesPCAplot2.tiff")
+ggplot(pcaData, aes(x = PC1, y = PC2, color = cell, shape = condition, label=rownames(pcaData))) + geom_point(size = 0) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed()
+dev.off()
+mat  <- assay(rld)
+mat  <- mat - rowMeans(mat)
+anno <- as.data.frame(colData(rld)[, c("condition")])
+rownames(anno) <- colData[,5]
+colnames(anno) <- "gene_name"
+tiff("pns_deve_genesheatmap.tiff")
+pheatmap(mat, annotation_col = anno, annotation_legend=FALSE, show_rownames = FALSE)
+dev.off()
+##make neurological genes final table and heat map
+table13 <- read.csv("gene_count_matrixedited.csv")
+table23 <- read.csv("neuro_genes.csv")
+table33 <- merge(table23, table13, by="gene_name")
+table43 <- table33$t_id <- NULL
+table53 <- colnames(table33)[c(2:19)] <- rownames(Data)[c(1:18)]
+write.csv(table33, "neuro_genesedited_counts.csv", row.names=FALSE)
+tableC33 <- merge(table33, tableB1, by="gene_name")
+write.csv(tableC33, "resultsall_neuro_editing_counts.csv", row.names=FALSE)
+countData <- as.matrix(read.csv("neuro_genesedited_counts.csv", row.names="gene_name"))
+colData <- read.csv("PHENO_DATAk3.csv", row.names=1)
+print("do all your row names and colnames match with the PHENO_DATA file")
+all(rownames(colData) %in% colnames(countData))
+countData <- countData[, rownames(colData)]
+print("after renaming columns with PHENO_DATA file do they still match")
+all(rownames(colData) == colnames(countData))
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition + cell + condition:cell)
+nrow(dds)
+dds <- dds[ rowSums(counts(dds)) > 1, ]
+nrow(dds)
+rld <- rlog(dds, blind = FALSE)
+tiff("neuro_genesPCAplot2.tiff")
+ggplot(pcaData, aes(x = PC1, y = PC2, color = cell, shape = condition, label=rownames(pcaData))) + geom_point(size = 0) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed()
+dev.off()
+mat  <- assay(rld)
+mat  <- mat - rowMeans(mat)
+anno <- as.data.frame(colData(rld)[, c("condition")])
+rownames(anno) <- colData[,5]
+colnames(anno) <- "gene_name"
+tiff("neuro_genesheatmap.tiff")
+pheatmap(mat, annotation_col = anno, annotation_legend=FALSE, show_rownames = FALSE)
+dev.off()
+##make neurological developmental genes final table and heat map
+table14 <- read.csv("gene_count_matrixedited.csv")
+table24 <- read.csv("neuro_deve_genes.csv")
+table34 <- merge(table24, table14, by="gene_name")
+table44 <- table34$t_id <- NULL
+table54 <- colnames(table34)[c(2:19)] <- rownames(Data)[c(1:18)]
+write.csv(table34, "neuro_deve_genesedited_counts.csv", row.names=FALSE)
+tableC34 <- merge(table34, tableB1, by="gene_name")
+write.csv(tableC34, "resultsall_neuro_deveediting_counts.csv", row.names=FALSE)
+countData <- as.matrix(read.csv("neuro_deve_genesedited_counts.csv", row.names="gene_name"))
+colData <- read.csv("PHENO_DATAk3.csv", row.names=1)
+print("do all your row names and colnames match with the PHENO_DATA file")
+all(rownames(colData) %in% colnames(countData))
+countData <- countData[, rownames(colData)]
+print("after renaming columns with PHENO_DATA file do they still match")
+all(rownames(colData) == colnames(countData))
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition + cell + condition:cell)
+nrow(dds)
+dds <- dds[ rowSums(counts(dds)) > 1, ]
+nrow(dds)
+rld <- rlog(dds, blind = FALSE)
+tiff("neuro_deve_genesPCAplot2.tiff")
+ggplot(pcaData, aes(x = PC1, y = PC2, color = cell, shape = condition, label=rownames(pcaData))) + geom_point(size = 0) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed()
+dev.off()
+mat  <- assay(rld)
+mat  <- mat - rowMeans(mat)
+anno <- as.data.frame(colData(rld)[, c("condition")])
+rownames(anno) <- colData[,5]
+colnames(anno) <- "gene_name"
+tiff("neuro_deve_genesheatmap.tiff")
+pheatmap(mat, annotation_col = anno, annotation_legend=FALSE, show_rownames = FALSE)
+dev.off()
+##make CNS developmental genes final table and heat map
+table15 <- read.csv("gene_count_matrixedited.csv")
+table25 <- read.csv("cns_deve_genes.csv")
+table35 <- merge(table25, table15, by="gene_name")
+table45 <- table35$t_id <- NULL
+table55 <- colnames(table35)[c(2:19)] <- rownames(Data)[c(1:18)]
+write.csv(table35, "cns_deve_genesedited_counts.csv", row.names=FALSE)
+tableC35 <- merge(table35, tableB1, by="gene_name")
+write.csv(tableC35, "resultsall_cns_deve_genesediting_counts.csv", row.names=FALSE)
+countData <- as.matrix(read.csv("cns_deve_genesedited_counts.csv", row.names="gene_name"))
+colData <- read.csv("PHENO_DATAk3.csv", row.names=1)
+print("do all your row names and colnames match with the PHENO_DATA file")
+all(rownames(colData) %in% colnames(countData))
+countData <- countData[, rownames(colData)]
+print("after renaming columns with PHENO_DATA file do they still match")
+all(rownames(colData) == colnames(countData))
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition + cell + condition:cell)
+nrow(dds)
+dds <- dds[ rowSums(counts(dds)) > 1, ]
+nrow(dds)
+rld <- rlog(dds, blind = FALSE)
+tiff("cns_deve_genesPCAplot2.tiff")
+ggplot(pcaData, aes(x = PC1, y = PC2, color = cell, shape = condition, label=rownames(pcaData))) + geom_point(size = 0) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed()
+dev.off()
+mat  <- assay(rld)
+mat  <- mat - rowMeans(mat)
+anno <- as.data.frame(colData(rld)[, c("condition")])
+rownames(anno) <- colData[,5]
+colnames(anno) <- "gene_name"
+tiff("cns_deve_genesheatmap.tiff")
+pheatmap(mat, annotation_col = anno, annotation_legend=FALSE, show_rownames = FALSE)
+dev.off()
+##make brain developmental genes final table and heat map
+table16 <- read.csv("gene_count_matrixedited.csv")
+table26 <- read.csv("brain_deve_genes.csv")
+table36 <- merge(table26, table16, by="gene_name")
+table46 <- table36$t_id <- NULL
+table56 <- colnames(table36)[c(2:19)] <- rownames(Data)[c(1:18)]
+write.csv(table36, "brain_deve_genesedited_counts.csv", row.names=FALSE)
+tableC36 <- merge(table36, tableB1, by="gene_name")
+write.csv(tableC36, "resultsall_brain_deveediting_counts.csv", row.names=FALSE)
+countData <- as.matrix(read.csv("brain_deve_genesedited_counts.csv", row.names="gene_name"))
+colData <- read.csv("PHENO_DATAk3.csv", row.names=1)
+print("do all your row names and colnames match with the PHENO_DATA file")
+all(rownames(colData) %in% colnames(countData))
+countData <- countData[, rownames(colData)]
+print("after renaming columns with PHENO_DATA file do they still match")
+all(rownames(colData) == colnames(countData))
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition + cell + condition:cell)
+nrow(dds)
+dds <- dds[ rowSums(counts(dds)) > 1, ]
+nrow(dds)
+rld <- rlog(dds, blind = FALSE)
+tiff("brain_deve_genesPCAplot2.tiff")
+ggplot(pcaData, aes(x = PC1, y = PC2, color = cell, shape = condition, label=rownames(pcaData))) + geom_point(size = 0) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed()
+dev.off()
+mat  <- assay(rld)
+mat  <- mat - rowMeans(mat)
+anno <- as.data.frame(colData(rld)[, c("condition")])
+rownames(anno) <- colData[,5]
+colnames(anno) <- "gene_name"
+tiff("brain_deve_genesheatmap.tiff")
+pheatmap(mat, annotation_col = anno, annotation_legend=FALSE, show_rownames = FALSE)
+dev.off()

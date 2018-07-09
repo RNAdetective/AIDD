@@ -1,0 +1,104 @@
+library(gdata)
+library(topGO)
+library(VennDiagram)
+library(ggplot2)
+
+## this will do all 4 tables from genes.txt
+genes <- read.table("insert_run.genes.txt")
+colnames <- read.csv("/media/sf_AIDD/index/VCnames.csv")
+genes2 <- colnames(genes)[c(1:28)] <- colnames(colnames)[c(1:28)]
+write.csv(genes, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/insert_run.genes.csv", row.names=FALSE)
+genes[,2:4]<- list(NULL)
+genes[,3:25]<- list(NULL)
+genes2 <- aggregate(genes[, 2], list(genes$gene_name), sum)
+colnames(genes2)[1] <- "gene_name"
+colnames(genes2)[2] <- "HIGH"
+genes2[genes2 == 0] <- NA
+genes3 <- na.omit(genes2)
+head(genes3)
+write.csv(genes3, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/insert_runHIGH.csv", row.names=FALSE)
+
+genes <- read.table("insert_run.genes.txt")
+colnames <- read.csv("/media/sf_AIDD/index/VCnames.csv")
+genes2 <- colnames(genes)[c(1:28)] <- colnames(colnames)[c(1:28)]
+write.csv(genes, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/insert_run.genes.csv", row.names=FALSE)
+genes[,2:4]<- list(NULL)
+genes[,3:25]<- list(NULL)
+genes2 <- aggregate(genes[, 2], list(genes$gene_name), sum)
+colnames(genes2)[1] <- "gene_name"
+colnames(genes2)[2] <- "HIGH"
+genes2[genes2 == 0] <- NA
+genes3 <- na.omit(genes2)
+head(genes3)
+write.csv(genes3, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/insert_runModerate.csv", row.names=FALSE)
+
+genes <- read.table("insert_run.genes.txt")
+colnames <- read.csv("/media/sf_AIDD/index/VCnames.csv")
+genes2 <- colnames(genes)[c(1:28)] <- colnames(colnames)[c(1:28)]
+write.csv(genes, "/media/sf_AIDD/Results/variant_calling/haplotype/transcript/insert_run.genes.csv", row.names=FALSE)
+genes[,2:4]<- list(NULL)
+genes[,3:25]<- list(NULL)
+genes2 <- aggregate(genes[, 2], list(genes$gene_name), sum)
+colnames(genes2)[1] <- "gene_name"
+colnames(genes2)[2] <- "HIGH"
+genes2[genes2 == 0] <- NA
+genes3 <- na.omit(genes2)
+head(genes3)
+write.csv(genes3, "/media/sf_AIDD/Results/variant_calling/haplotype/transcript/insert_runHIGHtranscripts.csv", row.names=FALSE)
+
+genes <- read.table("insert_run.genes.txt")
+colnames <- read.csv("/media/sf_AIDD/index/VCnames.csv")
+genes2 <- colnames(genes)[c(1:28)] <- colnames(colnames)[c(1:28)]
+write.csv(genes, "/media/sf_AIDD/Results/variant_calling/haplotype/transcript/insert_run.genes.csv", row.names=FALSE)
+genes[,2:4]<- list(NULL)
+genes[,3:25]<- list(NULL)
+genes2 <- aggregate(genes[, 2], list(genes$gene_name), sum)
+colnames(genes2)[1] <- "gene_name"
+colnames(genes2)[2] <- "HIGH"
+genes2[genes2 == 0] <- NA
+genes3 <- na.omit(genes2)
+head(genes3)
+write.csv(genes3, "insert_runModerateTranscripts.csv", row.names=FALSE)
+ 
+
+
+
+
+
+
+
+
+
+
+
+data1 <- read.csv("SRR3895734HIGH.csv")
+data2 <- read.csv("SRR3895735HIGH.csv")
+data3 <- read.csv("SRR3895736HIGH.csv")
+data4 <- read.csv("SRR3895737HIGH.csv")
+data5 <- read.csv("SRR3895738HIGH.csv")
+data6 <- read.csv("SRR3895739HIGH.csv")
+data7 <- read.csv("SRR3895741HIGH.csv")
+data8 <- read.csv("SRR3895742HIGH.csv")
+data9 <- read.csv("SRR3895743HIGH.csv")
+data10 <- read.csv("SRR3895744HIGH.csv")
+data11 <- read.csv("SRR3895746HIGH.csv")
+data12 <- read.csv("SRR3895748HIGH.csv")
+final1 <- rbind(data1, data2)
+final2 <- rbind(final1, data3)
+final3 <- rbind(final2, data4)
+final4 <- rbind(final3, data5)
+final5 <- rbind(final4, data6)
+final6 <- rbind(final5, data7)
+final7 <- rbind(final6, data8)
+final8 <- rbind(final7, data9)
+final9 <- rbind(final8, data10)
+final10 <- rbind(final9, data11)
+final11 <- rbind(final10, data12)
+final12 <- aggregate(final12[, 2], list(final12$gene_name), sum)
+colnames(final12)[1] <- "gene_name"
+final12$x <- NULL
+write.csv(final12, "AMLHIGH.csv", row.names=FALSE)
+
+
+
+

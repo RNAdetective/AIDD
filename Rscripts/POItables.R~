@@ -1,0 +1,45 @@
+results <- read.csv("resultsall.csv")
+colnames(results)[c(1)] <- c("gene_name")
+colData <- read.csv("PHENO_DATA.csv", row.names=1)
+GCMedit <- read.csv("gene_count_matrixedited.csv")
+colnames(GCMedit)[c(2:5)] <- rownames(colData)[c(1:4)]
+path <- "/home/user/AIDD/gene_list/pathway/"
+files <- list.files(path=path, pattern="*.csv")
+for(file in files)
+{
+perpos <- which(strsplit(file, "")[[1]]==".")
+assign(
+gsub(" ","",substr(file, 1, perpos-1)), 
+read.csv(paste(path,file,sep="")), envir= .GlobalEnv)
+}
+
+##make VEGFpathway way final table and heat map
+table1 <- merge(GCMedit, brain_deve_genes, by="gene_name")
+table2 <- merge(GCMedit, cns_deve_genes, by="gene_name")
+table3 <- merge(GCMedit, myeloid_homo_genes, by="gene_name")
+table4 <- merge(GCMedit, neg_myeloid_diff_genes, by="gene_name")
+table5 <- merge(GCMedit, neuro_deve_genes, by="gene_name")
+table6 <- merge(GCMedit, neuro_genes, by="gene_name")
+table7 <- merge(GCMedit, pns_deve_genes, by="gene_name")
+table8 <- merge(GCMedit, pos_myeloid_diff_genes, by="gene_name")
+table9 <- merge(GCMedit, VEGFpathway_genes, by="gene_name")
+
+table1 <- merge(table1, results, by="gene_name")
+table2 <- merge(table2, results, by="gene_name")
+table3 <- merge(table2, results, by="gene_name")
+table4 <- merge(table2, results, by="gene_name")
+table5 <- merge(table2, results, by="gene_name")
+table6 <- merge(table2, results, by="gene_name")
+table7 <- merge(table2, results, by="gene_name")
+table8 <- merge(table2, results, by="gene_name")
+table9 <- merge(table2, results, by="gene_name")
+
+write.csv(table1, "brain.csv", row.names=FALSE)
+write.csv(table2, "cns.csv", row.names=FALSE)
+write.csv(table3, "myeloidH.csv", row.names=FALSE)
+write.csv(table4, "myeloidN.csv", row.names=FALSE)
+write.csv(table5, "neuroD.csv", row.names=FALSE)
+write.csv(table6, "neuro.csv", row.names=FALSE)
+write.csv(table7, "pns.csv", row.names=FALSE)
+write.csv(table8, "myeloidP.csv", row.names=FALSE)
+write.csv(table9, "VEGFNet.csv", row.names=FALSE)
