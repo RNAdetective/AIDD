@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+## Rscripts run in order GLDE, GOF, POITables, heatmaps, GtopGO, Gvenn, TLDE, TOF, TPOITables, Theatmaps, TtopGO, Tvenn
+cd "/media/sf_AIDD/Results/DESeq2/gene/differential_expression"
+## this is the command to run the gene level differential analysis in R using DESeq2 as the main package for analysis
+Rscript /home/user/AIDD/Rscripts/GLDE.R
+##this runs the bargraphs for gene counts
+Rscript /home/user/AIDD/Rscripts/GOF.R
+sed -i 's/6:8/9:11/g' /home/user/AIDD/Rscripts/GOF.R
+sed -i 's/ADARGene/VEGFGene/g' /home/user/AIDD/Rscripts/GOF.R
+Rscript /home/user/AIDD/Rscripts/GOF.R
+if [ "$num_gof" == "1" ]; then
+sed -i 's/9:11/6/g' /home/user/AIDD/Rscripts/GOF.R
+sed -i 's/VEGFGene/Zgenes/g' /home/user/AIDD/Rscripts/GOF.R
+Rscript /home/user/AIDD/Rscripts/GOF.R
+fi
+if [ "$num_gof" == "2" ]; then
+sed -i 's/9:11/12:13/g' /home/user/AIDD/Rscripts/GOF.R
+sed -i 's/VEGFGene/Zgenes/g' /home/user/AIDD/Rscripts/GOF.R
+Rscript /home/user/AIDD/Rscripts/GOF.R
+fi
+if [ "$num_gof" == "3" ]; then
+sed -i 's/9:11/12:14/g' /home/user/AIDD/Rscripts/GOF.R
+sed -i 's/VEGFGene/Zgenes/g' /home/user/AIDD/Rscripts/GOF.R
+Rscript /home/user/AIDD/Rscripts/GOF.R
+fi
+if [ "$num_gof" == "4" ]; then
+sed -i 's/9:11/12:15/g' /home/user/AIDD/Rscripts/GOF.R
+sed -i 's/VEGFGene/Zgenes/g' /home/user/AIDD/Rscripts/GOF.R
+Rscript /home/user/AIDD/Rscripts/GOF.R
+fi
+if [ "$num_gof" == "5" ]; then
+sed -i 's/9:11/12:16/g' /home/user/AIDD/Rscripts/GOF.R
+sed -i 's/VEGFGene/Zgenes/g' /home/user/AIDD/Rscripts/GOF.R
+Rscript /home/user/AIDD/Rscripts/GOF.R
+fi
+##get heatmaps table ready
+echo "Running R to make tables for pathways with results"
+mkdir /home/user/temp
+for i in resultsall.csv PHENO_DATA.csv gene_count_matrixedited.csv ; do
+cp $path/Results/DESeq2_gene/$i /home/user/temp/$i
+cp $path/Results/DESeq2_gene/$i $path/Results/GenePathway/$i
+done
+
+cd /home/user/temp
+Rscript /home/user/AIDD/Rscripts/POItables.R
+
+cp -a /home/user/temp/. $path/Results/GenePathway/
+
+ls $path/Results/GenePathway
+
+##this makes heatmaps for tables previously made
+cd $path/Results/GenePathway
+Rscript /home/user/AIDD/Rscripts/heatmaps.R
+##this removes no longer needed temp files
+for files in /home/user/temp/ ; do
+ rm $files
+done
+ls $path/Results/GenePathway
+## this does topGO
+cp $path/Results/DESeq2_gene/Upreg.csv $path/Results/topGO_gene/
+cp $path/Results/DESeq2_gene/Downreg.csv $path/Results/topGO_gene/
+cp /home/user/AIDD/index/annotations2.csv $path/Results/topGO_gene/
+cd $path/Results/topGO_gene
+Rscript /home/user/AIDD/Rscripts/GtopGO.R
+## this does transcript level
+cd $path/Results/DESeq2_transcript
+Rscript /home/user/AIDD/Rscripts/TLDE.R
+##this runs the bargraphs for gene counts
+echo "Running R to explore gene of interest including ADAR, VEGF, and your genes"
+Rscript /home/user/AIDD/Rscripts/TOF.R
+
+cd $path/Results/topGO_trans
+for i in Upregtrans.csv Downregtrans.csv PHENO_DATA.csv annotations2.csv ; do
+cp $path/Results/DESeq2_transcript/$i $path/Results/topGO_trans
+done
+echo "Running R to run gene enrichment with topGO"
+Rscript /home/user/AIDD/Rscripts/TtopGO.R
+
+fi
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/logs/Rscripts.log

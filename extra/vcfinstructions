@@ -1,0 +1,76 @@
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+export PERL5LIB=/home/user/AIDD/AIDD_tools/vcftools_0.1.13/perl/
+export PERL5LIB=/home/user/AIDD/AIDD_tools/tabix-0.2.6/perl/
+
+tabix -p bed ref.bed.gz
+bcftools annotate -a ref.bed.gz -c CHROM,FROM,TO,GENE -h  (echo '##INFO=<ID=GENE,Number=1,Type=String,Description="Gene name">') SRR5164629.vcf.gz
+
+vcf-concat SRR5164629.vcf SRR5164630.vcf SRR5164631.vcf | bgzip -c > cellline3Mock.vcf.gz
+vcf-concat SRR5164632.vcf SRR5164633.vcf SRR5164634.vcf | bgzip -c > cellline3Zika.vcf.gz
+vcf-concat SRR5164635.vcf SRR5164636.vcf SRR5164637.vcf | bgzip -c > cellline2Mock.vcf.gz
+vcf-concat SRR5164638.vcf SRR5164639.vcf SRR5164640.vcf | bgzip -c > cellline2Zika.vcf.gz
+vcf-concat SRR5164641.vcf SRR5164642.vcf SRR5164643.vcf | bgzip -c > cellline1Mock.vcf.gz
+vcf-concat SRR5164644.vcf SRR5164645.vcf SRR5164646.vcf | bgzip -c > cellline1Zika.vcf.gz
+vcf-merge -H SRR5164629.vcf SRR5164630.vcf SRR5164631.vcf SRR5164632.vcf SRR5164633.vcf SRR5164634.vcf SRR5164635.vcf SRR5164636.vcf SRR5164637.vcf SRR5164638.vcf SRR5164639.vcf SRR5164640.vcf SRR5164641.vcf SRR5164642.vcf SRR5164643.vcf SRR5164644.vcf SRR5164645.vcf SRR5164646.vcf | bgzip -c > 18ZikaMock.vcf.gz
+
+
+vcftools --gzvcf SRR5164629.vcf --freq --out SRR5164629freq
+vcftools --gzvcf SRR5164630.vcf --freq --out SRR5164630freq
+vcftools --gzvcf SRR5164631.vcf --freq --out SRR5164631freq
+vcftools --gzvcf SRR5164632.vcf --freq --out SRR5164632freq
+vcftools --gzvcf SRR5164633.vcf --freq --out SRR5164633freq
+vcftools --gzvcf SRR5164634.vcf --freq --out SRR5164634freq
+vcftools --gzvcf SRR5164635.vcf --freq --out SRR5164635freq
+vcftools --gzvcf SRR5164636.vcf --freq --out SRR5164636freq
+vcftools --gzvcf SRR5164637.vcf --freq --out SRR5164637freq
+vcftools --gzvcf SRR5164638.vcf --freq --out SRR5164638freq
+vcftools --gzvcf SRR5164639.vcf --freq --out SRR5164639freq
+vcftools --gzvcf SRR5164640.vcf --freq --out SRR5164640freq
+vcftools --gzvcf SRR5164641.vcf --freq --out SRR5164641freq
+vcftools --gzvcf SRR5164642.vcf --freq --out SRR5164642freq
+vcftools --gzvcf SRR5164643.vcf --freq --out SRR5164643freq
+vcftools --gzvcf SRR5164644.vcf --freq --out SRR5164644freq
+vcftools --gzvcf SRR5164645.vcf --freq --out SRR5164645freq
+vcftools --gzvcf SRR5164646.vcf --freq --out SRR5164646freq
+
+
+bcftools stats SRR5164629.vcf. > SRR5164629.vchk
+plot-vcfstats SRR5164629.vchk -p plots/
+
+bcftools merge --merge snp SRR5164629.vcf SRR5164630.vcf SRR5164631.vcf SRR5164632.vcf SRR5164633.vcf SRR5164634.vcf SRR5164635.vcf SRR5164636.vcf SRR5164637.vcf SRR5164638.vcf SRR5164639.vcf SRR5164640.vcf SRR5164641.vcf SRR5164642.vcf SRR5164643.vcf SRR5164644.vcf SRR5164645.vcf SRR5164646.vcf --output-type v
+
+vcf-compare SRR5164629.vcf SRR5164630.vcf SRR5164631.vcf SRR5164632.vcf SRR5164633.vcf SRR5164634.vcf SRR5164635.vcf SRR5164636.vcf SRR5164637.vcf SRR5164638.vcf SRR5164639.vcf SRR5164640.vcf SRR5164641.vcf SRR5164642.vcf SRR5164643.vcf SRR5164644.vcf SRR5164645.vcf SRR5164646.vcf
+
+/home/user/AIDD/AIDD_tools/bin/vcftools --gzvcf cellline3Mock.vcf.gz --gzdiff --chr 1 --chr 2 --chr 3 --chr 4 --chr 5 --chr 6 --chr 7 --chr 8 --chr 9 --chr 10 --chr 11 --chr 12 --chr 13 --chr 14 --chr 15 --chr 16 --chr 17 --chr 18 --chr 19 --chr 20 --chr 21 --chr 22 cellline3Zika.vcf.gz --diff-site --out K048compare
+/home/user/AIDD/AIDD_tools/bin/vcftools --gzvcf cellline2Mock.vcf.gz --gzdiff cellline2Zika.vcf.gz --diff-site --out K048compare
+/home/user/AIDD/AIDD_tools/bin/vcftools --gzvcf cellline1Mock.vcf.gz --gzdiff cellline1Zika.vcf.gz --diff-site --out K048compare 
+
+--diff-site --out K048compare
+
+ --diff-indv --diff-site-discordance --diff-indv-discordance --depth --site-depth --freq --counts 
+
+
+
+vcftools --gzvcf input_file.vcf.gz --freq --chr 1 --out chr1_analysis
+
+Output a new vcf file from the input vcf file that removes any indel sites
+
+vcftools --vcf input_file.vcf --remove-indels --recode --recode-INFO-all --out SNPs_only
+
+Output file comparing the sites in two vcf files
+
+vcftools --gzvcf input_file1.vcf.gz --gzdiff input_file2.vcf.gz --diff-site --out in1_v_in2
+
+Output a new vcf file to standard out without any sites that have a filter tag, then compress it with gzip
+
+vcftools --gzvcf input_file.vcf.gz --remove-filtered-all --recode --stdout | gzip -c > output_PASS_only.vcf.gz
+
+Output a Hardy-Weinberg p-value for every site in the bcf file that does not have any missing genotypes
+
+vcftools --bcf input_file.bcf --hardy --max-missing 1.0 --out output_noMissing
+
+Output nucleotide diversity at a list of positions
+
+zcat cellline3Mock.vcf.gz | vcftools --gzvcf - --site-pi --positions SNP_list.txt --out cellline3Mocknucleotide_diversity
+
+vcftools --gzvcf cellline3Mock.vcf.gz --freq --chr 1 --out chr1_analysis
