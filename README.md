@@ -28,11 +28,11 @@ https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_
 
 3. Download our ready to go AIDD virtualbox.
 ```
-https://drive.google.com/open?id=1Wj6H0a1K57gmox50YAVQdGcNFPjN-5sa
+https://drive.google.com/open?id=1ySfznZt8x50Vc0wVGP1U56vWd4TuV_Gh
 ```
 4. Uncompress files.
 
-5. Open Virtualbox manager and under the menu Machine select add.  A new pop window will allow you to find the file you just uncompressed.  Then click open.  AIDDv1.0 will now appear on your list of virtualboxes.
+5. Open Virtualbox manager and under the menu Machine select add.  A new pop window will allow you to find the file you just uncompressed.  Then click open.  AIDDv2.0 will now appear on your list of virtualboxes.
 
 6. Make sure you check your setting for the machine and you have the correct amount of resources allocated to the virtualbox including RAM and CPU.
 
@@ -148,7 +148,11 @@ Once the Rscript is done running.
 ```
 Close the virtualbox and restart again.  Now you should be able to click on view and click on the last option virtual screen 1.  A side bar will pop up and you can select the proper screen resolution for your computer. You can hold right ctrl and press c to adjust to fill mode then make the window larger.  This right ctrl + c with toggle between these two views.
 
-You now have a newly constructed copy of AIDDv1.0virtualbox and you must conitnue from step 5 above Installing
+You now have a newly constructed copy of AIDDv2.0virtualbox and you must conitnue from step 5 above Installing
+
+## Zika Tutorial with RMD for R-studio
+
+
 
 ## Running AIDD
 
