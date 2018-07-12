@@ -152,7 +152,7 @@ You now have a newly constructed copy of AIDDv2.0virtualbox and you must conitnu
 
 ## Zika Tutorial with RMD for R-studio
 
-
+To run the tutorial open R studio and find the AIDDtutorial.rmd file under /home/user/AIDD/tutorial/AIDDtutorial.rmd.  Run the chunks from begining to end.  This tutorial explains each step of the AIDD pipeline.  The following running AIDD is using the automated script  to look at the details of these scripts please look in /home/user/AIDD/bsahScripts or /home/user/AIDD/Rscripts
 
 ## Running AIDD
 
