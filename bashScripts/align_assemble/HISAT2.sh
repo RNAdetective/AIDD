@@ -11,4 +11,4 @@ do
 done < $INPUT
 IFS=$OLDIFS
 }
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/HISAT2.lo
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/HISAT2.log
