@@ -61,7 +61,7 @@ sed -i "s/"start"/"$start"/g" /media/sf_AIDD/bashScripts/prep/trim.sh
 sed -i "s/"start"/"$start"/g" /media/sf_AIDD/bashScripts/prep/trimSingle.sh
 sed -i "s/"end"/"$end"/g" /media/sf_AIDD/bashScripts/prep/trim.sh
 sed -i "s/"end"/"$end"/g" /media/sf_AIDD/bashScripts/prep/trimSingle.sh
-if [ "$library" == "1" ]; then
+if [ "$trim" == "1" ]; then
 echo "Starting trimming fastq files"
 bash /media/sf_AIDD/bashScripts/prep/trim.sh
 else
@@ -97,5 +97,14 @@ bash /media/sf_AIDD/bashScripts/variantcalling/VariantCalling.sh
 fi
 if [ "$variant" == "2" ]; then
 echo "You can run variant calling at a later date by typing bash /media/sf_AIDD/VariantCalling.sh and following the onscreen prompts.  Your logs of this session are stored in the logs folder.  To start another experiment please move all files out of the main sf_AIDD."
-
-
+fi
+echo "Are you done with your experiment? 1=I'm done go ahead and clean up files. 2=No, I'm not done please don't delete files."
+read clean
+if [ "$clean" == "1" ]; then
+for i in tmp working_directory gene_list index transcript_list variant_list do
+rm -d /media/sf_AIDD/$i
+done
+echo "You can remove references folder or you can leave it for the next experimental run so you don't have to download them again."
+fi
+if [ "$clean" == "2" ]; then
+echo "All files remain and you will have to clean them manually at a later time."
