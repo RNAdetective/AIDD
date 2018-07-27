@@ -185,7 +185,7 @@ Step 4: Follow on screen prompts asking a few more detail about your specific ex
 AIDD will then run telling what it is doing at each step along the way.  When it is complete it will have all results in your shared folder organized by type of data.  See the manual for more information about folder system structure.  
 
 ## Pipeline Flow Chart
-![Screenshot](flowchart.jpg)
+![Screenshot](flowchart.png)
 ## Built With
 * [SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
 * [Samtools] (http://samtools.sourceforge.net/)
