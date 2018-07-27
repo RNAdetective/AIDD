@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-##add details how to create PHENO_DATA.csv file
-cp /media/sf_AIDD/PHENO_DATA.csv /media/sf_AIDD/working_directory/
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/createPD.log
-
