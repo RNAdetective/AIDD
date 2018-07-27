@@ -1,0 +1,8 @@
+import re
+infilename = 'sequenceofinterest.fa'
+outfilename = 'sequenceofinterestclean.fasta'
+regex = re.compile("[.-]+ *")   
+
+with open(infilename, 'r') as infile, open(outfilename, 'w') as outfile:
+    for line in infile:
+        outfile.write(regex.sub("", line))
