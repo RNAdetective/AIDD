@@ -15,7 +15,7 @@ all(rownames(colData) %in% colnames(countData))
 countData <- countData[, rownames(colData)]
 print("after renaming columns with PHENO_DATA file do they still match")
 all(rownames(colData) == colnames(countData))
-dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition)
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition)
 rld <- rlog(dds, blind = FALSE)
 dds <- DESeq(dds)
 pcaData <- plotPCA(rld, intgroup = c( "condition"), returnData = TRUE)

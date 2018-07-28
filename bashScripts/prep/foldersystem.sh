@@ -46,6 +46,14 @@ cp /home/user/Desktop/insert_transcript_lists_for_pathways/* /media/sf_AIDD/tran
 for i in counts ballgown ballgown_in bam_files snpEff vcf_files; do
     mkdir /media/sf_AIDD/raw_data/$i/
 done
+##vcf_file directories
+for i in NoCounts final filtered raw; do
+mkdir /media/sf_AIDD/raw_data/vcf_files/"$i"
+done
+##Nocount directories
+for i in final filtered raw; do
+mkdir /media/sf_AIDD/raw_data/vcf_files/NoCounts/"$i"
+done
 ## quality_control directory
 for i in alignment_metrics fastqc recalibration_plots insert_metrics logs; do
     mkdir /media/sf_AIDD/quality_control/$i/

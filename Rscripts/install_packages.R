@@ -64,6 +64,6 @@ biocLite("gdata")
 biocLite("DEXSeq")
 biocLite("cluster")
 biocLite("vcfR")
-
+biocLite("plotly")
 
 
