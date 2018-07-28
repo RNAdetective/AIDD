@@ -1,0 +1,769 @@
+---
+title: "AIDDQualityConrol"
+output: html_document
+---
+##AIDD step 1: create folder directories to store final outputs.
+This creates the folders in the sf_AIDD directory including;
+bashScripts - this folder contains all the bashScripts used during the experiment.  Some of these get edited as AIDD runs.  For anyone wishing to edit the scripts they are found here.
+gene_lits - this folder contains the gene lists used as indexes for AIDD to run.  Any gene list you put in the desktop will be transfered here to use and can be easily stored with the rest of the experimental files for easy access later.
+index - this folder contains annotations and the ensembl gene names matched with ids to convert between the two.
+quality_control - is the QC folder including fastqc to determine quality of reads.  these is also alignment_metrics and insert_metrics which have quality control for the variant calling steps and include important information about quality of alignments.  Recalibration_plots show the quality control performed for variant calling.  there is also a log folder for errors and debugging.
+raw_data - this folder contains gtf files in ballgown and ballgown files to input into ballgown in ballgown_in.  bam_files are the raw bam files used for assembly by stringtie.  The counts folder contains the count matrix for each run with FPKM, TPM, and coverage.  snpEff and vcf_files are the output from variant calling.  snpEff if vcf files and text files from snpEff containing functional information for each variant found.  vcf_files has raw variants, filtered variants, and final variants as both vcf and tables.
+references - is the folder containing all references used during the experiment.
+Results - contains DESeq2 results including both gene level and transcript level.  Calibration is he quality control used for DE.  Counts are the graphs that demonstrate counts and where the gene_count_matrix is stored.  Differential_expression contains the DE up and down regulated tables, top60heatmap and volcano plots and PCA contains the PCA plots for the experiment.
+Rscript - has all Rscript used by AIDD similar to bashScripts.
+tmp - this folder can be deleted when you are done running the experiment.
+transcript_list - same as gene_list but for transcript level analysis.
+variant_list - same as gene_list but for variants and RNA editing.
+work_directory - this can be deleted when AIDD is finished.
+```{bash}
+bash /home/user/AIDD/bashScripts/prep/foldersystem.sh
+```
+##Downloading references
+There are two options first option is to download each reference shown in the next few chunks.  the last chunk here shows how to download an already put together reference folder.  
+First there is the HISAT reference indexes.  First it downloads premade HISAT2 indexes from grch37 build then it uncompresses and renames them for the AIDD to be ale to find them.
+```{bash}
+wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch37_snp_tran.tar.gz
+tar xzvf grch37_snp_tran.tar.gz
+mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.1.ht2 /media/sf_AIDD/references/genome.1.ht2
+mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.2.ht2 /media/sf_AIDD/references/genome.2.ht2
+mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.3.ht2 /media/sf_AIDD/references/genome.3.ht2
+mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.4.ht2 /media/sf_AIDD/references/genome.4.ht2
+mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.5.ht2 /media/sf_AIDD/references/genome.5.ht2
+mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.6.ht2 /media/sf_AIDD/references/genome.6.ht2
+mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.7.ht2 /media/sf_AIDD/references/genome.7.ht2
+mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.8.ht2 /media/sf_AIDD/references/genome.8.ht2
+```
+This next chunk downloads fasta sequences for grch37.75 build from ensembl.org it then uncompresses and moves and renames it for AIDD.
+```{bash}
+wget ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh37.75.cdna.all.fa.gz
+gunzip Homo_sapiens.GRCh37.75.cdna.all.fa.gz
+mv /media/sf_AIDD/references/*.fa /media/sf_AIDD/references/ref.fa
+```
+This next chunk downloads the .gtf file for the grch37.75 build
+```{bash}
+wget ftp://ftp.ensembl.org/pub/release-75/gtf/homo_sapiens/Homo_sapiens.GRCh37.75.gtf.gz
+gunzip Homo_sapiens.GRCh37.75.gtf.gz
+mv /media/sf_AIDD/references/*.gtf /media/sf_AIDD/references/ref.gtf
+```
+This next chunk downloads the reference sequences for the grch37.75 primary assembly to use during variant calling.  GATK requires the sequences to be in karotype order so there is a python script to reorder the sequences and then picard creates a sequence dictionary to use during varinat calling.  the last step is creating a another index file for the fasta file using samtools.
+```{bash}
+wget -q ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
+gunzip Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
+mv /media/sf_AIDD/references/*.primary_assembly.fa /media/sf_AIDD/references/ref1.fa
+perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
+java -jar /home/user/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE=/media/sf_AIDD/references/ref2.fa OUTPUT=/media/sf_AIDD/references/ref2.dict
+samtools faidx /media/sf_AIDD/references/ref2.fa
+```
+This next chunk downloads the index and references files that were premade for the snpEff tools.  The first time you run AIDD this will format itself into a data folder in the reference file. 
+```{bash}
+wget https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh37.75.zip
+unzip snpEff_v4_3_GRCh37.75.zip
+```
+The last chunk downloads and uncompressed the snp files to filter known snp out before variant calling is finalized.  This allows us to use GATK for RNA seq data.
+```{bash}
+wget -q ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.b37.vcf.gz
+gunzip dbsnp_138.b37.vcf.gz
+mv dbsnp_138.b37.vcf dbsnp.vcf
+```
+Now the references are done and in the reference folder under sf_AIDD.  If you perfer to download the premade GRCh37 from AIDD follow the next chunck
+```{bash}
+wget https://drive.google.com/open?id=1A0ItKKoiA6MxCh9QdZBoScgxN_uEtzbN
+```
+## Download the SRA files from NCBI
+Once the references are done the next chunk will download the SRA files for the experiment using the SRAtoolkit.  It will then using the SRAtoolkit will convert sra to the two paired fastq files.  FastQC will then be used to check quality of the reads.  These outputs will be in the /media/sf_AIDD/quality_control/fastqc folder.  You need to check these you run your experiment before the next chunk which is trimming the read.  This script reads the PHENO_DATA file on the desktop and it runs the loop for each SRA file in the PENO_DATA.csv.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+echo "Now downloading sra files this can take  few hours depending on size of files"
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+    prefetch "$run"
+    mv /home/user/ncbi/public/sra/"$run".sra /media/sf_AIDD/working_directory/"$run".sra
+    fastq-dump /media/sf_AIDD/working_directory/$run.sra -I --split-files --read-filter pass -O /media/sf_AIDD/working_directory/
+    rm /media/sf_AIDD/working_directory/"$run".sra
+    mv /media/sf_AIDD/working_directory/"$run"_pass_1.fastq /media/sf_AIDD/working_directory/"$run"_1.fastq
+    mv /media/sf_AIDD/working_directory/"$run"_pass_2.fastq /media/sf_AIDD/working_directory/"$run"_2.fastq
+    fastqc /media/sf_AIDD/working_directory/"$run"_1.fastq /media/sf_AIDD/working_directory/"$run"_2.fastq --outdir=/media/sf_AIDD/quality_control/fastqc
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/downloads_sra.log
+```
+##Trimming the reads
+This next loop runs again from all the runs listed in the PHENO_DATA.csv file on the desktop.  It is set to trim 13 nucleotides from the front and 2 nucleotides off the back.  To pick these I used the fastQC analysis.  After the trimming which can take awhile the new fasta files are then analysed by fastQC to re asses the quality.  these again can be found in /media/sf_AIDD/quality_control/fastqc folder with the run numbers followed by _trim.  These are then ready for alignment.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+fastx_trimmer -f 13 -l 73 -i /media/sf_AIDD/working_directory/"$run"_1.fastq -o /media/sf_AIDD/working_directory/"$run"_trim_1.fastq    
+fastx_trimmer -f 13 -l 73 -i /media/sf_AIDD/working_directory/"$run"_2.fastq -o /media/sf_AIDD/working_directory/"$run"_trim_2.fastq
+fastqc /media/sf_AIDD/working_directory/"$run"_trim_1.fastq /media/sf_AIDD/working_directory/"$run"_trim_2.fastq --outdir=/media/sf_AIDD/quality_control/fastqc
+rm /media/sf_AIDD/working_directory/"$run"_1.fastq
+rm /media/sf_AIDD/working_directory/"$run"_2.fastq
+mv /media/sf_AIDD/working_directory/"$run"_trim_1.fastq /media/sf_AIDD/working_directory/"$run"_1.fastq
+mv /media/sf_AIDD/working_directory/"$run"_trim_2.fastq /media/sf_AIDD/working_directory/"$run"_2.fastq
+
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/trim.log
+```
+## HISAT2 alignment
+The next chunk will run HISAT2 with pre downloaded indexes.  This is set to run with standard defaults and will also produce alignments with compatible with cufflinks.  The alignment also creates a summary file to check alignment stats this can found in /media/sf_AIDD/quality_control/alignment_metrics.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+    hisat2 -q -x /media/sf_AIDD/references/genome -p3 --dta-cufflinks -1 /media/sf_AIDD/working_directory/"$run"_1.fastq -2 /media/sf_AIDD/working_directory/"$run"_2.fastq -t --summary-file /media/sf_AIDD/quality_control/alignment_metrics/"$run".txt -S /media/sf_AIDD/working_directory/"$run".sam
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/HISAT2.log
+```
+## Stringtie assembly
+This next chunk takes the sam file output from HISAT and converts it to bam format for the input of stringtie.  Stringtie is then run on the bam file for transcriptome assembly.  Stringtie will produce input for ballgown which is in the /media/sf_AIDD/raw_data/ballgown_in folder.  It will also generate count tables which are in the /media/sf_AIDD/raw_data/counts folder.  GTF files are also made in the /media/sf_AIDD/raw_data/ballgown these are sorted into folder by sample number in the PHENO_DATA file.  This is the correct folder directory to run the python script.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+    java -Djava.io.tmpdir=/media/sf_AIDD/tmp -jar /home/user/AIDD/AIDD_tools/picard.jar SortSam INPUT=/media/sf_AIDD/working_directory/"$run".sam OUTPUT=/media/sf_AIDD/raw_data/bam_files/"$run".bam SORT_ORDER=coordinate
+    stringtie /media/sf_AIDD/raw_data/bam_files/"$run".bam -p3 -G /media/sf_AIDD/references/ref.gtf -A /media/sf_AIDD/raw_data/counts/"$run".tab -l -B -b /media/sf_AIDD/raw_data/ballgown_in/"$sample"/"$run" -e -o /media/sf_AIDD/raw_data/ballgown/"$sample"/"$sample".gtf
+    
+   
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/assembly.log
+```
+## python script for creating gene_count_matrix
+This next chunk takes the data from all the runs GTF files in the ballgown folder and combines the count data in a matrix for DESeq2
+```{bash}
+cd /media/sf_AIDD/raw_data/
+python /home/user/AIDD/AIDD_tools/bin/prepDE.py -g /media/sf_AIDD/Results/DESeq2/gene/counts/gene_count_matrix.csv -t /media/sf_AIDD/Results/DESeq2/transcript/counts/transcript_count_matrix.csv
+```
+##create gene_count_matrix with proper labels.
+The next chunk adds the correct labels onto the gene_count_matrix file.  The labels can be found in the first column of the PHENO_DATA file on the desktop.  This can be used for any size dataset if you follow the AIDD.sh script that is fully automated and  
+```{r}
+table1 <- read.csv("/media/sf_AIDD/Results/DESeq2/gene/counts/gene_count_matrix.csv")
+table2 <- read.csv("/media/sf_AIDD/index/g_names.csv")
+Data <- read.csv("/media/sf_AIDD/PHENO_DATA.csv", row.names=1)
+table3 <- merge(table2, table1, by="gene_id")
+table3$gene_id <- NULL
+table5 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+write.csv(table3, "/media/sf_AIDD/Results/DESeq2/gene/counts/gene_count_matrixedited.csv", row.names=FALSE)
+
+table1 <- read.csv("/media/sf_AIDD/Results/DESeq2/transcript/counts/transcript_count_matrix.csv")
+colnames(table1)[1] <- "transcript_id"
+table2 <- read.csv("/media/sf_AIDD/index/t_names.csv")
+Data <- read.csv("/media/sf_AIDD/PHENO_DATA.csv", row.names=1)
+table3 <- merge(table2, table1, by="transcript_id")
+table3$transcript_id <- NULL
+table5 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
+write.csv(table3, "/media/sf_AIDD/Results/DESeq2/transcript/counts/transcript_count_matrixedited.csv", row.names=FALSE)
+```
+## load the R libraries
+Once the matrix is ready R can be used to perform DE.  First the proper packages need to be loaded.
+```{r}
+suppressPackageStartupMessages(library("DESeq2"))
+suppressPackageStartupMessages(library("vsn"))
+suppressPackageStartupMessages(library("dplyr"))
+suppressPackageStartupMessages(library("ggplot2"))
+suppressPackageStartupMessages(library("pheatmap"))
+suppressPackageStartupMessages(library("RColorBrewer"))
+suppressPackageStartupMessages(library("PoiClaClu"))
+suppressPackageStartupMessages(library("ggbeeswarm"))
+suppressPackageStartupMessages(library("genefilter"))
+suppressPackageStartupMessages(library("sva"))
+suppressPackageStartupMessages(library("ggrepel"))
+suppressPackageStartupMessages(library("plotly"))
+```
+## preparing matrix
+This assigns variables for the gene matrix and PHENO_DATA file to set up DESeq2 matrix for DE.  It then creates the DESeq Data Set matrix and shows you how many rows are present.  It then eliminates all rows with expression levels less then one.  It then shows how many rows are left.
+```{r}
+countData <- as.matrix(read.csv("/media/sf_AIDD/Results/DESeq2/gene/counts/gene_count_matrixedited.csv", row.names="gene_name"))
+colData <- read.csv("/media/sf_AIDD/PHENO_DATA.csv", row.names=1)
+all(rownames(colData) %in% colnames(countData))
+countData <- countData[, rownames(colData)]
+all(rownames(colData) == colnames(countData))
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition)
+print("total rows in new matrix")
+nrow(dds)
+dds <- dds[ rowSums(counts(dds)) > 1, ]
+nrow(dds)
+```
+## Calibration.
+The rlog is taken of the matrix which is the standard correction made by DESeq2 to correct for low read counts and the non-linear data.  This is then shown in quality control plots that are in the /media/sf_AIDD/Results/DESeq2/calibration folder.  These will show the calibrations made to the data and the results.
+```{r}
+tiff("/media/sf_AIDD/Results/DESeq2/gene/calibration/rlogandvariance.tiff")
+lambda <- 10^seq(from = -1, to = 2, length = 1000)
+cts <- matrix(rpois(1000*100, lambda), ncol = 100)
+meanSdPlot(cts, ranks = FALSE)
+dev.off()
+tiff("/media/sf_AIDD/Results/DESeq2/gene/calibration/logtranscounts.tiff")
+log.cts.one <- log2(cts + 1)
+meanSdPlot(log.cts.one, ranks = FALSE)
+dev.off()
+rld <- rlog(dds, blind = FALSE)
+print("Top three rows from new log matrix")
+head(assay(rld), 3)
+vsd <- vst(dds, blind = FALSE)
+print("Further processing vst of new log matrix")
+head(assay(vsd), 3)
+dds <- estimateSizeFactors(dds)
+df <- bind_rows(as_data_frame(log2(counts(dds)[, 1:2]+1)) %>% mutate(transformation = "log2(x + 1)"), as_data_frame(assay(rld)[, 1:2]) %>% mutate(transformation = "rlog"), as_data_frame(assay(vsd)[, 1:2]) %>% mutate(transformation = "vst"))
+colnames(df)[1:2] <- c("x", "y")
+tiff("/media/sf_AIDD/Results/DESeq2/gene/calibration/transcounts2sam.tiff")
+ggplot(df, aes(x = x, y = y)) + geom_hex(bins = 80) + coord_fixed() + facet_grid( . ~ transformation)
+dev.off()
+sampleDists <- dist(t(assay(rld)))
+sampleDists
+sampleDistMatrix <- as.matrix( sampleDists )
+rownames(sampleDistMatrix) <- paste( rld$condition)
+colnames(sampleDistMatrix) <- NULL
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+poisd <- PoissonDistance(t(counts(dds)))
+samplePoisDistMatrix <- as.matrix( poisd$dd )
+rownames(samplePoisDistMatrix) <- paste( rld$condition)
+colnames(samplePoisDistMatrix) <- NULL
+tiff("/media/sf_AIDD/Results/DESeq2/gene/calibration/PoisHeatmap.tiff")
+pheatmap(samplePoisDistMatrix, clustering_distance_rows = poisd$dd, clustering_distance_cols = poisd$dd, col = colors)
+dev.off()
+```
+## PCA plots
+PCA and MDSpois plots are used to check for patch effects in the dataset.  These will be in the /media/sf_AIDD/Results/DESeq2/gene/PCA.
+```{r}
+tiff("/media/sf_AIDD/Results/DESeq2/gene/PCA/PCAplot.tiff")
+plotPCA(rld, intgroup = c("condition"))
+dev.off()
+pcaData <- plotPCA(rld, intgroup = c( "condition"), returnData = TRUE)
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+tiff("/media/sf_AIDD/Results/DESeq2/gene/PCA/PCAplot2.tiff")
+ggplot(pcaData, aes(x = PC1, y = PC2, color = condition, group = condition, label=rownames(pcaData))) + geom_point(size = 0) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed() +geom_text(aes(label=rownames(pcaData)))
+dev.off()
+mds <- as.data.frame(colData(rld))  %>% cbind(cmdscale(sampleDistMatrix))
+tiff("/media/sf_AIDD/Results/DESeq2/gene/PCA/MDSplot.tiff")
+ggplot(mds, aes(x = `1`, y = `2`, color = condition)) + geom_point(size = 3) + coord_fixed()
+dev.off()
+mdsPois <- as.data.frame(colData(dds)) %>% cbind(cmdscale(samplePoisDistMatrix))
+tiff("/media/sf_AIDD/Results/DESeq2/gene/PCA/MDSpois.tiff")
+ggplot(mdsPois, aes(x = `1`, y = `2`, color = condition)) + geom_point(size = 3) + coord_fixed()
+dev.off()
+```
+## differential expression analysis.
+
+```{r}
+dds <- DESeq(dds)
+res <- results(dds)
+mcols(res, use.names = TRUE)
+colnames(res)[1] <- "gene_name" 
+write.csv(res, "/media/sf_AIDD/Results/DESeq2/gene/differential_expression/resultsall.csv")
+```
+## creates up and down DE lists
+
+```{r}
+resSig <- subset(res, padj < 0.1)
+resSigdown <- resSig[ order(resSig$log2FoldChange), ]
+write.csv(resSigdown, "/media/sf_AIDD/Results/DESeq2/gene/differential_expression/Downreg.csv")
+resSigup <- resSig[ order(resSig$log2FoldChange, decreasing = TRUE), ]
+write.csv(resSigup, "/media/sf_AIDD/Results/DESeq2/gene/differential_expression/Upreg.csv")
+```
+## creates top60heatmap
+
+```{r}
+topVarGenes <- head(order(rowVars(assay(rld)), decreasing = TRUE), 60)
+mat  <- assay(rld)[ topVarGenes, ]
+mat  <- mat - rowMeans(mat)
+anno <- as.data.frame(colData(rld)[, c("condition")])
+rownames(anno) <- colData[,4]
+colnames(anno) <- "gene_name"
+tiff("/media/sf_AIDD/Results/DESeq2/gene/counts/top60heatmap.tiff")
+pheatmap(mat, annotation_col = anno, annotation_legend=FALSE, fontsize_row=6)
+dev.off()
+```
+## creates final results tables
+
+```{r}
+res <- read.csv("/media/sf_AIDD/Results/DESeq2/gene/differential_expression/resultsall.csv")
+colnames(res)[1] <- "gene_name"
+colnames(res)[2] <- "base mean"
+countData <- read.csv("/media/sf_AIDD/Results/DESeq2/gene/counts/gene_count_matrixedited.csv")
+final <- merge(res, countData, by="gene_name")
+write.csv(final, "/media/sf_AIDD/Results/DESeq2/gene/differential_expression/finalResults.csv", row.names=FALSE)
+goi <- read.csv("/media/sf_AIDD/gene_list/DESeq2/GOI.csv")
+goifinal <- merge(goi, final, by="gene_name")
+write.csv(goifinal, "/media/sf_AIDD/Results/DESeq2/gene/differential_expression/goifinalresults.csv", row.names=FALSE)
+excitome <- read.csv("/media/sf_AIDD/gene_list/DESeq2/excitome.csv")
+colnames(final)[1] <- "excitome_name"
+excitomefinal <- merge(excitome, final, by="excitome_name")
+write.csv(goifinal, "/media/sf_AIDD/Results/DESeq2/gene/differential_expression/excitomefinalresults.csv", row.names=FALSE)
+```
+## volcano plot
+
+```{r}
+gene_list <- read.csv("/media/sf_AIDD/Results/DESeq2/gene/differential_expression/resultsall.csv", row.names=1)
+threshold_OE <- gene_list$pvalue < 0.05 
+length(which(threshold_OE))
+gene_list$threshold <- threshold_OE
+res_tableOE_ordered <- gene_list[order(gene_list$pvalue), ] 
+res_tableOE_ordered$genelabels <- ""
+res_tableOE_ordered$genelabels[1:10] <- rownames(res_tableOE_ordered)[1:10]
+tiff("/media/sf_AIDD/Results/DESeq2/gene/differential_expression/VolcanoPlotZika.tiff")
+volc = ggplot(res_tableOE_ordered, aes(log2FoldChange, -log10(pvalue))) + geom_point(aes(x = log2FoldChange, y = -log10(pvalue), colour = threshold)) + ggtitle("Differential Expression Volcano Plot") + xlab("log2 fold change") + ylab("-log10 adjusted p-value") 
+volc + geom_text_repel(data=head(res_tableOE_ordered, 10), aes(label = genelabels)) 
+dev.off()
+```
+##Count Graphs
+
+```{r}
+geneCounts <- plotCounts(dds, gene = "ADAR", intgroup = c("condition"), returnData = TRUE)
+tiff("/media/sf_AIDD/Results/DESeq2/gene/counts/ADARcounts3.tiff")
+ggplot(geneCounts, aes(x = condition, y = count, color = condition, label=rownames(pcaData))) + scale_y_log10() +  geom_beeswarm(cex = 3) +geom_text(aes(label=rownames(pcaData))) + geom_point(size = 0)
+dev.off()
+geneCounts <- plotCounts(dds, gene = "ADAR", intgroup = c("condition"), returnData = TRUE)
+tiff("/media/sf_AIDD/Results/DESeq2/gene/counts/ADARcounts4.tiff")
+ggplot(geneCounts, aes(x = condition, y = count, color = condition, label=rownames(pcaData))) + scale_y_log10() +  geom_beeswarm(cex = 3) + geom_line() +geom_text(aes(label=rownames(pcaData))) + geom_point(size = 0)
+dev.off()
+```
+## Pathway IFN results table
+
+```{r}
+results <- read.csv("/media/sf_AIDD/Results/DESeq2/gene/differential_expression/resultsall.csv")
+colnames(results)[2] <- "base_mean"
+colnames(results)[c(1)] <- c("gene_name")
+colData <- read.csv("/media/sf_AIDD/PHENO_DATA.csv", row.names=1)
+GCMedit <- read.csv("/media/sf_AIDD/Results/DESeq2/gene/counts/gene_count_matrixedited.csv")
+colnames(GCMedit)[c(2:5)] <- rownames(colData)[c(1:4)]
+pathway_file_genes <- read.csv("/media/sf_AIDD/gene_list/pathway/IFN.csv")
+table1 <- merge(GCMedit, pathway_file_genes, by="gene_name")
+table2 <- merge(table1, results, by="gene_name")
+write.csv(table2, "/media/sf_AIDD/Results/pathway/tables/IFN.csv", row.names=FALSE)
+```
+## DESeq2 on IFN pathway list
+
+```{r}
+countData <- as.matrix(read.csv("/media/sf_AIDD/Results/pathway/tables/IFN.csv", row.names="gene_name"))
+colData <- read.csv("/media/sf_AIDD/PHENO_DATA.csv", row.names=1)
+print("do all your row names and colnames match with the PHENO_DATA file")
+all(rownames(colData) %in% colnames(countData))
+countData <- countData[, rownames(colData)]
+print("after renaming columns with PHENO_DATA file do they still match")
+all(rownames(colData) == colnames(countData))
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition)
+nrow(dds)
+dds <- dds[ rowSums(counts(dds)) > 1, ]
+nrow(dds)
+rld <- rlog(dds, blind = FALSE)
+pcaData <- plotPCA(rld, intgroup = c( "condition"), returnData = TRUE)
+print("new pcaData matrix for creating PCAplots")
+pcaData
+percentVar <- round(100 * attr(pcaData, "percentVar"))
+tiff("/media/sf_AIDD/Results/pathway/heatmaps/IFN_PCAplot2.tiff")
+ggplot(pcaData, aes(x = PC1, y = PC2, color = condition, group = condition, label=rownames(pcaData))) + geom_point(size = 0) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed() +geom_text(aes(label=rownames(pcaData)))
+dev.off()
+```
+## heatmap for pathway
+
+```{r}
+mat  <- assay(rld)
+mat  <- mat - rowMeans(mat)
+anno <- as.data.frame(colData(rld)[, c("condition")])
+rownames(anno) <- colData[,3]
+colnames(anno) <- "gene_name"
+tiff("/media/sf_AIDD/Results/pathway/heatmaps/file_genes_heatmap.tiff")
+pheatmap(mat, annotation_col = anno, annotation_legend=FALSE, show_rownames = FALSE)
+dev.off()
+```
+## volcano plot for pathway
+
+```{r}
+dds <- DESeq(dds)
+res <- results(dds)
+res <- lfcShrink(dds, contrast=c("condition","Mock","Zika"), res=res)
+summary(res)
+res <- res[order(res$padj),]
+results = as.data.frame(dplyr::mutate(as.data.frame(res), sig=ifelse(res$padj<0.05, "FDR<0.05", "Not Sig")), row.names=rownames(res))
+head(results)
+DEgenes_DESeq <- results[which(abs(results$log2FoldChange) > log2(1.5) & results$padj < 0.05),]
+tiff("/media/sf_AIDD/Results/pathway/volcano/file_genes_VolcanoPlot.tiff")
+p = ggplot(results, aes(log2FoldChange, -log10(pvalue))) + geom_point(aes(col =sig)) + scale_color_manual(values = c("red", "black")) + ggtitle("Volcano Plot of DESeq2 analysis")
+p + geom_text_repel(data=results[1:10, ], aes(label=rownames(results[1:10, ])))
+dev.off()
+```
+## creates topGO Up regulated genes list 
+
+```{r}
+setwd("/media/sf_AIDD/Results/topGO/gene")
+upreg <- read.csv("/media/sf_AIDD/Results/DESeq2/gene/differential_expression/Upreg.csv")
+upreg2 <- upreg$baseMean <- NULL
+upreg2 <- upreg$lfcSE <- NULL
+upreg2 <- upreg$stat <- NULL
+upreg2 <- upreg$pvalue <- NULL
+upreg2 <- upreg$padj <- NULL
+upreg2 <- upreg[!(upreg$log2FoldChange < 1),]
+upreg3 <- upreg2$log2FoldChange <- NULL
+upreg3 <- colnames(upreg2)[1] <- "gene_name"
+write.table(upreg2, "/media/sf_AIDD/Results/DESeq2/gene/differential_expression/upreggenes.txt", sep="\t", row.names=FALSE)
+```
+## runs topGO for up regulated genes.
+
+```{r}
+setwd("/media/sf_AIDD/Results/topGO/gene")
+library("topGO")
+library("grid")
+library("Rgraphviz")
+geneID2GO <- readMappings(file = "/home/user/AIDD/index/annotations2.csv", sep = ",")
+geneUniverse <- names(geneID2GO)
+genesOfInterest <- read.table("/media/sf_AIDD/Results/DESeq2/gene/differential_expression/upreggenes.txt", header=FALSE)
+genesOfInterest <- as.character(genesOfInterest$V1)
+geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
+names(geneList) <- geneUniverse
+geneUniverse <- gsub("\\\"", "", geneUniverse)
+myGOdata <- new("topGOdata", description="My Zika project", ontology="BP", allGenes=geneList, annot = annFUN.gene2GO, gene2GO = geneID2GO)
+myGOdata
+sg <- sigGenes(myGOdata)
+str(sg)
+numSigGenes(myGOdata)
+resultFisher <- runTest(myGOdata, algorithm="classic",statistic="fisher")
+resultKS <- runTest(myGOdata, algorithm = "classic", statistic = "ks")
+resultFisher2 <- runTest(myGOdata, algorithm = "weight01", statistic="fisher")
+allRes <- GenTable(myGOdata,classicFisher=resultFisher,orderBy=resultFisher,ranksOf="classicFisher",topNodes=10)
+write.csv(allRes, "upregtopGO.csv", row.names=FALSE)
+showSigOfNodes(myGOdata, score(resultFisher),firstSigNodes=10,useInfo='all')
+printGraph(myGOdata, resultFisher, firstSigNodes=10,fn.prefix="tGO",useInfo="all",pdfSW=TRUE)
+dev.off()
+length(usedGO(myGOdata))
+```
+## creates topGO Up regulated genes list 
+
+```{r}
+setwd("/media/sf_AIDD/Results/topGO/gene")
+downreg <- read.csv("/media/sf_AIDD/Results/DESeq2/gene/differential_expression/Downreg.csv")
+downreg2 <- downreg$baseMean <- NULL
+downreg2 <- downreg$lfcSE <- NULL
+downreg2 <- downreg$stat <- NULL
+downreg2 <- downreg$pvalue <- NULL
+downreg2 <- downreg$padj <- NULL
+downreg2 <- downreg[!(downreg$log2FoldChange < 1),]
+downreg3 <- downreg2$log2FoldChange <- NULL
+downreg3 <- colnames(downreg2)[1] <- "gene_name"
+write.table(downreg2, "/media/sf_AIDD/Results/DESeq2/gene/differential_expression/downreggenes.txt", sep="\t", row.names=FALSE)
+```
+## this runs topGO for Down regulated list
+
+```{r}
+setwd("/media/sf_AIDD/Results/topGO/gene")
+geneID2GO <- readMappings(file = "/home/user/AIDD/index/annotations2.csv", sep = ",")
+geneUniverse <- names(geneID2GO)
+genesOfInterest <- read.table("/media/sf_AIDD/Results/DESeq2/gene/differential_expression/downreggenes.txt", header=FALSE)
+genesOfInterest <- as.character(genesOfInterest$V1)
+geneList <- factor(as.integer(geneUniverse %in% genesOfInterest))
+names(geneList) <- geneUniverse
+geneUniverse <- gsub("\\\"", "", geneUniverse)
+myGOdata <- new("topGOdata", description="MyZika project", ontology="BP", allGenes=geneList, annot = annFUN.gene2GO, gene2GO = geneID2GO)
+myGOdata
+sg <- sigGenes(myGOdata)
+str(sg)
+numSigGenes(myGOdata)
+resultFisher <- runTest(myGOdata, algorithm="classic",statistic="fisher")
+resultKS <- runTest(myGOdata, algorithm = "classic", statistic = "ks")
+resultFisher2 <- runTest(myGOdata, algorithm = "weight01", statistic="fisher")
+allRes <- GenTable(myGOdata,classicFisher=resultFisher,orderBy="resultFisher",ranksOf="classicFisher",topNodes=10)
+write.csv(allRes, "downregtopGO.csv", row.names=FALSE)
+showSigOfNodes(myGOdata, score(resultFisher),firstSigNodes=10,useInfo='all')
+printGraph(myGOdata, resultFisher, firstSigNodes=10,fn.prefix="tGOdown",useInfo="all",pdfSW=TRUE)
+dev.off()
+```
+## venn diagrams
+
+```{r}
+
+```
+## these next steps start variant calling
+The first step of variant calling is adding groups to the bam files for filtering later.  Then it reorders the bam file in karyotype order and then creates metrics files to use in later downstream qualtiy control and filtering steps.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar AddOrReplaceReadGroups I=/media/sf_AIDD/raw_data/bam_files/"$run".bam O=/media/sf_AIDD/working_directory/"$run"_2.bam RGID=4 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=20
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar ReorderSam I=/media/sf_AIDD/working_directory/"$run"_2.bam O=/media/sf_AIDD/working_directory/"$run"_3.bam R=/media/sf_AIDD/references/ref2.fa CREATE_INDEX=TRUE
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar CollectAlignmentSummaryMetrics R=/media/sf_AIDD/references/ref2.fa I=/media/sf_AIDD/working_directory/"$run"_3.bam O=/media/sf_AIDD/working_directory/"$run"_alignment_metrics.txt
+    cp /media/sf_AIDD/working_directory/"$run"_alignment_metrics.txt /media/sf_AIDD/quality_control/alignment_metrics/
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar CollectInsertSizeMetrics INPUT=/media/sf_AIDD/working_directory/"$run"_3.bam OUTPUT=/media/sf_AIDD/working_directory/"$run"_insert_metrics.txt HISTOGRAM_FILE=/media/sf_AIDD/working_directory/"$run"_insert_size_histogram.pdf
+    cp /media/sf_AIDD/working_directory/"$run"_insert_metrics.txt /media/sf_AIDD/quality_control/insert_metrics/
+    cp /media/sf_AIDD/working_directory/"$run"_insert_size_histogram.pdf /media/sf_AIDD/quality_control/insert_metrics/
+    samtools depth /media/sf_AIDD/working_directory/"$run"_3.bam > /media/sf_AIDD/working_directory/"$run"depth_out.txt
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/prepbam.log
+```
+## mark duplicates
+this chunk is used to mark duplicates in the bam files for more accurate variant calling.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp -jar /home/user/AIDD/AIDD_tools/picard.jar MarkDuplicates INPUT=/media/sf_AIDD/working_directory/"$run"_3.bam OUTPUT=/media/sf_AIDD/working_directory/"$run"_dedup_reads.bam METRICS_FILE=/media/sf_AIDD/working_directory/"$run"metrics.txt
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/markduplicates.log
+```
+## haplotype caller
+This chunk starts the variant calling after first making an index.  The raw variants are then stored as vcf file or table.  These are unfilterd and include base counts.  The next step will perform filtering.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+    java -jar /home/user/AIDD/AIDD_tools/picard.jar BuildBamIndex INPUT=/media/sf_AIDD/working_directory/"$run"_dedup_reads.bam
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T HaplotypeCaller -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"_dedup_reads.bam --dbsnp /media/sf_AIDD/references/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 -A BaseCounts --max_alternate_alleles 40 -o /media/sf_AIDD/working_directory/"$run"raw_variants.vcf
+    cp /media/sf_AIDD/working_directory/"$run"raw_variants.vcf /media/sf_AIDD/raw_data/vcf_files/
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"raw_variants.table
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/haplotype.log
+```
+## filter step 1
+This steps first separates the variants into indels and snps.  These are then stored as vcf files and tables still as raw variants.  These are still unfiltered.  Then the next steps filter with QD < 20, FS < 60.0, MQ < 40.0, MQRankSum < -12.5, ReadPosRankSum < -8.0 and SOR > 4.0 with the basic snp filter.  The next series of steps creates tables using base recalibrator that will be used to create recalibration plots to visualize the filtering.  These can be found in the quality control folder.  Then finally a new bam file is created with recal reads that have been filtered so haplotype calling can be done a second time.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants.vcf -selectType SNP -o /media/sf_AIDD/working_directory/"$run"raw_snps.vcf
+    cp /media/sf_AIDD/working_directory/"$run"raw_snps.vcf /media/sf_AIDD/raw_data/vcf_files/
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"raw_snps.table
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants.vcf -selectType INDEL -o /media/sf_AIDD/working_directory/"$run"raw_indels.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_snps.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o /media/sf_AIDD/working_directory/"$run"filtered_snps.vcf
+    cp /media/sf_AIDD/working_directory/"$run"filtered_snps.vcf /media/sf_AIDD/raw_data/vcf_files/
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"filtered_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"filtered_snps.table
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_indels.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o /media/sf_AIDD/working_directory/"$run"filtered_indels.vcf
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"_dedup_reads.bam -knownSites /media/sf_AIDD/working_directory/"$run"filtered_snps.vcf -knownSites /media/sf_AIDD/working_directory/"$run"filtered_indels.vcf --filter_reads_with_N_cigar -o /media/sf_AIDD/working_directory/"$run"recal_data.table
+    cp /media/sf_AIDD/working_directory/"$run"recal_data.table /media/sf_AIDD/quality_control/recalibration_plots/
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"_dedup_reads.bam -knownSites /media/sf_AIDD/working_directory/"$run"filtered_snps.vcf -knownSites /media/sf_AIDD/working_directory/"$run"filtered_indels.vcf -BQSR /media/sf_AIDD/working_directory/"$run"recal_data.table --filter_reads_with_N_cigar -o /media/sf_AIDD/working_directory/"$run"post_recal_data.table
+    cp /media/sf_AIDD/working_directory/"$run"post_recal_data.table /media/sf_AIDD/quality_control/recalibration_plots/
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T AnalyzeCovariates -R /media/sf_AIDD/references/ref2.fa -before /media/sf_AIDD/working_directory/"$run"recal_data.table -after /media/sf_AIDD/working_directory/"$run"post_recal_data.table -plots /media/sf_AIDD/working_directory/"$run"recalibration_plots.pdf
+    cp /media/sf_AIDD/working_directory/"$run"recalibration_plots.pdf /media/sf_AIDD/quality_control/recalibration_plots/
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T PrintReads -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"_dedup_reads.bam -BQSR /media/sf_AIDD/working_directory/"$run"recal_data.table --filter_reads_with_N_cigar -o /media/sf_AIDD/working_directory/"$run"recal_reads.bam
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/filter.log
+```
+## haplotype caller number 2
+This is the second round of variant calling with the same options as the first round but with the recall reads.  The are stored as both vcf files and tables.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T HaplotypeCaller -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"recal_reads.bam --dbsnp /media/sf_AIDD/references/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 -A BaseCounts --max_alternate_alleles 40 -o /media/sf_AIDD/working_directory/"$run"raw_variants_recal.vcf
+    cp /media/sf_AIDD/working_directory/"$run"raw_variants_recal.vcf /media/sf_AIDD/raw_data/vcf_files/
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants_recal.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"raw_variants_recal.table    
+
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/haplotype2.log
+```
+## filter step 2
+This is the second filtering step has the same parameters as before with the recal variants.  Then they are separated into indels and snps and then filtered resulting in the final file which is then used for snpEff.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants_recal.vcf -selectType SNP -o /media/sf_AIDD/working_directory/"$run"raw_snps_recal.vcf
+    cp /media/sf_AIDD/working_directory/"$run"raw_snps_recal.vcf /media/sf_AIDD/raw_data/vcf_files/
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_snps_recal.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"raw_snps_recal.table
+    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants_recal.vcf -selectType INDEL -o /media/sf_AIDD/working_directory/"$run"raw_indels_recal.vcf
+     java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_snps_recal.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o /media/sf_AIDD/working_directory/"$run"filtered_snps_final.vcf
+      java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_snps_recal.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o /media/sf_AIDD/working_directory/"$run"filtered_snps_final.vcf
+    cp /media/sf_AIDD/working_directory/"$run"filtered_snps_final.vcf /media/sf_AIDD/raw_data/vcf_files/
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"filtered_snps_final.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"filtered_snps_final.table
+     java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_indels_recal.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o /media/sf_AIDD/working_directory/"$run"filtered_indels_recal.vcf
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/filter2.log
+```
+## snpEff
+This chunk performs the protein effect prediction using snpEff and prebuilt annotations and references using the GRCh37.75 ensembl primary build.  
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp -jar /home/user/AIDD/AIDD_tools/snpEff.jar -v GRCh37.75 /media/sf_AIDD/working_directory/"$run"filtered_snps_final.vcf -stats /media/sf_AIDD/raw_data/snpEff/"$run" -csvStats /media/sf_AIDD/raw_data/snpEff"$run".csv > /media/sf_AIDD/raw_data/snpEff/"$run"filtered_snps_final.ann.vcf
+
+    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/raw_data/snpEff/"$run"filtered_snps_final.ann.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"filtered_snps_final.ann.table
+    mv /media/sf_AIDD/raw_data/*.csv /media/sf_AIDD/raw_data/snpEff/
+    mv /media/sf_AIDD/raw_data/*.txt /media/sf_AIDD/raw_data/snpEff/
+    sed 's/ \+/,/g' /media/sf_AIDD/raw_data/snpEff/snpEff"$run".genes.txt > /media/sf_AIDD/raw_data/snpEff/"$run"genes.csv
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/snpEff.log
+```
+## bedtools
+this next chunk will use bedtools to make a bedgraph file for viewing the genome.
+```{bash}
+main_function() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+    bedtools genomecov -bga -ibam /media/sf_AIDD/working_directory/"$run"recal_reads.bam > /media/sf_AIDD/working_directory/"$run"genomecov.bedgraph
+    mv /media/sf_AIDD/working_directory/snpEff_* /media/sf_AIDD/working_directory/"$run"
+
+done < $INPUT
+IFS=$OLDIFS
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/bedtools.log
+```
+## snpEff tables
+This chunk uses bash to take the output from snpEff and convert it to a table and select only genes with at least one high impact variant and put it into its own table and then moderate impact is put it in it's own table.  These can then be used for venn diagrams or for gene enrichment analysis.  These can also be matched with excitome list to see if any of the genes within the excitome list have moderate or high impact variants.
+```{bash}
+main_function() {
+INPUT=/media/sf_AIDD/PHENO_DATA.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x run condition sample t_name2
+do
+  sed -i '1d' /media/sf_AIDD/raw_data/snpEff/snpEff"$run".genes.txt
+  sed 's/ \+/,/g' /media/sf_AIDD/raw_data/snpEff/snpEff"$run".genes.txt > /media/sf_AIDD/raw_data/snpEff/"$run""$condition"genes.csv
+done < $INPUT
+IFS=$OLDIFS
+for i in gene transcript ; do
+for j in high moderate ; do
+cp /media/sf_AIDD/raw_data/snpEFF/*mockgenes.csv /media/sf_AIDD/Results/variant_calling/haplotype/"$i"/"$j"_impact/mock/
+cp /media/sf_AIDD/raw_data/snpEFF/*zikagenes.csv /media/sf_AIDD/Results/variant_calling/haplotype/"$i"/"$j"_impact/zika/
+done
+done
+} 
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/snpEfftables.log
+```
+##snpEff tables2
+This is the next step for creating high and moderate impact tables
+```{r}
+
+```
+
+
+```{bash}
+main_function() {
+for k in high moderate ; do
+for j in transcript gene ; do
+  for i in mock zika; do
+  ## this copies all mock to /transcript/high_impact/Mock
+  cp /media/sf_AIDD/Results/variant_calling/haplotype/"$j"/"$k"_impact/*"$i""$k"Final.csv /media/sf_AIDD/Results/variant_calling/haplotype/"$j"/"$k"_impact/"$i"/
+  ## this takes all csv files in the previous folder to one big csv file
+  awk 'FNR > 1' /media/sf_AIDD/Results/variant_calling/haplotype/"$j"/"$k"_impact/"$i"/*.csv > /media/sf_AIDD/Results/variant_calling/haplotype/"$j"/"$k"_impact/"$i"/"$i""$k"Final.csv
+  ## this will select only the unique genes
+  sort /media/sf_AIDD/Results/variant_calling/haplotype/"$j"/"$k"_impact/"$i"/"$i""$k"Final.csv | uniq -u > /media/sf_AIDD/Results/variant_calling/haplotype/"$j"/"$k"_impact/"$i""$k"Unique.txt
+  ##this will convert the text file to csv format 
+  sed 's/ \+/,/g' /media/sf_AIDD/Results/variant_calling/haplotype/"$j"/"$k"_impact/"$i""$k"Unique.txt > /media/sf_AIDD/Results/variant_calling/haplotype/"$j"/"$k"_impact/"$i""$k"Unique.csv
+done
+done
+done
+}
+main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/snpEfftables2.log
+```
+
+```{r}
+library(dplyr)
+library(data.table)
+
+multmerge = function(path){
+  filenames=list.files(path=path, full.names=TRUE)
+  rbindlist(lapply(filenames, fread))
+}
+path <- "/media/sf_AIDD/Results/variant_calling/haplotype/gene/high_impact/zika/"
+DF <- multmerge(path)
+write.csv(DF, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/high_impact/zikahighFinal.csv", row.names=FALSE)
+multmerge = function(path){
+  filenames=list.files(path=path, full.names=TRUE)
+  rbindlist(lapply(filenames, fread))
+}
+path <- "/media/sf_AIDD/Results/variant_calling/haplotype/gene/high_impact/mock/"
+DF <- multmerge(path)
+write.csv(DF, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/high_impact/mockhighFinal.csv", row.names=FALSE)
+multmerge = function(path){
+  filenames=list.files(path=path, full.names=TRUE)
+  rbindlist(lapply(filenames, fread))
+}
+path <- "/media/sf_AIDD/Results/variant_calling/haplotype/gene/moderate_impact/zika/"
+DF <- multmerge(path)
+write.csv(DF, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/moderate_impact/zikamoderateFinal.csv", row.names=FALSE)
+multmerge = function(path){
+  filenames=list.files(path=path, full.names=TRUE)
+  rbindlist(lapply(filenames, fread))
+}
+path <- "/media/sf_AIDD/Results/variant_calling/haplotype/gene/moderate_impact/mock/"
+DF <- multmerge(path)
+write.csv(DF, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/moderate_impact/mockmoderateFinal.csv", row.names=FALSE)
+
+multmerge = function(path){
+  filenames=list.files(path=path, full.names=TRUE)
+  rbindlist(lapply(filenames, fread))
+}
+path <- "/media/sf_AIDD/Results/variant_calling/haplotype/gene/high_impact/"
+DF <- multmerge(path)
+write.csv(DF, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/high_impact/mockmoderateFinal.csv", row.names=FALSE)
+```
