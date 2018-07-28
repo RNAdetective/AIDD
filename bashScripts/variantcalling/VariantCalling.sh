@@ -19,26 +19,26 @@ done
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables2.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables3.sh
-for i in haplotype filter haplotype2 filter2 snpEff bedtools do 
-sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/$i.sh
-sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-bash /media/sf_AIDD/bashScripts/variantcalling/$i
-sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcallings/$i.sh
-sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
+for i in haplotype filter haplotype2 filter2 snpEff bedtools; do 
+sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/"$i".sh
+sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+bash /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 done
 for i in raw final filtered; do
 mv /media/sf_AIDD/raw_data/vcf_files/NoCounts/*"$i"* /media/sf_AIDD/raw_data/vcf_files/NoCounts/"$i"/
@@ -59,26 +59,26 @@ done
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables2.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables3.sh
-for i in haplotype filter haplotype2 filter2 snpEff bedtools do 
-sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/$i.sh
-sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-bash /media/sf_AIDD/bashScripts/variantcalling/$i
-sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcallings/$i.sh
-sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
+for i in haplotype filter haplotype2 filter2 snpEff bedtools; do 
+sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/"$i".sh
+sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+bash /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 done
 for i in raw final filtered; do
 mv /media/sf_AIDD/raw_data/vcf_files/NoCounts/*"$i"* /media/sf_AIDD/raw_data/vcf_files/NoCounts/"$i"/
@@ -98,26 +98,26 @@ done
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables2.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables3.sh
-for i in haplotype filter haplotype2 filter2 snpEff bedtools do 
-sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/$i.sh
-sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-bash /media/sf_AIDD/bashScripts/variantcalling/$i
-sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcallings/$i.sh
-sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
+for i in haplotype filter haplotype2 filter2 snpEff bedtools; do 
+sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/"$i".sh
+sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+bash /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 done
 for i in raw final filtered; do
 mv /media/sf_AIDD/raw_data/vcf_files/NoCounts/*"$i"* /media/sf_AIDD/raw_data/vcf_files/NoCounts/"$i"/
@@ -136,26 +136,26 @@ done
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables2.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables3.sh
-for i in filter haplotype2 filter2 snpEff bedtools do 
-sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/$i.sh
-sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-bash /media/sf_AIDD/bashScripts/variantcalling/$i
-sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcallings/$i.sh
-sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
+for i in filter haplotype2 filter2 snpEff bedtools; do 
+sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/"$i".sh
+sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+bash /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 done
 for i in raw final filtered; do
 mv /media/sf_AIDD/raw_data/vcf_files/NoCounts/*"$i"* /media/sf_AIDD/raw_data/vcf_files/NoCounts/"$i"/
@@ -173,26 +173,26 @@ done
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables2.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables3.sh
-for i in haplotype2 filter2 snpEff bedtools do 
-sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/$i.sh
-sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-bash /media/sf_AIDD/bashScripts/variantcalling/$i
-sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcallings/$i.sh
-sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
+for i in haplotype2 filter2 snpEff bedtools; do 
+sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/"$i".sh
+sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+bash /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 done
 for i in raw final filtered; do
 mv /media/sf_AIDD/raw_data/vcf_files/NoCounts/*"$i"* /media/sf_AIDD/raw_data/vcf_files/NoCounts/"$i"/
@@ -209,26 +209,26 @@ done
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables2.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables3.sh
-for i in filter2 snpEff bedtools do 
-sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/$i.sh
-sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-bash /media/sf_AIDD/bashScripts/variantcalling/$i
-sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcallings/$i.sh
-sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
+for i in filter2 snpEff bedtools; do 
+sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/"$i".sh
+sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+bash /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 done
 for i in raw final filtered; do
 mv /media/sf_AIDD/raw_data/vcf_files/NoCounts/*"$i"* /media/sf_AIDD/raw_data/vcf_files/NoCounts/"$i"/
@@ -244,26 +244,26 @@ done
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables2.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables3.sh
-for i in snpEff bedtools do 
-sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/$i.sh
-sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-bash /media/sf_AIDD/bashScripts/variantcalling/$i
-sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcallings/$i.sh
-sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
+for i in snpEff bedtools; do 
+sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/"$i".sh
+sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+bash /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 done
 for i in raw final filtered; do
 mv /media/sf_AIDD/raw_data/vcf_files/NoCounts/*"$i"* /media/sf_AIDD/raw_data/vcf_files/NoCounts/"$i"/
@@ -278,26 +278,26 @@ done
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables2.sh
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables3.sh
-for i in bedtools do 
-sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/$i.sh
-sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-bash /media/sf_AIDD/bashScripts/variantcalling/$i
-sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcallings/$i.sh
-sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
-sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/$i.sh
+for i in bedtools; do 
+sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/"$i".sh
+sed -i 's/raw_variants/raw_variantsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snps/raw_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indels/raw_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snps/filtered_snpsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indels/filtered_indelsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_data/recal_dataNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_reads/recal_readsNoCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+bash /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_variantsNoCounts/raw_variants/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/AC/ \-A BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/cigar/cigar \-F BaseCounts/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_snpsNoCounts/raw_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/raw_indelsNoCounts/raw_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_snpsNoCounts/filtered_snps/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
+sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 done
 for i in raw final filtered; do
 mv /media/sf_AIDD/raw_data/vcf_files/NoCounts/*"$i"* /media/sf_AIDD/raw_data/vcf_files/NoCounts/"$i"/
