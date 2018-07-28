@@ -1,0 +1,17 @@
+    hisat2 -q -x /media/sf_sim/references/genome -p3 --dta-cufflinks -1 /media/sf_sim/hg19_stranded_1.fastq -2 /media/sf_sim/hg19_stranded_2.fastq -t --summary-file /media/sf_sim/hg19_stranded.txt -S /media/sf_sim/hg19_stranded.sam
+
+java -Djava.io.tmpdir=/media/sf_sim/tmp -jar /home/user/AIDD/AIDD_tools/picard.jar SortSam INPUT=/media/sf_sim/hg19_stranded.sam OUTPUT=/media/sf_sim/hg19_stranded.bam SORT_ORDER=coordinate
+    stringtie /media/sf_sim/hg19_stranded.bam -p3 -G /media/sf_sim/references/ref.gtf -A /media/sf_sim/hg19_stranded.tab -l -B -b /media/sf_sim/hg_stranded -e -o /media/sf_sim/hg19_stranded.gtf
+
+
+
+sed 's/ \+/\\/g' /media/sf_sim/hg19_stranded.pro > /media/sf_sim/hg19_stranded.csv
+sed -i 1i"locus,transcript_ref_seq,coding,length,expressed_fraction,expressed_number,library_fraction,library_number,sequenced fraction,sequenced_fraction,sequenced_number,covered_fraction,chi_square,coefficent_variation" /media/sf_sim/hg19_stranded.csv 
+awk '{print $2,$6}' /media/sf_sim/hg19_stranded.csv > /media/sf_sim/hg19_stranded2.csv
+sed 's/ \+/,/g' /media/sf_sim/hg19_stranded.tab > /media/sf_sim/hg19_strandedaligned.csv
+
+jpeg("/media/sf_sim/hg19_stranded.jpeg")
+ggplot(table3, aes(x=counts, y=tpm)) + geom_point() + geom_smooth(method=lm) + labs(title="simulated data", x="simlated", y = "HISAT2") + theme_classic()
+dev.off()
+cor.test( ~ counts + tpm, data=table3, method = "pearson", continuity = FALSE, conf.level = 0.95)
+
