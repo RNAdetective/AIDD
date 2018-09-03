@@ -1,0 +1,10 @@
+level_names <- read.csv("/media/sf_AIDD/index/level_names.csv")
+data <- read.csv("/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationclasscell_line.csv")
+colnames(data)[1] <- "level_name"
+names <- merge(level_names, data, by="level_name")
+data <- names[!duplicated(names$level_id), ]
+write.csv(data, "/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationidclasscell_line.csv", row.names=FALSE)
+data <- read.csv("/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationidclasscell_line.csv")
+data$level_name <- NULL
+colnames(data)[1] <- "regulationcell_lineclasslevel"
+write.csv(data, "/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationidGlistclasscell_line.csv", row.names=FALSE)

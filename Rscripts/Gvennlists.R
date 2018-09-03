@@ -1,0 +1,14 @@
+##this will load regulation or regulation regulated levels list created from GLDE.R for each cell line in level or level level analysis both for all levels or levels above 1 log2foldchange with a p<0.05.
+tablecell_line <- read.csv("/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationGListcell_line.csv")
+##changes name of column to make venn diagrams 
+colnames(tablecell_line)[1] <- "cell_line"
+##this saves the level list with level id's for all regulation or regulation regulated level or levels.
+write.csv(tablecell_line, "/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationvennallcell_line.csv", row.names=FALSE)
+##this will do the same as above but with only the top 100 level or levels found to regulation or regulation regulated in cells.
+datacell_line <- read.csv("/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationGListtop100cell_line.csv")
+##changes name of column to make venn diagrams 
+colnames(datacell_line)[1] <- "regulationGListclasscell_line"
+##this saves the level list with level id's for the top 100 regulation or regulation regulated level or levels.
+write.csv(datacell_line, "/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationtop100cell_line.csv", row.names=FALSE)
+
+
