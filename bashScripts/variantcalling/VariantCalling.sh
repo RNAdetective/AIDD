@@ -17,8 +17,6 @@ for i in raw final filtered; do
 mv /media/sf_AIDD/raw_data/vcf_files/*"$i"* /media/sf_AIDD/raw_data/vcf_files/"$i"/
 done
 bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables.sh
-bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables2.sh
-bash /home/user/AIDD/bashScripts/variantcalling/snpEfftables3.sh
 for i in haplotype filter haplotype2 filter2 snpEff bedtools; do 
 sed -i 's/\-A BaseCounts //g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 sed -i 's/\-F BaseCounts //g' /media/sf_AIDD/bashSCripts/variantcalling/"$i".sh
@@ -40,6 +38,7 @@ sed -i 's/filtered_indelsNoCounts/filtered_indels/g' /media/sf_AIDD/bashScripts/
 sed -i 's/recal_dataNoCounts/recal_data/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 sed -i 's/recal_readsNoCounts/recal_reads/g' /media/sf_AIDD/bashScripts/variantcalling/"$i".sh
 done
+mv /media/sf_AIDD/raw_data/vcf_files/*"NoCounts"* /media/sf_AIDD/raw_data/vcf_files/NoCounts/
 for i in raw final filtered; do
 mv /media/sf_AIDD/raw_data/vcf_files/NoCounts/*"$i"* /media/sf_AIDD/raw_data/vcf_files/NoCounts/"$i"/
 done
