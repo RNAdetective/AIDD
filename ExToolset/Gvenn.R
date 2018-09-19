@@ -1,0 +1,22 @@
+suppressPackageStartupMessages(library("gdata"))
+suppressPackageStartupMessages(library("VennDiagram"))
+suppressPackageStartupMessages(library("gplots"))
+gLists <- read.csv("/media/sf_AIDD/Results/DESeq2/level/differential_expression/venndiagrams/file_name.csv")
+gLists$X <- NULL
+head(gLists)
+tail(gLists)
+gLS <- lapply(as.list(gLists), function(x) x[x != ""])
+lapply(gLS, tail)
+names(gLS) <- c(set_column_name)
+VENN.LIST <- gLS
+tiff("/media/sf_AIDD/Results///DESeq2/level/differential_expression/venndiagrams/file_name.tiff", units="in", width=10, height=10, res=600)
+venn.plot <- venn.diagram(VENN.LIST, NULL, category.names=c(set_column_name), fill=c(set_colors), alpha=c(set_alpha), cex = 2, cat.fontface=4)
+grid.draw(venn.plot)
+dev.off()
+a <- venn(VENN.LIST, show.plot=TRUE)
+str(a)
+inters <- attr(a,"intersections")
+lapply(inters, head)
+sink("/media/sf_AIDD/Results/DESeq2/level/differential_expression/venndiagrams/file_namevenn.txt")
+inters
+sink()
