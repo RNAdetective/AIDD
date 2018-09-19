@@ -1,0 +1,9 @@
+G010_1 <- read.csv("/media/sf_AIDD/Results/variant_calling/haplotype/gene/moderate_impact/mock/G010_M1mockmoderate.csv")
+G010_2 <- read.csv("/media/sf_AIDD/Results/variant_calling/haplotype/gene/moderate_impact/mock/G010_M2mockmoderate.csv")
+G010_3 <- read.csv("/media/sf_AIDD/Results/variant_calling/haplotype/gene/moderate_impact/mock/G010_M3mockmoderate.csv")
+G010all <- merge(G010_1, G010_2, by="gene_id")
+G010final <- merge(G010all, G010_3, by="gene_id")
+G010final2 <- G010final[!duplicated(G010final$gene_id), ]
+G010final3 <- G010final2[apply(G010final2[,-1], 1, function(x) !all(x==0)),] 
+write.csv(G010final3, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/moderate_impact/G010mock.csv", row.names=FALSE)
+

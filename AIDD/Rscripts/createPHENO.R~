@@ -1,0 +1,15 @@
+##this gets count files for individual experiments within bigger experiment this 
+countData <- read.csv("/media/sf_AIDD/Results/DESeq2/level/counts/level_count_matrixedited.csv")
+countDataF6 <- countData[ ,-c(8:19)]
+write.csv(countDataF6, "/media/sf_AIDD/Results/DESeq2/level/counts/level_count_matrixeditedK048.csv", row.names=FALSE)
+countDataM6 <- countData[ ,-c(2:7,14:19)]
+write.csv(countDataM6, "/media/sf_AIDD/Results/DESeq2/level/counts/level_count_matrixeditedK054.csv", row.names=FALSE)
+countDataL6 <- countData[ ,-c(2:13)]
+write.csv(countDataL6, "/media/sf_AIDD/Results/DESeq2/level/counts/level_count_matrixeditedG010.csv", row.names=FALSE)
+colData <- read.csv("/media/sf_AIDD/PHENO_DATA.csv")
+colDataF6 <- colData[-c(7:18), ]
+write.csv(colDataF6, "/media/sf_AIDD/PHENO_DATAK048.csv", row.names=FALSE)
+colDataM6 <- colData[-c(1:6, 13:18), ]
+write.csv(colDataM6, "/media/sf_AIDD/PHENO_DATAK054.csv", row.names=FALSE)
+colDataL6 <- colData[-c(1:12), ]
+write.csv(colDataL6, "/media/sf_AIDD/PHENO_DATAG010.csv", row.names=FALSE)

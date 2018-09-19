@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+awk -v COLT=$1 '
+        NR==1 {
+                for (i=1; i<=NF; i++) {
+                        if ($i==COLT) {
+                                title=i;
+                                print $i;
+                        }
+                }
+        }
+        NR>1 {
+                if (i=title) {
+                        print $i;
+                }
+        }
+' file
+#Where file is the file with the data in columns.
+
+If you issue script.sh C-8 then the result will be:
+
+C-8
+30
+21
+67

@@ -1,0 +1,198 @@
+#!/usr/bin/env bash
+##this will create all gene_count_matrix and PHENO_DATA needed for further analysis
+##this runs gene level analysis with DESeq2 to generate PCA, QC, and differential expression analysis
+Rscript /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/.csv/cell_line.csv/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/.tiff/cell_line.tiff/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/readcell_line.csv/read.csv/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/writecell_line.csv/write.csv/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/geneofinterestcell_line.csv/geneofinterest.csv/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/transcriptofinterestcell_line/transcriptofinterest.csv/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/transcriptfilter/genefilter/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/excitomecell_line.csv/excitome.csv/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/gene/level/s' /media/sf_AIDD/Rscripts/GLDE.R
+for i in gene transcript ; do
+for l in K048 K054 G010 ; do
+sed -i 's/level/'$i'/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/cell_line/'$l'/g' /media/sf_AIDD/Rscripts/GLDE.R
+Rscript /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/'$i'/level/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/'$l'/cell_line/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/cell_line.csv/.csv/g' /media/sf_AIDD/Rscripts/GLDE.R
+sed -i 's/cell_line.tiff/.tiff/g' /media/sf_AIDD/Rscripts/GLDE.R
+##This will then run the pathway analysis at both gene and transcript level.
+Rscript /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/resultsall.csv/resultsallcell_line.csv/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/PHENO_DATA.csv/PHENO_DATAcell_line.csv/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/edited.csv/editedcell_line.csv/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/.tiff/cell_line.tiff/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/condition_1/ZIKV/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/condition_2/mock/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/cell.csv/cellcell_line.csv/g' /media/sf_AIDD/Rscripts/Gpathway.R
+for i in gene transcript ; do
+for l in K048 K054 G010 ; do
+sed -i 's/level/'$i'/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/cell_line/'$l'/g' /media/sf_AIDD/Rscripts/Gpathway.R
+INPUT=/media/sf_AIDD/gene_list/pathway/pathway_list.csv
+OLDIFS=$IFS
+IFS=,
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+while read  x file_name
+do
+    sed -i "s/file_genes/"$file_name"/g" /media/sf_AIDD/Rscripts/Gpathway.R
+    Rscript /media/sf_AIDD/Rscripts/Gpathway.R
+    sed -i "s/"$file_name"/file_genes/g" /media/sf_AIDD/Rscripts/Gpathway.R
+done < $INPUT
+IFS=$OLDIFS
+sed -i 's/'$i'/level/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/'$l'/cell_line/g' /media/sf_AIDD/Rscripts/Gpathway.R
+done
+done
+sed -i 's/resultsallcell_line.csv/resultsall.csv/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/PHENO_DATAcell_line.csv/PHENO_DATA.csv/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/editedcell_line.csv/edited.csv/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/cell_line.tiff/.tiff/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/'$condition1'/condition_1/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/'$condition2'/condition_2/g' /media/sf_AIDD/Rscripts/Gpathway.R
+sed -i 's/cellcell_line.csv/cell.csv/g' /media/sf_AIDD/Rscripts/Gpathway.R
+##This will create lists for venn diagrams for all up regulated and down regulated genes and top100 up and down regulated genes found in differential expression analysis
+for i in gene transcript ; do
+for j in up down ; do
+for l in K048 K054 G010 ; do
+sed -i 's/level/'$i'/g' /media/sf_AIDD/Rscripts/Gvennlists.R
+sed -i 's/regulation/'$j'/g' /media/sf_AIDD/Rscripts/Gvennlists.R
+sed -i 's/cell_line/'$l'/g' /media/sf_AIDD/Rscripts/Gvennlists.R
+Rscript /media/sf_AIDD/Rscripts/Gvennlists.R
+sed -i 's/'$i'/level/g' /media/sf_AIDD/Rscripts/Gvennlists.R
+sed -i 's/'$j'/regulation/g' /media/sf_AIDD/Rscripts/Gvennlists.R
+sed -i 's/'$l'/cell_line/g' /media/sf_AIDD/Rscripts/Gvennlists.R
+done
+done
+done
+##this adds id instead of gene name to gene and transcript level, up and down regulated g/t and all in the list and also only the top 100 for each cell line.
+for i in gene transcript ; do
+for j in up down ; do
+for k in vennall top100 ; do
+for l in K048 K054 G010 ; do
+sed -i 's/level/'$i'/g' /media/sf_AIDD/Rscripts/changeidGvenn.R
+sed -i 's/regulation/'$j'/g' /media/sf_AIDD/Rscripts/changeidGvenn.R
+sed -i 's/class/'$k'/g' /media/sf_AIDD/Rscripts/changeidGvenn.R
+sed -i 's/cell_line/'$l'/g' /media/sf_AIDD/Rscripts/changeidGvenn.R
+Rscript /media/sf_AIDD/Rscripts/changeidGvenn.R
+sed -i 's/'$i'/level/g' /media/sf_AIDD/Rscripts/changeidGvenn.R
+sed -i 's/'$j'/regulation/g' /media/sf_AIDD/Rscripts/changeidGvenn.R
+sed -i 's/'$k'/class/g' /media/sf_AIDD/Rscripts/changeidGvenn.R
+sed -i 's/'$l'/cell_line/g' /media/sf_AIDD/Rscripts/changeidGvenn.R
+done
+done
+done
+done
+##this will combine all 3 cell types into one table for gene level and transcript level and well as for up and down regulated and all genes/transcripts or just the top 100 genes/transcripts into a csv ready for venn diagrams comparing all three cell lines that are up reg or down reg in either gene or transcript level. 
+for i in gene transcript ; do
+for j in up down ; do
+for k in vennall top100 ; do
+paste -d , /media/sf_AIDD/Results/DESeq2/"$i"/differential_expression/"$j"regid"$k"* > /media/sf_AIDD/Results/DESeq2/"$i"/differential_expression/"$j"regGlistid"$k".csv
+done
+done
+done
+##this does the same as above but it will combine gene with transcript to compare each cell line gene verse transcript lists to find unique only found in transcript analysis that would have been missed by gene level analysis.
+for i in gene transcript ; do
+for j in up down ; do
+for k in vennall top100 ; do
+for l in K048 K054 G010 ; do
+paste -d , /media/sf_AIDD/Results/DESeq2/gene/differential_expression/"$j"regidGlist"$k""$l".csv /media/sf_AIDD/Results/DESeq2/transcript/differential_expression/"$j"regidGlist"$k""$l".csv > /media/sf_AIDD/Results/DESeq2/gene/differential_expression/"$j"regidGlist"$k""$l"added.csv
+done
+done
+done
+done
+##this will make venn diagrams for the above files created with ids for all up or down regulated genes or transcripts or the top 100 comparing the three cell lines.
+sed -i 's/file_name/regulationregGlistidclass/g' /media/sf_AIDD/Rscripts/Gvenn.R
+for i in gene transcript ; do
+for j in up down ; do
+for k in vennall top100 ; do
+##this changes the alpha setting in the venn diagram
+sed -i 's/set_alpha/0.5,0.5,0.5/g' /media/sf_AIDD/Rscripts/Gvenn.R
+##this will change the colors for venn diagram
+sed -i 's/set_colors/"red","blue","yellow"/g' /media/sf_AIDD/Rscripts/Gvenn.R
+##this will set column names to cell_lineregulationreg
+sed -i 's/set_columns/"'$j'reg'$k''$i'G010","'$j'reg'$k''$i'K048","'$j'reg'$k''$i'K054"/g' /media/sf_AIDD/Rscripts/Gvenn.R
+##this changes for level, class, and regulaion and runs the Gvenn script
+sed -i 's/level/'$i'/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/regulation/'$j'/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/class/'$k'/g' /media/sf_AIDD/Rscripts/Gvenn.R
+Rscript /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/'$i'/level/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/'$j'/regulation/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/'$k'/class/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/0.5,0.5,0.5/set_alpha/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/"red","blue","yellow"/set_colors/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/"'$j'reg'$k''$i'G010","'$j'reg'$k''$i'K048","'$j'reg'$k''$i'K054"/set_columns/g' /media/sf_AIDD/Rscripts/Gvenn.R
+done
+done
+done
+sed -i 's/regulationregGlistidclass/file_name/g' /media/sf_AIDD/Rscripts/Gvenn.R
+##this will make gene and transcript lists from venn diagram output for gene enrichment analysis by
+for j in up down ; do
+for k in vennall top100 ; do
+for l in K048 K054 G010 ; do
+sed -i 's/file_name/'$j'regGlistid'$k'/g' /media/sf_AIDD/bashScripts/prep/venntexttogenelist.sh
+bash /media/sf_AIDD/bashScripts/prep/venntexttogenelist.sh
+sed -i 's/'$j'regGlistid'$k'/file_name/g' /media/sf_AIDD/bashScripts/prep/venntexttogenelist.sh
+done
+done
+done
+##
+for i in gene transcript ; do
+for j in up down ; do
+for k in vennall top100 ; do
+for l in K048 K054 G010 ; do
+sed -i 's/set_alpha/0.5,0.5/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/set_colors/"purple","blue"/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/set_columns/"'$j'reg'$l''$k'gene","'$j'reg'$l''$k'transcript"/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/level/'$i'/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/class/'$k'/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/regulation/'$j'/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/cell_line/'$l'/g' /media/sf_AIDD/Rscripts/Gvenn.R
+Rscript /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/'$j'/regulation/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/'$k'/class/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/'$l'/cell_line/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/'$i'/level/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/0.5,0.5/set_alpha/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/"purple","blue"/set_colors/g' /media/sf_AIDD/Rscripts/Gvenn.R
+sed -i 's/"'$j'reg'$l''$k'gene","'$j'reg'$l''$k'transcript"/set_columns/g' /media/sf_AIDD/Rscripts/Gvenn.R
+done
+done
+done
+done
+sed -i 's/regulationregidGlistclasscell_lineadded/file_name/g' /media/sf_AIDD/Rscripts/Gvenn.R
+## this will create venn diagrams for each cell line comparing up reg gene to up reg transcripts and down reg as well regulationregidGlistclasscell_line
+for j in up down ; do
+for k in vennall top100 ; do
+for l in K048 K054 G010 ; do
+sed -i 's/file_name/'$j'regGlistid'$k''$l'added/g' /media/sf_AIDD/bashScripts/prep/venntexttogenelist.sh
+bash /media/sf_AIDD/bashScripts/prep/venntexttogenelist.sh
+sed -i 's/'$j'regGlistid'$k''$l'/file_name/g' /media/sf_AIDD/bashScripts/prep/venntexttogenelist.sh
+done
+done
+done
+## use /media/sf_AIDD/Results/DESeq2/gene/differential_expression/regulationregidGlistclasscell_line/regulationregcell_lineclasstranscript.csv as gene lists for topGO.R
+## use /media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationGlistclass.txt for previous step to create folders to find gene lists in only the K048 K054 and G010 uniques only
+sed -i 's/directory/regulationregidGlistclasscell_lineadded/g' /media/sf_AIDD/Rscripts/GtopGO.R
+sed -i 's/file_name/regulationregcell_lineclasstranscript/g' /media/sf_AIDD/Rscripts/GtopGO.R 
+for i in K048 K054 G010 ; do
+for j in top100 vennall ; do
+for k in up down ; do
+sed -i 's/class/'$j'/g' /media/sf_AIDD/Rscripts/GtopGO.R
+sed -i 's/regulation/'$k'/g' /media/sf_AIDD/Rscripts/GtopGO.R
+sed -i 's/cell_line/'$i'/g' /media/sf_AIDD/Rscripts/GtopGO.R
+Rscript /media/sf_AIDD/Rscripts/GtopGO.R
+sed -i 's/'$i'/cell_line/g' /media/sf_AIDD/Rscripts/GtopGO.R
+sed -i 's/'$j'/class/g' /media/sf_AIDD/Rscripts/GtopGO.R
+sed -i 's/'$k'/regulation/g' /media/sf_AIDD/Rscripts/GtopGO.R
+done
+done
+done
+sed -i 's/regulationregidGlistclasscell_lineadded/directory/g' /media/sf_AIDD/Rscripts/GtopGO.R
+sed -i 's/regulationregcell_lineclasstranscript/file_name/g' /media/sf_AIDD/Rscripts/GtopGO.R
+
