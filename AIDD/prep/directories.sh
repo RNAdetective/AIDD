@@ -41,7 +41,7 @@ for i in gene_list index transcript_list variant_list ; do
 done
 ## makes subdirectories under indexes directory and moves respective indexes to there correct folders
 for i in DESeq2 pathway; do
-for j in gene transcript variant
+for j in gene transcript variant ; do
     mkdir /media/sf_AIDD/indexes/"$j"_list/$i/
     cp /home/user/AIDD/indexes/"$j"_list/$i/* /media/sf_AIDD/gene_list/$i/
 done
@@ -72,7 +72,7 @@ for i in DESeq2 topGO pathway variant_calling ; do
     mkdir /media/sf_AIDD/Results/$i/
 done
 ## Results/variant_calling subdirectories
-for i in substitutions high_impact moderate_impact amino_acid nucleotide ; do 
+for i in substitutions amino_acid nucleotide impact ; do 
     mkdir /media/sf_AIDD/Results/variant_calling/$i/
 done
 ##this will add subdirectories for G_VEX
@@ -96,11 +96,9 @@ for j in gene transcript ; do
     mkdir /media/sf_AIDD/Results/DESeq2/$j/$i/
 done
 done
-## this will create a directory for venndiagrams
-    mkdir /media/sf_AIDD/Results/DESeq2/$j/differential_expression/venndiagrams/
 ## this creates subdirectories for GEX nad TEX
 for j in gene transcript ; do
-for i in excitome "$i"ofinterest ; do
+for i in excitome "$j"ofinterest venndiagrams; do
     mkdir /media/sf_AIDD/Results/DESeq2/$j/differential_expression/$i
 done
 done
@@ -108,7 +106,6 @@ done
 for i in high_impact moderate_impact ; do
 for j in gene transcript ; do
     mkdir /media/sf_AIDD/Results/variant_calling/$j/$i/
-done
 done
 done
 ##this will create directories for I-VEX
@@ -135,7 +132,7 @@ INPUT=/media/sf_AIDD/PHENO_DATA.csv
 OLDIFS=$IFS
 IFS=,
 [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
+while read  x run codition sample t_name2
 do
     mkdir /media/sf_AIDD/raw_data/ballgown_in/$sample/
 done < $INPUT
