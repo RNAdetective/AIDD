@@ -1,8 +1,0 @@
-data <- read.csv("/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationregcell_line.csv")
-attach(data)
-sort <- data[order(log2FoldChange),]
-attach(sort)
-top100 <- sort[1:100,]
-top100$log2FoldChange <- NULL
-colnames(top100)[1] <- "cell_line"
-write.csv(top100, "/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationregtop100cell_line.csv", row.names=FALSE)
