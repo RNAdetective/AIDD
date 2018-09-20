@@ -141,14 +141,14 @@ sudo su
 
 ##copy and paste the following in the root directory prompt
 
-Rscript /home/user/AIDD/Rscripts/install_packages.R
+Rscript /home/user/AIDD/AIDD/Rscripts/install_packages.R
 
 ##if the script runs into a error where it asks the user for input just exit out and run it again and that should fix the error.
 Once the Rscript is done running.  
 ```
 Close the virtualbox and restart again.  Now you should be able to click on view and click on the last option virtual screen 1.  A side bar will pop up and you can select the proper screen resolution for your computer. You can hold right ctrl and press c to adjust to fill mode then make the window larger.  This right ctrl + c with toggle between these two views.
 
-You now have a newly constructed copy of AIDDv2.0virtualbox and you must conitnue from step 5 above Installing
+You now have a newly constructed copy of AIDDvirtualbox and you must conitnue from step 5 above Installing
 
 ## AML with RMD for R-studio
 
