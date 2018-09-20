@@ -1,6 +1,0 @@
-data <- read.csv("/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationregidclasscell_line.csv")
-data$level_name <- NULL
-data[!dregulationlicated(data$level_id), ]
-colnames(data)[1] <- "regulationregcell_lineclasslevel"
-write.csv(data, "/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationregidGlistclasscell_line.csv", row.names=FALSE)
-
