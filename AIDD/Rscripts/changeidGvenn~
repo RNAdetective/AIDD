@@ -1,6 +1,0 @@
-lveel_names <- read.csv("/media/sf_AIDD/index/level_names.csv")
-data <- read.csv("/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationregvenncell_line.csv")
-colnames(data)[1] <- "level_name"
-names <- merge(g_names, data, by="level_name")
-write.csv(names, "/media/sf_AIDD/Results/DESeq2/level/differential_expression/regulationregvennidcell_line.csv", row.names=FALSE)
-
