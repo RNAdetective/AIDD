@@ -118,7 +118,7 @@ http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
 
 5.  Once you load your new virtual box open command prompt and copy paste the following commands
 ```
-wget https://github.com/nplonsk2/AIDD/raw/master/VMsetup.tar.gz
+wget https://github.com/RNAdetective/AIDD/raw/master/VMsetup.tar.gz
 
 tar -xvzf VMsetup.tar.gz
 
