@@ -1,4 +1,4 @@
-These are the directions to download the premade AIDDPipeline image or to create a new vm image with biolinux8 and how to use the script to update, download and install all necessary tools for AIDD to run which is a RNAseq computational pipeline for transcriptome diversity discovery.
+These are the directions to download the premade AIDDPipeline image or to create a new vm image with biolinux8 and how to use the script to update, download and install all necessary tools for AIDDPipeline.sh to run which is our RNAseq computational pipeline for transcriptome diversity discovery.
 
 Everyone starts here:
 1. Download and set up oracle virtual box machine https://www.virtualbox.org/wiki/Downloads make sure you also download and install https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_Pack-5.2.6-120293.vbox-extpack inorder for shared folders and other things to work.
@@ -90,6 +90,8 @@ sudo m-a prepare
 
 sudo sh /media/user/VBox_GAs_5.2.6/autorun.sh
 
-14.You know have a newly constructed VirtualBox capable of running AIDD follow the onscreen instructions.
+14.You know have a newly constructed VirtualBox capable of running our script for RNAseq transcriptome diversity discovery so copy and paste the following command and follow the on screen prompts or follow the instructions found in the manual.
+
+bash /home/user/AIDD/AIDD.sh
 
 

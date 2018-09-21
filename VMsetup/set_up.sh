@@ -1,9 +1,24 @@
 #!/usr/bin/env bash
+##sudo apt-get --yes --force-yes install virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+sudo adduser user vboxsf
+## this uninstalls old version of R that came with biolinux8
+sudo apt-get --yes --force-yes remove r-base-core
+## the following adds permission and downloads the newest version of R sets R up for R package downloads required for analysis.
+sudo sh -c 'echo' "deb http://cran.rstudio.com/bin/linux/ubuntu precise/" >> /etc/apt/sources.list
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+sudo add-apt-repository ppa:marutter/rdev
+sudo apt-get --yes --force-yes update
+sudo apt-get --yes --force-yes upgrade
+sudo cp /etc/bash_completion.d/R /usr/share/bash-completion/completions/R
+sudo apt-get --yes --force-yes install r-base-core 
+## this downloads the tool that allows R to find and downloads certain packages needed for analysis.
+sudo apt-get --yes --force-yes install r-cran-rmysql
+
 ## this allows user to access shared folders
 sudo apt-get --yes --force-yes update
 sudo apt-get --yes --force-yes upgrade
-sudo apt-get --yes --force-yes install virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
-sudo adduser user vboxsf
+sudo apt-get --yes --force-yes install ipvsadm
+sudo apt-get --yes --force-yes install dkms
 ##this updates java for the picard tool
 sudo apt-add-repository ppa:openjdk-r/ppa
 sudo apt-get --yes --force-yes update
@@ -20,21 +35,18 @@ sudo apt-get --yes --force-yes install libcurl4-openssl-dev
 sudo apt-get --yes --force-yes install libxml2-dev
 sudo apt-get --yes --force-yes install libssl-dev
 sudo apt-get --yes --force-yes install libgsl0ldbl
-sudo apt-get --yes --force-yes install gsl-bin libgsl0-dev
 sudo apt-get --yes --force-yes install gsl-bin libgsl2
 sudo apt-get --yes --force-yes install libtiff-dev
 sudo apt-get --yes --force-yes install build-essential python2.7-dev python-htseq
-## this uninstalls old version of R that came with biolinux8
-sudo apt-get --yes --force-yes remove r-base-core
-## the following adds permission and downloads the newest version of R sets R up for R package downloads required for analysis.
-sudo sh -c 'echo' "deb http://cran.rstudio.com/bin/linux/ubuntu precise/" >> /etc/apt/sources.list
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-sudo add-apt-repository ppa:marutter/rdev
-sudo apt-get --yes --force-yes update
-sudo apt-get --yes --force-yes upgrade
-sudo apt-get --yes --force-yes install r-base
-## this downloads the tool that allows R to find and downloads certain packages needed for analysis.
-sudo apt-get --yes --force-yes install r-cran-rmysql
+
+##download Rstudio
+sudo apt-key adv –keyserver keyserver.ubuntu.com –recv-keys E084DAB9
+# Basic format of next line deb https://<my.favorite.cran.mirror>/bin/linux/ubuntu <enter your ubuntu version>/
+sudo add-apt-repository 'deb https://ftp.ussg.iu.edu/CRAN/bin/linux/ubuntu trusty/'
+sudo apt-get install gdebi-core
+wget https://download1.rstudio.org/rstudio-1.0.44-amd64.deb
+sudo gdebi rstudio-1.0.44-amd64.deb
+rm rstudio-1.0.44-amd64.deb
 mkdir /home/user/AIDD
 mkdir /home/user/AIDD/AIDD_tools
 mkdir /home/user/AIDD/AIDD_tools/bin
@@ -42,9 +54,8 @@ mkdir /home/user/AIDD/AIDD_tools/bin
 wget http://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz -O sratoolkit.tar.gz
 tar -vxzf /home/user/sratoolkit.tar.gz
 rm /home/user/sratoolkit.tar.gz
-cp /home/user/sratoolkit.2.8.2-1-ubuntu64/bin/* /home/user/AIDD/AIDD_tools/bin
-cd /home/user/
-mv /home/user/sratoolkit.2.8.2-1-ubuntu64 /home/user/AIDD/AIDD_tools/
+mv /home/user/sratoolkit.2.9.2-ubuntu64/ /home/user/AIDD/AIDD_tools/
+cp /home/user/AIDD/AIDD_tools/sratoolkit.2.9.2-ubuntu64/bin/* /home/user/AIDD/AIDD_tools/bin
 ##samtools
 wget https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2 -O /home/user/samtools.tar.bz2
 tar -xjvf samtools.tar.bz2
@@ -97,10 +108,15 @@ wget https://github.com/broadinstitute/picard/releases/download/2.17.3/picard.ja
 mv /home/user/picard.jar /home/user/AIDD/AIDD_tools/picard.jar
 mv /home/user/picard-2.17.3 /home/user/AIDD/AIDD_tools
 ## this downloads GATK
-wget https://github.com/broadinstitute/gatk/releases/download/4.0.0.0/gatk-4.0.0.0.zip
+wget https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef
 unzip gatk-4.0.0.0.zip
 rm /home/user/gatk-4.0.0.0.zip
 mv /home/user/gatk-4.0.0.0 /home/user/AIDD/AIDD_tools
+## download fastqc
+wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.7.zip
+unzip fastqc_v0.11.7.zip
+mv /home/user/FastQC/ /home/user/AIDD/AIDD_tools/
+cp /home/user/AIDD/AIDD_tools/FastQC/fastqc /home/user/AIDD/AIDD_tools/bin/
 ## install snpEff
 wget http://sourceforge.net/projects/snpeff/files/snpEff_latest_core.zip
 unzip snpEff_latest_core.zip
@@ -109,25 +125,16 @@ cp /home/user/snpEff/snpEff.jar /home/user/AIDD/AIDD_tools/snpEff.jar
 cp /home/user/snpEff/snpEff.config /home/user/AIDD/AIDD_tools/snpEff.config
 mv /home/user/snpEff /home/user/AIDD/AIDD_tools
 mv /home/user/clinEff /home/user/AIDD/AIDD_tools
-##install fastqc
-wget https://www.bioinformatics.babraham.ac.uk/projects/download.html#fastqc
-##install GATK
-wget https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef
-##install sratool kit
-wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu64.tar.gz
-##install vcf tools
-wget https://sourceforge.net/projects/vcftools/files/latest/download
-##install trimmomatic
-wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.38.zip
-##install tabix
-wget https://sourceforge.net/projects/samtools/files/tabix/tabix-0.2.6.tar.bz2/download
 ##this will get pipeline scripts
-wget https://github.com/nplonsk2/RNAseqPipeline/raw/master/AIDDScripts.tar.gz
-tar -vxzf AIDDScripts.tar.gz
-mv /home/user/AIDDScripts/* /home/user/AIDD/
-mv /home/user/AIDD/desktop/* /home/user/Desktop/
+wget https://github.com/RNAdetective/AIDD/raw/master/AIDD_scripts.tar.gz
+tar -vxzf AIDD_scripts.tar.gz
+mv /home/user/AIDD_scripts/* /home/user/AIDD/
+wget https://github.com/RNAdetective/AIDD/raw/master/Desktop.tar.gz
+tar -vxzf Desktop.tar.gz
 ## remove the files not needed
 rm /home/user/VMsetup.tar.gz
-rm /home/user/AIDDScripts.tar.gz
-gsettings set org.gnome.desktop.background picture-uri file:////home/user/AIDD/AIDDlogo.jpg
+rm /home/user/AIDD_scripts.tar.gz
+rm /home/user/Desktop.tar.gz
+##set desktop backgruond
+gsettings set org.gnome.desktop.background picture-uri "file:///home/user/AIDD/AIDDlogo.jpg"
 
