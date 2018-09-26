@@ -1,9 +1,10 @@
 ![Screenshot](AIDD2.jpg)
 # Automated Isoform Diversity Detector: AIDD
-* AIDD incorporates open source tools into a static virtualbox to ensure reproducability.  
+* AIDD incorporates open source tools into a static virtualbox to ensure reproducability in RNA-seq experiments.  
 * There is a bash script that completely automates the pipeline making it ease to use. 
 * The manual also instructs the more advanced user how to change the script to add more individual options.  
 * It is capable of looking at the transcriptome and editome in both global and local environments.
+* It includes a novel ExToolset which can look at all levels of transcriptome diversity in a RNA-seq dataset.
 * There is an ability to explore differential expression trends for entire pathways of genes at once with heatmaps and PCA plots.
 * There is an options to look at just one gene at time and it's isoform expression as well.
 * Variant Calling is used to find evidence of RNA editing and predict the impact effects of those variants.
@@ -28,11 +29,11 @@ https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_
 
 3. Download our ready to go AIDD virtualbox.
 ```
-https://drive.google.com/open?id=1ySfznZt8x50Vc0wVGP1U56vWd4TuV_Gh
+https://drive.google.com/drive/folders/1v0gus46csuThHODeB2KkA8_NlnGXj2Ta?usp=sharing
 ```
-4. Uncompress files.
+4. Uncompress all 6 files.
 
-5. Open Virtualbox manager and under the menu Machine select add.  A new pop window will allow you to find the file you just uncompressed.  Then click open.  AIDDv2.0 will now appear on your list of virtualboxes.
+5. Open Virtualbox manager and under the menu Machine select add.  A new pop window will allow you to find the file you just uncompressed.  Then click open.  AIDD will now appear on your list of virtualboxes.
 
 6. Make sure you check your setting for the machine and you have the correct amount of resources allocated to the virtualbox including RAM and CPU.
 
@@ -43,9 +44,25 @@ https://drive.google.com/open?id=1ySfznZt8x50Vc0wVGP1U56vWd4TuV_Gh
 * Do the same under the tab processors.  
 * The top green bar is how much CPU to give to virtualbox and this needs to be in the green as well. 
 
-7. Set up external, internal hard drive, or shared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the three options you have and instructions to create each of them.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.  The pipeline is designed to run automated from a shared folder so if you choose to run the automated script you need to have set up option C.
+7. Set up ashared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the instructions to create the shared folder AIDD on your computer.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.  You can also run AIDD in batches if space.
 
-A.	If you choose the external drive make sure you set up the virtual box to recognize your drive.  
+A.	create a shared folder on your host system.  
+
+* Create your folder on your host system and make sure you give it share permissions.
+* Name your folder AIDD.
+* Go into the setting in the virtualbox and click on shared folders. 
+* Click on the folder icon with the + sign on top of it.  
+* This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  
+* This will create a pop up window and you can select your new shared folder AIDD. 
+* After you select the folder the pop up will close and you should make sure the auto-mount box is checked and make permanent box if you want the folder to stay shared for more then one session.  
+* Then click ok.  
+* Your new folder should show up on the list then click ok.  
+* Now start the virtual box and you should see you new folder AIDD under devices in the folder menu.  
+* Then use this path for the pipeline it should be /media/sf_AIDD.
+
+#### These are other options to create hard drive space for AIDD however if you plan to run the automated script you have to have a shared folder names AIDD.
+
+B.	If you choose the external drive make sure you set up the virtual box to recognize your drive.  
 
 * Do this by going to the settings and selecting USB.  
 * Make sure you have the right 2.0 or 3.0 option selected and click add device.  
@@ -53,7 +70,7 @@ A.	If you choose the external drive make sure you set up the virtual box to reco
 * Then apply changes and restart the virtualbox.  
 * The final path should be /media/user/whatever you named you external drive
 
-B.	If you choose the internal drive use these instructions to add an internal hard drive space. 
+C.	If you choose the internal drive use these instructions to add an internal hard drive space. 
 
 * Click settings and then select Storage.  
 * Highlight Controller: SATA and then at the bottom there is a blue drive button with a green plus select this one.  
@@ -75,20 +92,7 @@ B.	If you choose the internal drive use these instructions to add an internal ha
 * Supply this path to the first prompt in the pipeline.  
 * The final path should be /media/user/”whatever you named it”
 
-C.	The last option is to create a shared folder on your host system.  
-
-* Create your folder on your host system and make sure you give it share permissions.  
-* Go into the setting in the virtualbox and click on shared folders. 
-* Click on the folder icon with the + sign on top of it.  
-* This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  
-* This will create a pop up window and you can select your new shared folder. 
-* After you select the folder the pop up will close and you should make sure the auto-mount box is checked and make permanent box if you want the folder to stay shared for more then one session.  
-* Then click ok.  
-* Your new folder should show up on the list then click ok.  
-* Now start the virtual box and you should see you new folder under devices in the folder menu.  
-* Then use this path for the pipeline it should be /media/sf_”name of folder”.
-
-### Creating VM
+### Creating VM from scratch to run AIDD (advanced users who want to upgrade tools in AIDD or add there own tools and operating system settings)
 
 If you prefer to create your own virtualbox instead of downloading the premade image follow this next series of steps.  But you do not have to do these if you are going to use the premade virutalbox.
 
@@ -152,7 +156,7 @@ You now have a newly constructed copy of AIDDvirtualbox and you must conitnue fr
 
 ## AML with RMD for R-studio
 
-To run the tutorial open R studio and find the AIDDtutorial.rmd file under /home/user/AIDD/tutorial/AIDDtutorial.rmd.  Run the chunks from begining to end.  This tutorial explains each step of the AIDD pipeline.  The following running AIDD is using the automated script  to look at the details of these scripts please look in /home/user/AIDD/bsahScripts or /home/user/AIDD/Rscripts
+To run the tutorial open R studio and find the AIDDtutorial.rmd file under /home/user/AIDD/extra/AIDDtutorial.rmd.  Run the chunks from begining to end.  This tutorial explains each step of the AIDD pipeline and allow for user to change code as necessry.
 
 ## Running AIDD
 
