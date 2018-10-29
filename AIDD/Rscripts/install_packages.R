@@ -1,5 +1,3 @@
-source("http://bioconductor.org/workflows.R")
-workflowInstall("rnaseqGene")
 source("http://bioconductor.org/biocLite.R")
 biocLite("devtools")
 biocLite("DESeq2")
@@ -65,5 +63,4 @@ biocLite("DEXSeq")
 biocLite("cluster")
 biocLite("vcfR")
 biocLite("plotly")
-
-
+biocLite("tibble")

@@ -13,7 +13,7 @@ do
     ##starts haplotype caller with rna-seq common parameters
     java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T HaplotypeCaller -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"_dedup_reads.bam --dbsnp /media/sf_AIDD/references/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 -A BaseCounts --max_alternate_alleles 40 -o /media/sf_AIDD/working_directory/"$run"raw_variants.vcf
     ##this moves vcf files to raw data folder and cleans working directory
-    mv /media/sf_AIDD/working_directory/"$run"raw_variants.vcf /media/sf_AIDD/raw_data/vcf_files/
+    cp /media/sf_AIDD/working_directory/"$run"raw_variants.vcf /media/sf_AIDD/raw_data/vcf_files/
     ##converts raw vcf files into table for easier use.
     java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"raw_variants.table
 done < $INPUT

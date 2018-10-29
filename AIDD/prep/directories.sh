@@ -29,6 +29,8 @@ conditionname2=$(awk -F, 'NR==3{print $2}' /media/sf_AIDD/condition.csv)
 for i in raw_data Results quality_control working_directory references AIDD ExToolset indexes tmp temp ; do
     mkdir /media/sf_AIDD/$i/
 done
+##this moves ExToolset
+cp /home/user/AIDD/ExToolset/* /media/sf_AIDD/ExToolset/
 ##This will create subdirectories for script transfer of AIDD and tool sets
 for i in align_assemble prep Rscripts variantcalling ; do
     mkdir /media/sf_AIDD/AIDD/$i/
