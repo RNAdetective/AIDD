@@ -31,6 +31,8 @@ sudo apt-get --yes --force-yes upgrade
 sudo apt-get --yes --force-yes install curl
 sudo apt-get --yes --force-yes install php5-curl
 sudo apt-get --yes --force-yes install aptitude
+sudo apt-get --yes --force-yes install libmysql++-dev"ful
+sudo apt-get --yes --force-yes install libpoppler-cpp-dev
 sudo apt-get --yes --force-yes install libcurl4-openssl-dev
 sudo apt-get --yes --force-yes install libxml2-dev
 sudo apt-get --yes --force-yes install libssl-dev
