@@ -1,0 +1,5 @@
+table1 <- read.csv("/media/sf_AIDD/Results/variant_calling/amino_acid/amino_acidfinal.csv")
+write.csv(table1, "/media/sf_AIDD/Results/variant_calling/amino_acid/amino_acidfinalall.csv", row.names=FALSE)
+index <- read.csv("/media/sf_AIDD/indexes/index/amino_acidimp.csv")
+table2 <- merge(index, table1, by="sub_names")
+write.csv(table2, "/media/sf_AIDD/Results/variant_calling/amino_acid/amino_acidfinal.csv", row.names=FALSE)

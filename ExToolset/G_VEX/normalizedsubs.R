@@ -1,0 +1,5 @@
+datatable <- read.csv("/media/sf_AIDD/Results/variant_calling/sub_level/sub_levelfinal.csv", row.names=1)
+normalized <- sweep(datatable, 2, colSums(datatable), `/`)
+write.csv(normalized, "/media/sf_AIDD/Results/variant_calling/sub_level/sub_levelproportions.csv")
+Totals <- colSums(datatable)
+write.csv(Totals, "/media/sf_AIDD/Results/variant_calling/sub_level/sub_levelTotals.csv")
