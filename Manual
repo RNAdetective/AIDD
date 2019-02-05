@@ -1,0 +1,207 @@
+Supplemental Manual:
+The pipeline incorporates open source tools into one easy to use virtual machine pipeline.  
+The user has the option to run the script to run the pipeline in limited user input options. 
+The user is also free to run the code themselves from the command prompt.  
+There are also additional tools added to the virtualbox but that are not used in the default pipeline.  
+The user is free to use these for the optional steps indicated below.  
+The program and code used in the pipeline are described in detail below including the default pipeline steps and optional additions.
+
+Step 1: Make sure AIDD virutalbox is up an running following the steps outlined on github.
+
+Step 2: Create your experimental index file.  
+Go to /home/user/AIDD/index/PHENO_DATA.csv 
+fill this in with your correct experimental information 
+then save and close the file.
+
+Step 3: copy and paste the following command into the command prompt
+
+bash /home/user/AIDD/AIDD.sh
+
+Step 4: User prompts will direct the user to enter the specifics for your experiment
+
+a. Enter the path for you folder to store the data.
+b. Answer yes if you want to download sequences and no if you have the data already on your hard drive.  
+Answer no if you have experimental files of your own and make sure they are in the correct path 
+
+/home/user/ncbi/public/sra 
+
+c. You will be asked to enter SRA numbers next.  If you are downloading sequences these would be the numbers NCBI uses to identify them
+in the SRA database and if you have your own files enter those file names instead of SRA numbers when prompted.
+d. It will then ask how many samples you have enter how ever many sra numbers you have (4-18)
+e. Enter your option for indexes we suggest GRCh37_snp_tran
+f. Enter whether your sequences are single or paired
+g Pick which aligner you would like to use currently only HISAT2 default option.  In order to run the others you need to edit the script 
+h. Choose which data type you have for statistical analysis bivariate or multivariate
+i. Then enter if you would like to do variant calling now or at a later time.
+
+CODE:
+echo "Please enter the path to external hard drive with at least 1 terabyte of space if you want to run all 18 files"
+##this path can be to any hard drive including an external drive which can be added through USB drive.  
+read path
+mkdir $path
+cd $path
+echo "Please enter up to 18 sra file numbers seperated by a space with no punctuation for example SRR0000000 SRR0000000 SRR0000000."
+read varname1 varname2 varname3 varname4 varname5 varname6 varname7 varname8 varname9 varname10 varname11 varname12 varname13 varname14 varname15 varname16 varname17 varname18
+echo "Please enter HISAT2 index file choice from one of the following options: GRCh37, GRCh37_snp, GRCh37_tran, GRCh37_snp_tran, GRCh38, GRCh38_snp, GRCh38_tran, GRCh38_snp_tran"
+read variable 
+echo "Please enter library layout type: single or paired"
+read library 
+echo "Choose one of the following DESeq3 design set-ups: 1.) if your PHENO table contains just one condition1 column enter design.  2.) if you PHENO table contains two conditions both condition1 and condition2 columns are present in the table then enter design2."
+read design
+echo "Would you like to do variant calling?"
+read variant
+
+Step 5: This is the step where AIDD will download all necessary reference files for the tools.  
+The user input for index choice will be the instructions for which set of references and indexes to download. 
+See the code below for more details.  It downloads all SRA sequences and moves then to the correct working directory
+The rest of the index files are from other sources and need to be converted to the correct format based on the tool used.
+This can be seen in the code below.
+
+Optional Step 5: If the user prefers to use their own or need something other then human reference files these reference can be downloads separately 
+however we do not recommend using anything other then ensembl indexes and references 
+because the downstream tools are designed to take ensembl annotated data and the other references 
+and indexes need extra organizing and filtering steps not provided in this pipeline. 
+Once you have downloads and followed the following code to properly organize these files they 
+should be moved to the working directory selected in the first prompt.  And make sure they have the same neames
+used in the code below.
+
+CODE:
+echo "Now Downloading sra files and moving them to $path" 
+prefetch $varname1 $varname2 $varname3 $varname4 $varname5 $varname6 $varname7 $varname8 $varname9 $varname10 $varname11 $varname12 $varname13 $varname14 $varname15 $varname16 $varname17 $varname18
+for file in /home/user/ncbi/public/sra/*sra
+do
+    name="$(basename "$file" .sra)"
+    echo "Moving $name"
+    mkdir -p "$name"
+    mv "$file" "$name"
+done
+if  [ "$variable" == "GRCh37_snp_tran" ]; then
+echo "downloading, extracting, and moving index files"
+wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch37_snp_tran.tar.gz
+echo "Uncompressing and moving file"
+tar xzvf grch37_snp_tran.tar.gz
+mv $path/grch37*/genome_snp_tran.{1..8}.ht2 $path/genome.{1..8}.ht2
+wget ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh37.75.cdna.all.fa.gz
+echo "Uncompressing and moving file"
+gunzip Homo_sapiens.GRCh37.75.cdna.all.fa.gz
+mv $path/*.fa $path/ref.fa
+wget ftp://ftp.ensembl.org/pub/release-75/gtf/homo_sapiens/Homo_sapiens.GRCh37.75.gtf.gz
+echo "Uncompressing and moving file"
+gunzip Homo_sapiens.GRCh37.75.gtf.gz
+mv $path/*.gtf $path/ref.gtf
+wget ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
+gunzip Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
+mv $path/*.primary_assembly.fa $path/ref1.fa
+perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
+java -jar /home/user/Pipelines/HISAT2_pipeline/picard.jar CreateSequenceDictionary REFERENCE=$path/ref2.fa OUTPUT=$path/ref2.dict
+samtools faidx $path/ref2.fa
+wget https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh37.75.zip
+unzip snpEff_v4_3_GRCh37.75.zip
+wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.b37.vcf.gz
+gunzip dbsnp_138.b37.vcf.gz
+mv dbsnp_138.b37.vcf dbsnp.vcf
+fi
+
+Step 6: Conversion of SRA files to fastq files and alignment using HISAT2.  
+There is a user defined option at the beginning asked for paired or single end reads.  
+At this time the default pipeline is set to paired end reads and only paired end reads can be used for variant calling for the default pipeline.  
+Single end reads do not have the accuracy needed during alignment and re-mapping during variant calling to be accurate enough for RNA editing detection.
+Optional Step 6A: If you already have fastq files these can manually be moved into the working directory in a folder with that samples name containing all fastq files associated with that sample name. 
+Optional Step 6B: If you prefer to use STAR as an aligner this is tool is included as well as Salmon but these are not recommended in this pipeline.  
+STAR requires at least 30G of RAM to use human reference genomes which most computers do not have access to and Salmon does not provide an accurate reliable alignment especially for single end reads for further downstream processing.
+
+CODE:
+if  [ "$library" == "single" ]; then
+for fn in $varname{1..18};
+do
+    samp=`basename ${fn}`
+    
+    echo "Running fastq-dump to convert .sra to .fastq ${samp}"
+    fastq-dump ${fn}/${samp}.sra \
+      -O $path/${samp}
+done
+for fn in $varname{1..18};
+do
+samp=`basename ${fn}`
+echo "Running HISAT2 alignment for single layout and with previously downloaded reference sequences for ${samp}"
+hisat2 -q -x $path/genome -p3 --dta-cufflinks \
+         -U ${fn}/${samp}.fastq \
+         -t --summary-file $path/${samp}/${samp}.txt -S $path/${samp}/${samp}.sam
+done
+fi
+if  [ "$library" == "paired" ]; then
+for fn in $varname{1..18};
+do
+samp=`basename ${fn}`
+echo "Running fastq dump to convert .sra file to 2 mate .fastq files for ${samp}"
+fastq-dump ${fn}/${samp}.sra \
+      -I --split-files \
+      -O $path/${samp}
+done
+for fn in $varname{1..18};
+do
+samp=`basename ${fn}`
+echo "Running HISAT2 alignment for paired layout with preiously downloaded reference sequences for ${samp}"
+hisat2 -q -x $path/genome -p3 --dta-cufflinks \
+         -1 ${fn}/${samp}_1.fastq \
+         -2 ${fn}/${samp}_2.fastq \
+         -t --summary-file $path/${samp}/${samp}.txt -S $path/${samp}/${samp}.sam
+Done
+fi 
+
+Step 7: The next steps are conversion from sam files to bam files using picard java tool.  These bam files are then used for the transcriptome assembly and counting step.  Stringtie is the tool used for transcriptome assembly because it simulataneous counts and assembles the transcript creating a more accurate count of individual transcripts due to a more accurate assembly of different isoforms.
+Optional Step 7A: The user can choose to convert sam files to bam files using samtools which is installed in the virtualbox but not utilized in the pipeline.
+Optional Step 7B: The user can choose to use another assembly tool such as cuffdiff which is included in the virtualbox but not used in the current pipeline due to recommended use of stringtie with HISAT2 alignment tool.
+
+CODE:
+for fn in $varname{1..18};
+do
+    samp=`basename ${fn}`
+    echo "Starting sorting with java picard tool to convert .sam to .bam for ${samp}"
+    java -jar /home/user/Pipelines/HISAT2_pipeline/picard.jar SortSam INPUT=$path/${samp}/${samp}.sam OUTPUT=$path/${samp}/${samp}.bam SORT_ORDER=coordinate 
+done
+echo "Strating stringtie to create count matrics files to be used in downstream differential expression analysis for ${samp}"
+stringtie ${samp}/${samp}.bam \
+         -p3 -G $path/ref.gtf -A $path/Counts/${samp}.tab -l -B -b $path/ballgown_in/${samp} -e -o $path/ballgown/${samp}.gtf
+Done
+
+Step 8: At this point DEXseq and DESeq2 input count matrixes are created from stringtie output files using python scripts included in the R packages for those programs.  Although the DEXseq files are not currently used in this pipeline they are created for independent use by the user in an option step.  The DESeq2 files are created to use in downstream analysis for differential gene expression.  Another important step in this part is to construct and move files to the correct directories for the python script to work properly.
+Optional Step 8A: The user can use the created DEXseq files to run an exon count usage for isoform discovery however this step in currently not included in the pipeline but there are plans to include it in future updates.
+Optional Step 8B: If the user chooses to manually run tools make sure the .gtf files and in this folder structure working_directory/ballgown/sample01/sample01.gtf and so on for all the files.  If they are not in this folder structure then the python scripts will not work.
+Code:
+echo "Starting python script to find exon counts for DEXSeq2"
+for i in 0{1..9} {10..18}
+do
+   python /home/user/Pipelines/HISAT2_pipeline/bin/dexseq_prepare_annotation.py $path/ballgown/${samp}.gtf $path/DEXSeq/${samp}.gff
+done
+echo "Starting python script to find exon counts for DEXSeq2"
+for i in 0{1..9} {10..18}
+do
+   python /home/user/Pipelines/HISAT2_pipeline/bin/dexseq_count.py $path/ballgown/${samp}.gff $path/${samp}/${samp}.sam $path/DEXSeq/${samp}
+done
+echo "Starting python script to find gene and transcript counts"
+python /home/user/Pipelines/HISAT2_pipeline/bin/prepDE.py -g $path/Results/gene_count_matrix.csv -t $path/Results/transcript_count_matrix.csv
+
+Step 9: The first of two provided Rscripts will run for gene level differential expression analysis (GLDE.R).  This Rscript is designed to use DESeq2 to analysis differential expression at the gene level.  There are also filtering steps and “shrinkage” steps to help eliminate false fold change detection in low read count samples as well as control for extreme outliers in counts.  This Rscript code is provided below and will provide the principal component analysis of the experiment followed by the creation of all figures for publication at the gene level. 
+Tools used: DESeq2 for complete R packages list see end of code below.
+Input: gene_count_matrix.csv (created from the python scripts from step 7)
+Output Files: PCA plots, MA plots, log gene count plots, table containing all differentially expressed genes with fold changes and statistical analysis columns, top 60 differentially expression genes hierarchal clustering heat map, bar graphs and line plots of ADAR and VEGF gene counts, tables of ADAR and VEGF gene counts with differential expression statistical analysis columns, heatmaps of genes involved in pathways provided and tables of genes involved in those pathways including counts and statistical analysis columns.
+Rscript used: GLDE.R
+Indexes or References used: pathways included in the virtualbox these include: neural development, brain development, pns development, cns development, VEGFA expression pathway, myeloid cell differentiation up and down regulation pathways as well as myeloid cell homeostasis pathway.
+Optional Step 9A: If the user prefers to manually enter the code and use the same code provided it must be done in the order it is provided or certain parts might not work correctly.
+Optional Step 9B: If the user would like different genes then ADAR or VEGF the code can easily be manually changes in the Rscripts by replacing all ADAR with the gene name the user chooses and then running the pipeline or R scrips can be run manually entering code after replacing all ADAR with the gene of interest.
+Optional Step 9C: The user can provide there own pathway by creating an ensembl gene list of genes involved in that pathway as a comma deliminated text file.  Simply move that .csv file into the working directory before strating the pipeline.  Then insert the name of that file into the optional code included at the end of the GLDE.R file.  Then run the pipeline from the beginning or manually enter the R code into the command prompt.
+Code: see GLDE.R script included in the Pipelines directory on the virtualbox for code details and descriptions
+
+Step 10: Is the same as step 8 but with transcript level counts.  DESeq2 is used to analysis differential expression of transcripts to discover transcriptome diversity.  Again ADAR and VEGF isoforms are shown in the pipeline.
+Optional Step 10A: Again if the user manually enters the code into the command prompt instead of using script the steps must be done in the correct order or downstream figures cannot be generated.  
+Optional Step 10B: If the user wishes to explore other genes transcriptome diversity besides ADAR or VEGF simply replace ADAR with the gene of interest in the code and run as usual from the beginning.  Or if is preferred run the pipeline and then manually enter the R script with the replaced ADAR gene with the user gene of interest.
+Code: See TLDE.R script included in the Pipelines directory on the virtualbox for code details and descriptions
+
+Step 11: This step runs R package topGO to do gene enrichment analysis on the top and down regulated genes over 2 fold expression as calculated by DESeq2 in the previous steps.  We use a classic algorithm and a fisher statistic to calculate root nodes for the pathway maps as the resulting output.  
+Optional Step 11A: these tests can be changes in the code to any of the other statistical tests preferred this was simiply picked as the tutorial example as they are good tests to choose in our case and then the pipeline can be run similar 
+Code: see topGO.R script included in the Pipelines directory on the virtualbox for code details and descriptions
+
+Step 12: Variant Calling pipeline for RNA editing detection.  This is provided as a separate script as well as an option in the pipeline.  The variant calling tools used require substantially more memory and more time then the differential expression analysis so it is included as an option and doesn’t have to be run with every  experiment.  
+The variant calling pipeline was taken from GATK best practices and recommendations made for RNA editing.  The parameters and options were suggestions made to decrease false positive discovery rates as well as increase accuracy for RNA editing.
+Code: see VariantCalling.sh bash script included in the Pipelines directory on the virtualbox for the code details and descriptions. 
