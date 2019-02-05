@@ -81,9 +81,9 @@ tar 2.5.3a.tar.gz
 cp "$home_dir"/AIDD/AIDD_tools/2.5.3a/STAR-2.5.3a/bin/Linux_x85_64/* "$home_dir"/AIDD/AIDD_tools/bin
 rm 2.5.3a.tar.gz
 ##this will get pipeline scripts
-wget https://github.com/RNAdetective/AIDD/raw/master/AIDD.tar.gz
-tar -vxzf AIDD.tar.gz
-rm AIDD.tar.gz
+wget https://github.com/RNAdetective/AIDD/raw/master/AIDDscripts.tar.gz
+tar -vxzf AIDDscripts.tar.gz
+rm AIDDscripts.tar.gz
 mkdir "$home_dir"/AIDD/AIDD/
 mv "$home_dir"/AIDD/AIDD_tools/AIDD/* "$home_dir"/AIDD/AIDD/
 rm -d "$home_dir"/AIDD/AIDD_tools/AIDD/
