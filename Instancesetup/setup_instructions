@@ -1,8 +1,8 @@
-These are the instructions to setup a instance of AIDD.
+These are the instructions to setup an instance of AIDD.
 
 Start with ubuntu18
 then enter these commands
-wget https://github.com/RNAdetective/AIDDinstance/raw/master/Instancesetup.tar.gz
+wget https://github.com/RNAdetective/AIDD/raw/AIDDv2.0.0/Instancesetup.tar.gz
 tar -vxzf Instancesetup.tar.gz
 bash ~/Instancesetup/set_up.sh
 
