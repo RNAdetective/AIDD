@@ -213,12 +213,13 @@ ___
 * [SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
 * [Samtools] (http://samtools.sourceforge.net/)
 * [HISAT2] (https://ccb.jhu.edu/software/hisat2/index.shtml)
-* [Picard] (http://broadinstitute.github.io/picard/)
-* [Stringtie] (https://ccb.jhu.edu/software/stringtie/)
 * [STAR] (https://github.com/alexdobin/STAR)
-* [Cuffdiff/Cufflinks] (http://cole-trapnell-lab.github.io/cufflinks/cuffdiff/)
+* [Bowtie2] (http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
 * [Kallisto] (https://pachterlab.github.io/kallisto/about)
 * [Salmon] (http://salmon.readthedocs.io/en/latest/salmon.html)
+* [Picard] (http://broadinstitute.github.io/picard/)
+* [Stringtie] (https://ccb.jhu.edu/software/stringtie/)
+* [Cuffdiff/Cufflinks] (http://cole-trapnell-lab.github.io/cufflinks/cuffdiff/)
 * [GATK] (https://software.broadinstitute.org/gatk/)
 * [snpEff] (http://snpeff.sourceforge.net/)
 
@@ -234,11 +235,16 @@ R packages
 ___
 
 ## References for tools.
+
 Auwera, G. A. Van Der, Carneiro, M. O., Hartl, C., Poplin, R., Levy-moonshine, A., Jordan, T., … Depristo, M. A. (2014). From FastQ data to high confidence varant calls: the Genome Analysis Toolkit best practices pipeline. Curr Protoc Bioinformatics (Vol. 11). http://doi.org/10.1002/0471250953.bi1110s43.From
 
 Depristo, M. A., Banks, E., Poplin, R., Garimella, K. V., Maguire, J. R., Hartl, C., … Daly, M. J. (2011). A framework for variation discovery and genotyping using next-generation DNA sequencing data. Nature Genetics, 43(5), 491–501. http://doi.org/10.1038/ng.806
 
+Dobin A, Davis CA, Schlesinger F, et al. STAR: ultrafast universal RNA-seq aligner. Bioinformatics. 2012;29(1):15-21. 
+
 Kim, D., Langmead, B., & Salzberg, S. L. (2015). HISAT: a fast spliced aligner with low memory requirements. Nature Methods, 12(4), 357–360. http://doi.org/10.1038/nmeth.3317
+
+Langmead B, Salzberg S. Fast gapped-read alignment with Bowtie 2. Nature Methods. 2012, 9:357-359.
 
 Li, H. (2011). A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics, 27(21), 2987–2993. http://doi.org/10.1093/bioinformatics/btr509
 
