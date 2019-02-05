@@ -1,5 +1,13 @@
-![Screenshot](AIDD2.jpg)
-# Automated Isoform Diversity Detector: AIDD
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/AIDDv2.0.0/AIDD2.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+ 
+ ***
+ 
+ # About AIDD
+ 
 * AIDD incorporates open source tools into a static virtualbox to ensure reproducability in RNA-seq experiments.  
 * There is a bash script that completely automates the pipeline making it ease to use. 
 * The manual also instructs the more advanced user how to change the script to add more individual options.  
@@ -10,9 +18,21 @@
 * Variant Calling is used to find evidence of RNA editing and predict the impact effects of those variants.
 * Gene enrichment analysis is to highlight pathways affected by variants.
 
+___
+
+#### **AIDDv2.0.0 now allows for** 
+
+* options of aligners, assemblers, and DE tools.
+* defining your own directories as well as setup scripts for instance setup.
+* analysis of mouse data and more human reference set options.
+* analysis of scRNA-seq, miRNAseq, and lcRNAseq in addition to bulk RNAseq.
+* normalization of editing sites, multivariate analysis and demension reduction as well as ANOVA and correlation analysis of the excitome. 
+
+___
+
 ## Getting Started
 
-These are the directions to download the premade AIDD virtualbox or to create a new vm image with biolinux8 and how to use the script to update, download and install all necessary tools for AIDD to run the RNAseq computational pipeline for transcriptome diversity discovery.  We will soon add the ability to use docker.
+These are the directions to download the premade AIDD virtualbox or to create a new vm image with ubuntu 18 and how to use the script to update, download and install all necessary tools for AIDD to run the RNAseq computational pipeline for transcriptome diversity discovery.
 
 ### Prerequisites
 
@@ -60,7 +80,11 @@ A.	create a shared folder on your host system.
 * Now start the virtual box and you should see you new folder AIDD under devices in the folder menu.  
 * Then use this path for the pipeline it should be /media/sf_AIDD.
 
-#### These are other options to create hard drive space for AIDD however if you plan to run the automated script you have to have a shared folder names AIDD.
+___
+
+### These are other options to create hard drive space for AIDD however if you plan to run the automated script you have to have a shared folder names AIDD to run as defaults if you choose to do another setup and have more hard drive space on the virtual box or have an instance you are running then you cannot run AIDD with defaults and it will prompt you to enter the correct directories for your situation.
+
+___
 
 B.	If you choose the external drive make sure you set up the virtual box to recognize your drive.  
 
@@ -92,13 +116,15 @@ C.	If you choose the internal drive use these instructions to add an internal ha
 * Supply this path to the first prompt in the pipeline.  
 * The final path should be /media/user/”whatever you named it”
 
-### Creating VM from scratch to run AIDD (advanced users who want to upgrade tools in AIDD or add there own tools and operating system settings)
+___
 
+### Creating personal VM to run AIDD 
+(advanced users who want to make adjustment to default settings)
 If you prefer to create your own virtualbox instead of downloading the premade image follow this next series of steps.  But you do not have to do these if you are going to use the premade virutalbox.
 
-1. use the following link to download biolinux8 the .iso file not the .ova file for the vm.
+1. use the following link to download ubuntu 18.04 (other version of ubuntu might not install the tools correctly).
 ```
-http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
+http://releases.ubuntu.com/18.04/
 ```
 2. Go to create new machine in the oracle virtual machine window by clicking the new button
 
@@ -106,36 +132,31 @@ http://nebc.nerc.ac.uk/downloads/bio-linux-8-latest.iso
 * then click VDH create virtual hard disk now and select at least 40G of storage space to create the hard disk.  
 * Click create
 
-3. When it asks where to load from click on bio linux 8 .iso file in your file system.
+3. When it asks where to load from click on ubuntu 18.04 file in your file system.
  
- * This will then load the iso file and it is just like you are installing a new os.
- * then install biolinux following prompts until it is done.
+ * This will tell VM were to get install files from.
+ * then install ubuntu following prompts until it is done.
  * Hit Continue make sure you erase disk options and keep clicking continue
  * Make sure you use username = user and password = password
- * When you click restart wait about 15 seconds and you can close the virtualbox and click the option shutdown machine.
+ * Even if you follow the prompt for a system reset you still need to manually close you VM and re-start.
  
 4. Make sure you have set aside enough RAM and CPU to run the machine you must select at least 4G of RAM and 1CPU to run at bare minimum.  
 
-* (Although to run STAR aligner option you must select at least 30G of RAM).  
+* (Although to run STAR aligner option you must select at least 40G of RAM).  
 * Check the settings system.  
 * Then check motherboard and processor make sure all the blue markers are in the green for your machine.  
 
 5.  Once you load your new virtual box open command prompt and copy paste the following commands
 ```
-wget https://github.com/RNAdetective/AIDD/raw/master/VMsetup.tar.gz
+wget https://github.com/RNAdetective/AIDD/raw/AIDDv2.0.0/Instancesetup.tar.gz
 
-tar -xvzf VMsetup.tar.gz
+tar -xvzf Instancesetup.tar.gz
 
-bash /home/user/VMsetup/set_up.sh
+bash /home/user/Instancesetup/set_up.sh
 ```
 6. The program will run and ask you for the following prompts
 
-* The first prompt will ask you for the password which is password
-* The second prompt will ask to hit enter
-* The third prompt will ask which version you want to keep you want to keep current version you want the default hit n
-* The fourth promt It will prompt for the password again enter password
-* The fifth prompt will ask for you to pick which verison of Java you would like to use the options are 0 1 2 you want to hit 2
-* The sixth prompt will ask for you to hit enter again
+* Follow instructions while setup runs. 
 
 7. once the operating system and programs are ready copy and paste the following to run the R package setup
 ```
@@ -145,18 +166,18 @@ sudo su
 
 ##copy and paste the following in the root directory prompt
 
-Rscript /home/user/AIDD/AIDD/Rscripts/install_packages.R
-
-##if the script runs into a error where it asks the user for input just exit out and run it again and that should fix the error.
-Once the Rscript is done running.  
+Rscript /home/user/Instancesetup/install_packages.R
 ```
 Close the virtualbox and restart again.  Now you should be able to click on view and click on the last option virtual screen 1.  A side bar will pop up and you can select the proper screen resolution for your computer. You can hold right ctrl and press c to adjust to fill mode then make the window larger.  This right ctrl + c with toggle between these two views.
 
-You now have a newly constructed copy of AIDDvirtualbox and you must conitnue from step 5 above Installing
+___
 
 ## AML with RMD for R-studio
 
-To run the tutorial open R studio and find the AIDDtutorial.rmd file under /home/user/AIDD/extra/AIDDtutorial.rmd.  Run the chunks from begining to end.  This tutorial explains each step of the AIDD pipeline and allow for user to change code as necessry.
+To run the tutorial open R studio and find the AIDDtutorial.rmd file under /home/user/AIDD/AIDDtutorial.rmd.  Run the chunks from begining to end.  This tutorial explains each step of the AIDD pipeline and allow for user to change code as necessry.
+The tutorial allows for both understanding of the tools and statistical analysis performed by AIDD and can be used as an educational tool for hands on teaching of bioinformatic analysis of RNA sequencing data.
+
+___
 
 ## Running AIDD
 
@@ -175,18 +196,16 @@ Step 2: Follow the instructions on the desktop.
 
 * 5.) repeat this same procedure but for the insert_transcript_lists_for_pathways folder on the desktop.  Making sure to add you pathway names to the csv file names pathwayT_list.
 
-* 6.) When you are done entering the specifics for your experiment then copy and paste this into the command line and then follow on screen prompts.
-```
-bash /home/user/AIDD/AIDD.sh
-```
 Step 3: copy and paste the following command into the command prompt
 
 ```
-bash /home/user/AIDD/AIDD.sh
+bash /home/user/AIDD/AIDD/AIDD.sh
 ```
 Step 4: Follow on screen prompts asking a few more detail about your specific experiment.  If you would like to run with our predefined defaults select that in the beginning.
 
 AIDD will then run telling what it is doing at each step along the way.  When it is complete it will have all results in your shared folder organized by type of data.  See the manual for more information about folder system structure.  
+
+___
 
 ## Pipeline Flow Chart
 ![Screenshot](flow_chart.png)
@@ -212,6 +231,8 @@ R packages
 * [Ggplot2] (https://cran.r-project.org/web/packages/ggplot2/index.html)
 * [topGO] (http://bioconductor.org/packages/release/bioc/html/topGO.html)
 
+___
+
 ## References for tools.
 Auwera, G. A. Van Der, Carneiro, M. O., Hartl, C., Poplin, R., Levy-moonshine, A., Jordan, T., … Depristo, M. A. (2014). From FastQ data to high confidence varant calls: the Genome Analysis Toolkit best practices pipeline. Curr Protoc Bioinformatics (Vol. 11). http://doi.org/10.1002/0471250953.bi1110s43.From
 
@@ -230,3 +251,5 @@ McKenna, A., Hanna, M., Banks, E., Sivachenko, A., Cibulskis, K., Kernytsky, A.,
 Pertea, M., Kim, D., Pertea, G., Leek, J. T., & Steven, L. (2017). HHS Public Access, 11(9), 1650–1667. http://doi.org/10.1038/nprot.2016.095.Transcript-level
 
 Pertea, M., Pertea, G. M., Antonescu, C. M., Chang, T.-C., Mendell, J. T., & Salzberg, S. L. (2015). StringTie enables improved reconstruction of a transcriptome from RNA-seq reads. Nature Biotechnology, 33(3), 290–295. http://doi.org/10.1038/nbt.3122
+
+___
