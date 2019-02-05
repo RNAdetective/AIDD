@@ -1,0 +1,5 @@
+library("data.table")
+table1 <- read.csv("/media/sf_AIDD/Results/variant_calling/substitutions/raw/file_name/sub_level.csv")
+table2 <- as.matrix(table1)
+table3 <- as.vector(table2)
+write.csv(table3, "/media/sf_AIDD/Results/variant_calling/sub_level/file_name.csv")
