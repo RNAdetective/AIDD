@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/AIDDv2.0.0/AIDD2.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/AIDD2.jpg">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
