@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 echo "What is your home directory?"
-read $home_dir
+read home_dir
 tool_dir="$home_dir"/AIDD/AIDD_tools/bin
 AIDD_tools="$home_dir"/AIDD/AIDDtoolscompressed
 sudo apt-get --yes update
