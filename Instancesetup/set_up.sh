@@ -74,14 +74,17 @@ rm salmon-0.12.0_linux_x86_64.tar.gz
 tar kallisto_linux-v0.45.0.tar.gz
 cp "$home_dir"/AIDD/AIDD_tools/kallisto_linux-v0.45.0/kallisto "$tool_dir"
 rm kallisto_linux-v0.45.0.tar.gz
+## install bowtie2
+tar bowtie2-2.3.4.3-linux-x86
 ##this will get pipeline scripts
+cd
 wget https://github.com/RNAdetective/AIDD/raw/master/AIDDscripts.tar.gz
 tar -vxzf AIDDscripts.tar.gz
 rm AIDDscripts.tar.gz
 mkdir "$home_dir"/AIDD/AIDD/
-mv "$home_dir"/AIDD/AIDD_tools/AIDD/* "$home_dir"/AIDD/AIDD/
-rm -d "$home_dir"/AIDD/AIDD_tools/AIDD/
+cp -r "$home_dir"/AIDDscripts/* "$home_dir"/AIDD/AIDD
 ##this will get desktop folder
+cd
 wget https://github.com/RNAdetective/AIDD/raw/master/Desktop.tar.gz
 tar -vxzf Desktop.tar.gz
 ## this will change background picture 
