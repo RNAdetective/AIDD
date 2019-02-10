@@ -25,8 +25,7 @@ aligner="$(config_get aligner)"; # HISAT2 or STAR
 assembler="$(config_get assembler)"; # Strintie or cufflinks
 variant="$(config_get variant)"; # variant calling
 instance="$(config_get instance)"; # instance or computer
-phenobatch="$(config_get phenobatch)"; # are you running a batch number
-exper="$(config_get exper)"; # which experiment to download pheno
+instancebatch="$(config_get instancebatch)"; # are you running a batch number
 batch="$(config_get batch)"; # which batch number
 ref="$(config_get ref)"; # do you want to download your references
 pheno="$(config_get pheno)"; # is your pheno data local or do you need to download it
@@ -101,8 +100,6 @@ HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$
 HISAT2_single() { hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$wd"/"$file_fastq" -t --summary-file "$dir_path"/raw_data/counts/"$run".txt -S "$wd"/"$file_sam" ; }
 STAR_paired() { echo "STAR some text line on how to run" ; }
 STAR_single() { echo "STAR some text line on how to run" ; }
-Bowtie2_paired() { echo "Bowtie2 some text line on how to run" ; }
-Bowtie2_single() { echo "Bowtie2 some text line on how to run" ; }
 samtobam() { java -Djava.io.tmpdir="$dir_path"/tmp -jar "$AIDDtool"/picard.jar SortSam INPUT="$wd"/"$file_sam" OUTPUT="$rdbam"/$file_bam SORT_ORDER=coordinate ; }
 assem_string() { stringtie "$rdbam"/"$file_bam" -p3 -G "$ref_dir_path"/ref.gtf -A "$dir_path"/raw_data/counts/"$file_tab" -l -B -b "$dir_path"/raw_data/ballgown_in/"$sample"/"$run" -e -o "$dir_path"/raw_data/ballgown/"$sample"/"$file_name_gtf" ; }
 gtfcheck() { 
@@ -665,27 +662,12 @@ file_name_gtf="$sample".gtf;
     file_in="$wd"/$file_fastq    
     file_out="$wd"/$file_sam
     run_tools
-  fi
-####################################################################################################################
-# ALIGNMENT BOWTIE2 PAIRED
-####################################################################################################################
-  if [[ "$library" == 1 && "$aligner" == 3 || "$miRNA" == "2" ]];
-  then
-    tool=BOWTIE2_paired
-    file_in="$wd"/$file_fastqpaired1    
-    file_in2="$wd"/$file_fastqpaired2    
-    file_out="$wd"/$file_sam
-    run_tools2i
-  fi
-####################################################################################################################
-# ALIGNMENT BOWTIE2 SINGLE
-####################################################################################################################
-  if [[ "$library" == 2 && "$aligner" == 3 || "$miRNA" == "2" ]];
-  then
-    tool=BOWTIE2_single
-    file_in="$wd"/$file_fastq    
-    file_out="$wd"/$file_sam
-    run_tools
+  else
+        echo1=FOUND
+        echo2=$file_out
+        echo3=FINISHED
+        echo4=$tool
+        mes_out # ERROR OUTPUT IS THERE
   fi
 ####################################################################################################################
 #  samtobam

@@ -10,15 +10,10 @@ echo "would you like to run with defaults?  This includes downloading files from
 read default
 if [ "$default" == 2 ]; #this allows for download of sequences or starting with your own .fastq files 
 then
-  echo "Are you using a shared folder? 1=(default)yes 2=no(instance)" # shared folder or folder AIDD on the main users home directory.
-  read instance
-  if [ "$instance" == "2" ];
-  then
-    echo "What is your working directory?"
-    read sup_dir
-    echo "What is your home directory?"
-    read home_dir
-  fi
+  echo "What is your working directory?"
+  read sup_dir
+  echo "What is your home directory?"
+  read home_dir
   echo "Are you downloading sequences from NCBI 1=(default)yes 2=no" # download sequences
   read sra
   if [ "$sra" == 2 ]; # if no downloads
@@ -26,9 +21,18 @@ then
     echo "Please enter the directory where the fastq files are located. For example /media/sf_files/ if you have shared the folder from your main computer or if you are on an instance "$home_dir"/folderwithfiles/"
     read fastq_dir_path # where to find fastq files
   fi
+  echo "Are you using a shared folder? 1=(default)yes 2=no(instance)" # shared folder or folder AIDD on the main users home directory.
+  read instance
+  echo "Do you need to run AIDD once? 1=(default)yes 2=no(batch instance)" # do you need to download a pheno_data file
+  read instancebatch
+  if [ "$instancebatch" == "2" ];
+  then
+    echo "Which batch are you using?"
+    read batch #which batch are you running
+  fi
   echo "Do you have references already downloaded? 1=(default)yes 2=no" # do you want to download references now
   read ref
-  if [ "$ref" == "2" ];
+  if [ "$ref" == 2 ];
   then
     echo "Do you have bulk human data? 1=(default)yes 2=no(mouse)" # human or mouse data
     read human
@@ -39,11 +43,6 @@ then
   read scRNA
   echo "Do you have mRNA data? 1=(default)yes 2=no (miRNA)" # mRNA or miRNA data
   read miRNA
-  if [ "$miRNA" == "2" ];
-  then
-    echo "Would you like to align to hairpin or mature miRNA sequences? 1=hairpin 2=mature"
-    read miRNAtype
-  fi
   echo "Please enter library layout type: 1=(default)paired or 2=single" # this allows for selection between paired and single end data
   read library
   echo "Which aligner would you like to use? 1=(default)HISAT2, 2=STAR, 3=BOWTIE2" # which alignment tool
@@ -52,23 +51,8 @@ then
   read assembler 
   echo "Would you like to do variant calling for RNAediting prediction at this time? 1=(default)yes 2=no" # run variant calling
   read variant
-  echo "Do you have your PHENO_DATA already on the desktop? 1=(default)yes 2=no" # do you want to download your pheno_data file
+  echo "Do you have your PHENO_DATA already downloaded? 1=(default)yes 2=no" # do you want to download your pheno_data file
   read pheno
-  if [ "$pheno" == "2" ];
-  then
-    echo "Are you running batches? 1=yes 2=no"
-    read phenobatch
-    if [ "$phenobatch" == "1" ];
-    then
-      echo "Which batch are you using?"
-      read batch #which batch are you running
-    fi
-    if [ "$phenobatch" == "2" ];
-    then
-      echo "What is the name of your experiment?"
-      read exper
-    fi
-  fi
   echo "Do you want to start at the beginning or do you want to start with variant calling? 1=(default)beginning 2=variant calling I already have bam files present" # do you need to download bam files
   read bamfile
 else
@@ -104,11 +88,6 @@ cd "$dir_path"
 wget https://github.com/RNAdetective/AIDD/raw/master/batches/PHENO_DATAwhole.csv
 cd "$home_dir"/AIDD/AIDD 
 }
-get_PHENOnonbatch() {
-cd "$dir_path"
-wget https://github.com/RNAdetective/AIDD/raw/master/batches/PHENO_DATA"$exper".csv
-cd "$home_dir"/AIDD/AIDD
-}
 create_pd() {
 for i in raw_data Results quality_control working_directory AIDD tmp temp ; 
 do
@@ -141,9 +120,9 @@ downloadindex() {
 for i in gene transcript ; 
   do
     cd "$dir_path"/indexes/"$i"_list/DESeq2/ # moves experimental gene/transcript list from the desktop to the correct index folder to be used for building own on the fly indexes for GEX and TEX tools
-    wget https:/github.com/RNAdetective/AIDD/raw/master/Desktop/insert_"$i"_of_interest/*
+    wget https:/github.com/RNAdetective/AIDD/raw/master/insert_"$i"_of_interest/*
     cd "$dir_path"/indexes/"$i"_list/pathway/
-    wget https:/github.com/RNAdetective/AIDD/raw/master/Desktop/insert_"$i"_lists_for_pathways/*
+    wget https:/github.com/RNAdetective/AIDD/raw/master/insert_"$i"_lists_for_pathways/*
   done
   wget https://github.com/RNAdetective/AIDDinstance/raw/master/batches/PHENO_DATA"$batch".csv
   cp "$home_dir"/PHENO_DATA"$batch".csv "$dir_path"/PHENO_DATA.csv
@@ -165,8 +144,6 @@ instancebatch=$batch
 batch=$batchnumber
 ref=$ref
 pheno=$pheno
-phenobatch=$phenobatch
-exper=$exper
 bamfile=$bamfile
 human=$human
 ref_set=$ref_set
@@ -201,8 +178,6 @@ variant=Default Value
 instance=Default Value
 ref=Default Value
 pheno=Default Value 
-phenobatch=Default Value
-exper=Default Value
 bamfile=Default Value
 scRNA=Default Value
 human=Default Value
@@ -366,19 +341,7 @@ then
   dir_path=/media/sf_AIDD
   home_dir=/home/user
     create_pd
-  if [ "$pheno" == "1" ];
-  then
     move_PHENO
-  fi
-  if [ "$phenobatch" == "1" ];
-  then
-    get_PHENO
-    split_PHENO
-  fi
-  if [ "$phenobatch" == "2" ];
-  then
-    getPHENOnonbatch
-  fi
     moveAIDD
     checkconfig
   if [ ! "$(ls -A )" ];
@@ -396,19 +359,8 @@ then
   mkdir "$ref_dir_path"
   mkdir "$dir_path"
   create_pd
-  if [ "$pheno" == "1" ];
-  then
-    move_PHENO
-  fi
-  if [ "$phenobatch" == "1" ];
-  then
-    get_PHENO
-    split_PHENO
-  fi
-  if [ "$phenobatch" == "2" ];
-  then
-    getPHENOnonbatch
-  fi
+  get_PHENO
+  split_PHENO
   moveAIDD # MOVE AIDD SCRIPTS TO EXPERIMENT DIRECTORY
   checkconfig
   if [ "$indexes" == 2 ]; # HOME DIRECTORY FOLDER ADD IN OPTION IN BEG #######indexes 1=yes 2=no (means download them) FOR DOWNLOAD INDEXES
@@ -762,6 +714,7 @@ then
   if [ "$aligner" == "3" ];
   then
     bowtie2-build [options]* "$ref_dir_path"/ref1.fa "$ref_dir_path"/genome
+    fi
   fi
 fi
 ####################################################################################################################
