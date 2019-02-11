@@ -559,45 +559,18 @@ then
 ####################################################################################################################
   if  [ "$ref_set" == "1" ]; 
   then
-    if [ "$aligner" == "1" ];
-    then
-      ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch37_snp_tran.tar.gz
-      set_ref=grch37_snp_tran
-      HISAT_ref
-    fi
+    ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch37_snp_tran.tar.gz
+    set_ref=grch37_snp_tran
+    HISAT_ref
     ftpsite=ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh37.75.cdna.all.fa.gz # ref.fa
     ref_name=ref.fa
     downloaded_ref
-    if [ "$miRNA" == "1" ];
-    then
     ftpsite=ftp://ftp.ensembl.org/pub/release-75/gtf/homo_sapiens/Homo_sapiens.GRCh37.75.gtf.gz # ref.gtf
     ref_name=ref.gtf
     downloaded_ref
-    fi
-    if [ "$miRNA" == "2" ];
-    then
-      ftpsite=ftp://mirbase.org/pub/mirbase/CURRENT/genomes/hsa.gff3 # ref.gtf
-      ref_name=ref.gtf
-      downloaded_ref
-    fi
-    if [ "$miRNA" == "1" ];
-    then
-      ftpsite=ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz # ref1.fa
-      ref_name=ref1.fa
-      downloaded_ref
-    fi
-    if [[ "$miRNA" == "2" && "$miRNAtype" == "1" ]];
-    then
-      ftpsite=ftp://mirbase.org/pub/mirbase/CURRENT/hairpin.fa.gz # ref1.fa
-      ref_name=ref1.fa
-      downloaded_ref
-    fi
-    if [[ "$miRNA" == "2" && "$miRNAtype" == "2" ]];
-    then
-      ftpsite=ftp://mirbase.org/pub/mirbase/CURRENT/mature.fa.gz # ref1.fa
-      ref_name=ref1.fa
-      downloaded_ref
-    fi
+    ftpsite=ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz # ref1.fa
+    ref_name=ref1.fa
+    downloaded_ref
     ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.b37.vcf.gz
     ref_name=dbsnp.vcf
     downloaded_ref
@@ -610,64 +583,46 @@ then
 ####################################################################################################################
   if  [ "$ref_set" == "2" ]; then
   ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch38_snp_tran.tar.gz
-  set_ref=grch38_snp_tran
+  set_ref=grch37_snp_tran
   HISAT_ref
   ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz # ref.fa
-  ref_name=ref.fa
-  download_ref
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/gtf/homo_sapiens/Homo_sapiens.GRCh38.92.gtf.gz # ref.gtf
-  ref_name=ref.gtf
-  download_ref 
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz # ref1.fa
-  ref_name=ref1.fa
-  download_ref
-  ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg38/dbsnp_138.hg38.vcf.gz # dpsnp.vcf
-  ref_name=dbsnp.vcf
-  download_ref
-  wget https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.92.zip
- # snpEff
-  gunzip download
-  organize_ref
-  fi
-####################################################################################################################
-#  hg19 FILL THESE IN
-####################################################################################################################
-  if  [ "$ref_set" == "2" ]; then
-  ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/hg19.tar.gz
-  set_ref=hg19
-  HISAT_ref
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz # ref.fa
-  ref_name=ref.fa
-  download_ref
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/gtf/homo_sapiens/Homo_sapiens.GRCh38.92.gtf.gz # ref.gtf
-  ref_name=ref.gtf
-  download_ref 
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz # ref1.fa
-  ref_name=ref1.fa
-  download_ref
-  ftpsite=https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.92.zip # snpEff
-  ref_name=
-  download_ref
-  ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.hg38.vcf.gz # dpsnp.vcf
-  ref_name=dbsnp.vcf
-  download_ref
-  organize_ref
-  fi
-####################################################################################################################
-#  Mouse
-####################################################################################################################
-  if  [ "$human" == "2" ]; then
-  ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grcm38_snp_tran.tar.gz
-  set_ref=grcm38_snp_tran
-  HISAT_ref
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/mus_musculus/cdna/Mus_musculus.GRCm38.cdna.all.fa.gz # ref.fa
+  com_ref=Homo_sapiens.GRCh38.cdna.all.fa
   ref_name=ref.fa
   download_ref
   ftpsite=ftp://ftp.ensembl.org/pub/release-92/gtf/homo_sapiens/Homo_sapiens.GRCh38.92.gtf.gz # ref.gtf
   com_ref=Homo_sapiens.GRCh38.92.gtf
   ref_name=ref.gtf
   download_ref 
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.primary_assembly.fa.gz # ref1.fa
+  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz # ref1.fa
+  com_ref=Homo_sapiens.GRCh38.dna.primary_assembly.fa
+  ref_name=ref1.fa
+  download_ref
+  ftpsite=https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.92.zip # snpEff
+  com_ref=snpEff_v4_3_GRCh38.92
+  ref_name=
+  download_ref
+  ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.hg38.vcf.gz # dpsnp.vcf
+  com_ref=dbsnp_138.hg38.vcf
+  download_ref
+  organize_ref
+  fi
+####################################################################################################################
+#  Mouse FILL THESE IN
+####################################################################################################################
+  if  [ "$human" == "2" ]; then
+  ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch38_snp_tran.tar.gz
+  set_ref=grch37_snp_tran
+  HISAT_ref
+  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz # ref.fa
+  com_ref=Homo_sapiens.GRCh38.cdna.all.fa
+  ref_name=ref.fa
+  download_ref
+  ftpsite=ftp://ftp.ensembl.org/pub/release-92/gtf/homo_sapiens/Homo_sapiens.GRCh38.92.gtf.gz # ref.gtf
+  com_ref=Homo_sapiens.GRCh38.92.gtf
+  ref_name=ref.gtf
+  download_ref 
+  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz # ref1.fa
+  com_ref=Homo_sapiens.GRCh38.dna.primary_assembly.fa
   ref_name=ref1.fa
   download_ref
   ftpsite=https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.92.zip # snpEff
@@ -679,47 +634,34 @@ then
   organize_ref
   fi
 ####################################################################################################################
-#  Rat
+#  hg19 FILL THESE IN
 ####################################################################################################################
-  if  [ "$human" == "3" ]; then
-  ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/rn6.tar.gz
-  set_ref=rn6
+  if  [ "$ref_set" == "2" ]; then
+  ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch38_snp_tran.tar.gz
+  set_ref=grch37_snp_tran
   HISAT_ref
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/rattus_norvegicus/cdna/Rattus_norvegicus.Rnor_6.0.cdna.all.fa.gz # ref.fa
+  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz # ref.fa
+  com_ref=Homo_sapiens.GRCh38.cdna.all.fa
   ref_name=ref.fa
   download_ref
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/gtf/mus_musculus/Mus_musculus.GRCm38.92.gtf.gz # ref.gtf
+  ftpsite=ftp://ftp.ensembl.org/pub/release-92/gtf/homo_sapiens/Homo_sapiens.GRCh38.92.gtf.gz # ref.gtf
+  com_ref=Homo_sapiens.GRCh38.92.gtf
   ref_name=ref.gtf
   download_ref 
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/rattus_norvegicus/dna/Rattus_norvegicus.Rnor_6.0.dna.toplevel.fa.gz # ref1.fa
+  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz # ref1.fa
+  com_ref=Homo_sapiens.GRCh38.dna.primary_assembly.fa
   ref_name=ref1.fa
   download_ref
-  ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.hg38.vcf.gz # dpsnp.vcf
-  ref_name=dbsnp.vcf
+  ftpsite=https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.92.zip # snpEff
+  com_ref=snpEff_v4_3_GRCh38.92
+  ref_name=
   download_ref
-  wget https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.92.zip # snpEff
-  gunzip download
+  ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.hg38.vcf.gz # dpsnp.vcf
+  com_ref=dbsnp_138.hg38.vcf
+  download_ref
   organize_ref
   fi
-####################################################################################################################
-#  STAR References
-####################################################################################################################
-  if [ "$aligner" == "2" ];
-  then
-    star --runMode genomeGenerate --genomeDir "$ref_dir_path"/ --genomeFastaFiles "$ref_dir_path"/ref1.fa --sjdbGTFfile "$ref_dir_path"/ref.gtf
-  fi
-####################################################################################################################
-#  Bowtie2 Build References
-####################################################################################################################
-  if [ "$aligner" == "3" ];
-  then
-    bowtie2-build [options]* "$ref_dir_path"/ref1.fa "$ref_dir_path"/genome
-    fi
-  fi
 fi
-####################################################################################################################
-#  Run AIDD
-####################################################################################################################
 if [ "$instance" == 1 ];
 then
   dir_path="$dir_path"
