@@ -1,0 +1,43 @@
+1. Download lit_search from github then uncompress in directory you want to store the data.
+ 
+wget https://github.com/RNAdetective/AIDD/raw/master/lit_search.tar.gz
+tar -vxzf lit_search.tar.gz
+
+2. Add search terms to search_term.csv which is in ~/lit_search/scripts/
+
+3. Run script
+
+bash ~/lit_search/scripts/litsearch.sh /home/user/lit_search topic1 topic2 topic3 topic4 topic5 topic6
+
+topics 1-6 are the main topics for example ZIKV or WNV these are the terms that are used to search the database.  For example ZIKV with return all pubmed records with ZIKV or any of its associated Mesh Terms.  This will create a abstract file and then the search_term.csv is the terms that you want to search the abstracts for. For example you may want to search for brain OR neuro OR CNS so you enter these terms in the search_term.csv the script will then search for these terms in the abstracts of the articles you already collected.
+
+When the script is done you will find all results in the lit_search folder.
+
+each topic entered will have its own folder
+with files in the main folder 
+topicabPMID.csv is a list of all PMIDs of the articles found with abstracts.
+topicabstracts is a text file with all the abstracts for that topic
+topicstats.csv is a list of PMID country and year for the articles downloads for the topic
+summary.txt is a summary file from the article retrieval from pubmed.
+There is a folder under each topic called final
+In here you will find a folder for each search term you entered to search the abstracts with
+This folder contains a csv file and tiff file for each search term you entered
+The csv file is the total number of PMID that had you search term in the abstract and the second row is the total number of articles with abstracts that you downloaded minus the abstracts with your search word totaling the number of articles not containing your word.
+There is a also a folder in this directory final
+In this folder you will find a list for each search term you entered containing all the PMID of abstracts with your search term in them.
+This is also a list and piechart for all the search terms added together from the search_terms.csv files and named with the first search term in the search_terms.csv file.
+
+in the main lit_search folder there is also a folder called final
+in this folder there is a folder for each set of search terms in the search_terms.csv file
+in that folder are count files saying how many articles contained at least one of your search terms in search_terms.csv there are a list of PMID for each main topic as well as the topic_counts all together and a .tiff file with the pie chart for how many articles out of the articles downloaded for each topic mention your topic at least once.
+
+
+
+in the main lit_search folder called topic_stats 
+In this folder there are 
+
+
+
+ 
+ 
+

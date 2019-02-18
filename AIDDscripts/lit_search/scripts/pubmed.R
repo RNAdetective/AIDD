@@ -20,7 +20,7 @@ pubmed_data <- data.frame('PMID'=PMID(records),'Title'=ArticleTitle(records),'Ab
 pubmed_data$Abstract <- as.character(pubmed_data$Abstract) 
 pubmed_data$Abstract <- gsub(",", " ", pubmed_data$Abstract, fixed = TRUE) #removes commas in abstract
 write.csv(pubmed_data, abs) #writes abstract text file
-pubmed_data2 <- data.frame('PMID'=PMID(records),'Country'=Country(records),'YearA'=YearAccepted(records),'Journal'=Title(records)) #pulls out other stats
+pubmed_data2 <- data.frame('PMID'=PMID(records),'Country'=Country(records),'YearA'=YearAccepted(records),'YearR'=YearReceived(records)) #pulls out other stats
 write.csv(pubmed_data2, info) #writes summary stats file
 total <- nrow(pubmed_data2)
 
