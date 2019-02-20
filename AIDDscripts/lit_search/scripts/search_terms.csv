@@ -1,5 +1,6 @@
-neuro
-CNS
-brain
-nerve
-spinal
+neurological_terms,congenital_terms
+neurological,congenital
+brain,TORCH
+spine,fetus
+CNS,pregnancy
+astrocyte,development
