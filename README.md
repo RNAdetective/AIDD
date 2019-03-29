@@ -174,7 +174,7 @@ ___
 
 ## AML with RMD for R-studio
 
-To run the tutorial open R studio and find the AIDDtutorial.rmd file under /home/user/AIDD/AIDDtutorial.rmd.  Run the chunks from begining to end.  This tutorial explains each step of the AIDD pipeline and allow for user to change code as necessry.
+To run the tutorial open R studio and find the AIDDtutorial.rmd file under /home/user/AIDD/AIDD/AIDDtutorial.rmd.  Run the chunks from begining to end.  This tutorial explains each step of the AIDD pipeline and allow for user to change code as necessry.
 The tutorial allows for both understanding of the tools and statistical analysis performed by AIDD and can be used as an educational tool for hands on teaching of bioinformatic analysis of RNA sequencing data.
 
 ___
@@ -199,9 +199,9 @@ Step 2: Follow the instructions on the desktop.
 Step 3: copy and paste the following command into the command prompt
 
 ```
-bash /home/user/AIDD/AIDD/AIDD.sh
+bash /home/user/AIDD/AIDD/AIDD.sh 1 /home/user /media/AIDD
 ```
-Step 4: Follow on screen prompts asking a few more detail about your specific experiment.  If you would like to run with our predefined defaults select that in the beginning.
+Step 4: AIDD will run with default parameters and options if you want to change anything please see the manual for more details
 
 AIDD will then run telling what it is doing at each step along the way.  When it is complete it will have all results in your shared folder organized by type of data.  See the manual for more information about folder system structure.  
 
