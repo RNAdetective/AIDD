@@ -157,7 +157,7 @@ In the main folder you will also find files summarizing you experimental conditi
 readdepth bargraph showing all the samples read depths to use if you need to filter out low read samples before running ExToolset
 A bar graph showing how many samples are in each condition in your PHENO_DATA file as well as the corresponding csv files used to generate bar graphs
 __________________________
-Detailed descriptions of scripts used in the pipeline
+Detailed descriptions of scripts used in the pipeline in the AIDD/AIDD directory
 
 AIDD.sh
 
@@ -211,7 +211,60 @@ Again this section should not be altered if you have fastq files already on your
 #samtobam
   this stem will convert readable sam files to computer formated bam files for future steps
 #assembly is next and currently stringtie is the only assembler in the future cufflinks may be added but only for miRNA analysis alone.
+## the next sections perform variant calling for determining RNA editing and are modeled around the best practices outlined by GATK (https://gatkforums.broadinstitute.org/gatk/discussion/3892/the-gatk-best-practices-for-variant-calling-on-rnaseq-in-full-detail) as of March 2019.
+  ##The first part of the variant calling get the assembled bam file organized and formatted correctly for use with GATK and uses picard tools.
+    the file is annotated for filtering prep_bam_2
+    the file is reorganized for proper chromosome order prep_bam_3
+    the file is then inspected for alignment and qulaity control summaries including read depth and length these are stored in the quality control folder
+    the duplicates in the file are marked and filtered using markduplicates a picard tool
+    now the files are ready for the actual variant calling
+  ##The second part of variant calling uses GATK haplotype caller to find variants
+    after haplotype calling then using best practices defined filters we attempt to filter false positive and negatives using predefined quality control measures
+    then a new bam file is created by annotating the original file with those variants found and there appropriate quality control measures
+  ##The third part of variant calling takes the newly annotation variant called bam file and re runs haplotype and filtering to remove false positives resulting in the final vcf files with true RNA editing events
+  ##The forth part of variant calling uses the final vcf files as input for snpEff which predicts variants effect on protein structure and function
+    currently only protein coding RNA editing is analysed with AIDD although you can take the raw vcf files and use them to look at non-coding regions outside of AIDD
+    during this step vcf files are filtered and divided into RNA editing type AG is just A to G subs TC is just T to C subs CT is just C to T subs and G to A is just G to A subs ADARediting combines AG and TC and APOBECediting combines CT and GA then all the variants found are in the All file
+    this is important if you only want to look at ADAR editing or APOBEC editing and is used in ExToolset.  If you wish to look at ALL only you can manually remove the other options from the for loop under # impact prediction
+  ##When variant calling is finished The ExToolset will run and generate Results folders as described above.
 
-  
-  
-  
+AIDD/AIDD/ExToolset/ExToolset.sh
+
+The first section defines all the functions used in the ExToolset these should not be altered or ExToolset will not run
+
+#creates directories, create config files and add condition variables are already done since you ran AIDD if you wish to run ExToolset on existed data not generated from AIDD then please follow the instructions here https://github.com/RNAdetective/ExToolset
+#moves available matrix and or raw data files is again an option for when ExToolset is run alone not as part of the AIDD pipeline
+#create file check files is the first section that is done with AIDD pipeline
+  this section checks for gtf files, alignment summary csv files, and snpEff output files for each RNAediting type
+  if you are missing files the screen will print out the error message saying which file to check and replace. The summary csv files can be found in the quality control directory mentioned earlier
+  you will need to replace missing files by re running AIDD with just those samples because ExToolset can not run without all files for all samples
+#create alignment summary file for normalization in extoolset this will summarize all alignments for all samples in one matrix and create bar graphs showing these results
+#creates GTEX 
+  this creates the gene and transcript TPM matrixes these can be changed to raw FPKM or coverage counts by altering the python script used as described previously
+  it will also create gene or transcript of interest files based on user defined gene lists they are interested in as well as the predifined genes and transcripts involved in the excitome
+  it will then combine all of these into one file the GTEX_count_matrix found in the results directory
+#global substitution variant matrix G_VEX matrix.
+  this next section takes the raw snpEff output and extract the appropriate nucleotide or amino_acid substitution matrices and combines then into one matrix for all samples
+  this G_VEX matrix is then normalized by dividing each sample count by it's read depth this will control for varying read depths between samples
+#impact of RNA editing matrix I_VEX matrix
+  this step will takes raw snpEff impact prediction files and creates one matrix with both gene level and transcript level detail for high impact and moderate impact variants as defined by snpEff usual manual
+  The user can change these to look at other columns of data from the orginal snpEff output and for example can look at 5 prime editing only by changing high_impact to the correct column name and then changes the following variable col_num= to the appropriate column numbers from the snpEff file
+  when finished this creates one matrix file with all these counts summarized for each sample across each condition (gene or transcript and high or moderate impact for each snptype All ADAR editing APOBEC editing)  Again the for loop for snptype can be changed to include only the type needed
+#Runs extoolset for correlation summary 
+  this will generate pearsons correlations for each experiment
+    add details of Rscript if want another type of correlation
+  This will also make one csv file summarized all the correlation coefficient and p-values for each variable run (the variables are the columns in the all_count_matrix.csv file.
+#Impact gene list prep
+  this will create gene names stored in the genelist folder described above.
+  these can be used for pathway analysis with outside tools like DAVID or panther to find pathways or process effected by RNA editing
+  it also creates a summary file of total number of impacted genes or transcripts found in each condition.
+  There are also gene lists with counts of how many variants were found in each gene that can be used to create charts outside of AIDD
+#The last section runs DESeq2 for each condition in PHENO_DATA.csv file
+
+For more details on how the scripts work please see the AIDDtutorial.Rmd files located in AIDD/AIDD directory
+This tutorial breaks down each step of the pipeline in Rmd format and each chunk can be run seperately and editing parameters or other manually changes to the scripts can be tested here.
+If you do not know how much your sequences need to be trimmed before starting this can be used to download a sample from the experiment and the generated fastqc report can be used to determine start and end of trimming if it is not 12 and 97 like what is used for 100 base pair reads as the default in AIDD
+This tutorial can also be used in a classroom setting to teach basic RNA sequencing analysis and RNA editing detection bioinformatic analysis with minimal prior knowledge of RNA seq bioinformatic analysis
+
+
+
