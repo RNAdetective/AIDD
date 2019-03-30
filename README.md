@@ -150,7 +150,7 @@ and wait for it to finish downloading before moving on to the next steps
    click continue when the warning message pops up
    then click continue
    userMake sure you use username = user and password = password you can also select to log in automatically but it really does not make a difference then click continue
- * Now ubuntu is installing when it is finished it will ask you to reset even if you follow the prompt for a system reset you still need to manually close you VM by clicking on the X and make sure you poweroff not save the state and re-start but before you restart do step 4.
+ * Now ubuntu is installing when it is finished it will ask you to reset even if you follow the prompt for a system reset you still need to manually close you VM by clicking on the X and make sure you poweroff not save the state and re-start but before you restart do step
  
 4. Make sure you have set aside enough RAM and CPU to run the machine you must select at least 6G of RAM and 1CPU to run at bare minimum (although at 16G is recommended to ensure accurate variant calling).  
 
@@ -162,9 +162,9 @@ and wait for it to finish downloading before moving on to the next steps
 
 * click on the devices tab and from the drop down menu select install
 
-5.  Once you load your new virtual box open command prompt.  When your VM starts it will have a pop up just click next until you can click done then this will close that window. If it asks you to do updates click on no. Then from the devices tab select insert guest additions CD image. When it asks if you would like to run the CD image click yes then enter the password for user then click authenticate.  Let the command run then when prompt hit return to close the window.
+6.  Once you load your new virtual box open command prompt.  When your VM starts it will have a pop up just click next until you can click done then this will close that window. If it asks you to do updates click on no. Then from the devices tab select insert guest additions CD image. When it asks if you would like to run the CD image click yes then enter the password for user then click authenticate.  Let the command run then when prompt hit return to close the window.
 
-6. Next you need to get and run AIDD Instance setup scripts from github.  Download scripts by copy and paste the following command into the terminal
+7. Next you need to get and run AIDD Instance setup scripts from github.  Download scripts by copy and paste the following command into the terminal
 
 ```
 wget https://github.com/RNAdetective/AIDD/raw/master/Instancesetup.tar.gz
@@ -175,7 +175,7 @@ bash /home/user/Instancesetup/set_up.sh /home/user
 ```
 you can change the home dirctory of where to put the AIDD folder for scripts and indexes this is useful when creating a instance that has a different user name then user
 
-6. The program will run and ask you for the following prompts
+8. The program will run and ask you for the following prompts
 
 * Follow instructions while setup runs 
     first it will ask you to supply a password
@@ -186,7 +186,7 @@ you can change the home dirctory of where to put the AIDD folder for scripts and
     then next pop up will ask you to hit enter
     it finish after it downloads the AIDD scripts from github.
 
-Close the virtualbox and restart again.
+Close the virtualbox and restart again make sure you go back and create a shared folder if you didnot make your virtual harddrive big enough to store all your data.
 
 ___
 
@@ -205,13 +205,13 @@ Step 1: Make sure AIDD virutalbox is up an running following the steps outlined 
 
 Step 2: Follow the instructions on the desktop.
 * 1.) Open PHENO_DATA.csv on the desktop and fill out for your experiment.
-        * On the desktop you will find a file PHENO_DATA.csv add your experimental information into this file
-        * column 1: the sample names for each sample you wish to use to label graphs and tables for the results.
-        * column 2: the SRA run identification number or the name of the .fastq file you are using from non-public data.
-        * column 3: this is the main condition for the experiment for example AML or healthy (make sure to use this term instead of control). DO NOT use the word control because DESeq2 will not accept this as a condition.
-        * column 4: this is the sample number used to create matrix it is just sample01-sample what ever your last sample number is. Make sure if you have over a hundred samples that you use sample001. 
-        * column 5-6: these are addition conditions to be with multivariate analysis if you do not have any additional conditions leave them empty.
-        * Now save the new data with the same name on the desktop.
+        *On the desktop you will find a file PHENO_DATA.csv add your experimental information into this file
+        *column 1: the sample names for each sample you wish to use to label graphs and tables for the results.
+        *column 2: the SRA run identification number or the name of the .fastq file you are using from non-public data.
+        *column 3: this is the main condition for the experiment for example AML or healthy (make sure to use this term instead of control). DO NOT use the word control because DESeq2 will not accept this as a condition.
+        *column 4: this is the sample number used to create matrix it is just sample01-sample what ever your last sample number is. Make sure if you have over a hundred samples that you use sample001. 
+        *column 5-6: these are addition conditions to be with multivariate analysis if you do not have any additional conditions leave them empty.
+        *Now save the new data with the same name on the desktop.
 
 
 * 2.) Insert any gene lists of interest into the insert_gene_of_interest folder on the desk top.  Make .csv files with the first column numbered 1-X.  Then in the second column list your genes you want on one bar graph.  Also open GOI.csv and add to the list of genes any you want line graph count graphs for as well as a included in the table of gene of interest results.
