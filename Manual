@@ -185,8 +185,15 @@ you can change the home dirctory of where to put the AIDD folder for scripts and
     then next pop up will ask you to hit enter
     it finish after it downloads the AIDD scripts from github.
 
-Close the virtualbox and restart again make sure you go back and create a shared folder if you didnot make your virtual harddrive big enough to store all your data.
+Close the virtualbox and restart again Then from the devices tab select insert guest additions CD image. When it asks if you would like to run the CD image click yes then enter the password for user then click authenticate.  Let the command run then when prompt hit return to close the window.
 
+Then paste the following command into the terminal to add shared folders to your virtual image
+
+```
+sudo usermod -a -G group user
+```
+Then you should shutdown the VM
+make sure you go back and create a shared folder if you didnot make your virtual harddrive big enough to store all your data also make sure you adjust the processor and RAM according to the directions above to the right settings for AIDD and then restart the VM to run AIDD.
 ___
 
 ## AML with RMD for R-studio
