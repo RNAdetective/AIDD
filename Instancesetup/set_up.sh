@@ -22,7 +22,7 @@ rm "$tool".zip
 }
 sudo apt-get --yes update
 sudo apt-get --yes upgrade
-for tool in sra-toolkit fastx-toolkit samtools fastqc csvtools r-base-core python2.7 default-jdk oracle-java8-installer ;
+for tool in sra-toolkit fastx-toolkit samtools fastqc csvtools r-base-core python2.7 default-jdk oracle-java8-installer gdebi-core  libcurl4-openssl-dev libxml2-dev libssl-dev r-cran-rmysql libmysql++-dev ;
 do
   intool=tool
   install_tool # installs tools
@@ -30,6 +30,8 @@ done
 sudo apt-add-repository ppa:webupd8team/java #this updates java for the picard tool  
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1 # this insalls both versions of python
 sudo apt-get --yes install build-essential python2.7-dev python-htseq
+wget https://s3.amazonaws.com/rstudio-dailybuilds/rstudio-xenial-1.1.463-amd64.deb
+rm rstudio-xenial-1.1.463-amd64.deb
 new_dir="$home_dir"/AIDD
 create_dir
 AIDDs="$home_dir"/AIDD/AIDD/
@@ -93,3 +95,6 @@ toolz
 cp "$tool_dir"/hisat2-2.1.0/* "$tool_dir_bin"
 gsettings set org.gnome.desktop.background picture-uri "file://"$AIDDs"/AIDDlogo.jpg"
 rm -r "$home_dir"/AIDDscripts
+cd
+sudo Rscript "$home_dir"/Instancescripts/set_up.R
+sudo usermod -G vboxsf -a user
