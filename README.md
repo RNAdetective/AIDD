@@ -186,17 +186,7 @@ you can change the home dirctory of where to put the AIDD folder for scripts and
     then next pop up will ask you to hit enter
     it finish after it downloads the AIDD scripts from github.
 
-7. once the operating system and programs are ready copy and paste the following to run the R package setup
-```
-##this first command runs command at the root
-
-sudo su
-
-##copy and paste the following in the root directory prompt
-
-Rscript /home/user/Instancesetup/install_packages.R
-```
-Close the virtualbox and restart again.  Now you should be able to click on view and click on the last option virtual screen 1.  A side bar will pop up and you can select the proper screen resolution for your computer. You can hold right ctrl and press c to adjust to fill mode then make the window larger.  This right ctrl + c with toggle between these two views.
+Close the virtualbox and restart again.
 
 ___
 
@@ -215,6 +205,14 @@ Step 1: Make sure AIDD virutalbox is up an running following the steps outlined 
 
 Step 2: Follow the instructions on the desktop.
 * 1.) Open PHENO_DATA.csv on the desktop and fill out for your experiment.
+        * On the desktop you will find a file PHENO_DATA.csv add your experimental information into this file
+        * column 1: the sample names for each sample you wish to use to label graphs and tables for the results.
+        * column 2: the SRA run identification number or the name of the .fastq file you are using from non-public data.
+        * column 3: this is the main condition for the experiment for example AML or healthy (make sure to use this term instead of control). DO NOT use the word control because DESeq2 will not accept this as a condition.
+        * column 4: this is the sample number used to create matrix it is just sample01-sample what ever your last sample number is. Make sure if you have over a hundred samples that you use sample001. 
+        * column 5-6: these are addition conditions to be with multivariate analysis if you do not have any additional conditions leave them empty.
+        * Now save the new data with the same name on the desktop.
+
 
 * 2.) Insert any gene lists of interest into the insert_gene_of_interest folder on the desk top.  Make .csv files with the first column numbered 1-X.  Then in the second column list your genes you want on one bar graph.  Also open GOI.csv and add to the list of genes any you want line graph count graphs for as well as a included in the table of gene of interest results.
 
@@ -229,10 +227,6 @@ Step 3: copy and paste the following command into the command prompt
 ```
 bash /home/user/AIDD/AIDD/AIDD.sh 1 /home/user /media/AIDD
 ```
-Step 4: AIDD will run with default parameters and options if you want to change anything please see the manual for more details
-
-AIDD will then run telling what it is doing at each step along the way.  When it is complete it will have all results in your shared folder organized by type of data.  See the manual for more information about folder system structure.  
-
 ___
 
 ## Pipeline Flow Chart
