@@ -239,6 +239,7 @@ ___
 ![Screenshot](flow_chart.png)
 ## Built With
 * [SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
+* [Fastx-Toolkit] (http://hannonlab.cshl.edu/fastx_toolkit/)
 * [Samtools] (http://samtools.sourceforge.net/)
 * [HISAT2] (https://ccb.jhu.edu/software/hisat2/index.shtml)
 * [STAR] (https://github.com/alexdobin/STAR)
