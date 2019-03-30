@@ -1,25 +1,5 @@
-,Run,condition,sample,t_name2
-NTSC_1,SRR1044666,Nuclear Transfer Stem Cell,sample01,NTSC_1
-NTSC_2,SRR1044667,Nuclear Transfer Stem Cell,sample02,NTSC_2
-NTSC_3,SRR1044668,Nuclear Transfer Stem Cell,sample03,NTSC_3
-NTSC_4,SRR1044669,Nuclear Transfer Stem Cell,sample04,NTSC_4
-HESC_1,SRR1044670,Human Embryonic Stem Cell,sample05,HESC_1
-HESC_2,SRR1044671,Human Embryonic Stem Cell,sample06,HESC_2
-IPSC_1,SRR1044672,induced Pluripotent Stem Cell,sample07,IPSC_1
-IPSC_2,SRR1044673,induced Pluripotent Stem Cell,sample08,IPSC_2
-IPSC_3,SRR1044674,induced Pluripotent Stem Cell,sample09,IPSC_3
-IPSC_4,SRR1044675,induced Pluripotent Stem Cell,sample10,IPSC_4
-Fibro_1,SRR1044676,Human Dermal Fibroblast,sample11,Fibro_1
-NTSC_5,SRR1268166,Nuclear Transfer Stem Cell,sample12,NTSC_5
-NTSC_6,SRR1268167,Nuclear Transfer Stem Cell,sample13,NTSC_6
-NTSC_7,SRR1268168,Nuclear Transfer Stem Cell,sample14,NTSC_7
-NTSC_8,SRR1268169,Nuclear Transfer Stem Cell,sample15,NTSC_8
-HESC_3,SRR1268170,Human Embryonic Stem Cell,sample16,HESC_3
-HESC_4,SRR1268171,Human Embryonic Stem Cell,sample17,HESC_4
-IPSC_5,SRR1268172,induced Pluripotent Stem Cell,sample18,IPSC_5
-IPSC_6,SRR1268173,induced Pluripotent Stem Cell,sample19,IPSC_6
-IPSC_7,SRR1268174,induced Pluripotent Stem Cell,sample20,IPSC_7
-IPSC_8,SRR1268175,induced Pluripotent Stem Cell,sample21,IPSC_8
-IPSC_9,SRR1268176,induced Pluripotent Stem Cell,sample22,IPSC_9
-IPSC_10,SRR1268177,induced Pluripotent Stem Cell,sample23,IPSC_10
-Fibro_2,SRR1268178,Human Dermal Fibroblast,sample24,Fibro_2
+sampname,run,condition,sample,geneotype,celltype
+ZIKV_1,SRR3191542,ZIKV,sample01,A2,NPC
+ZIKV_2,SRR3191543,ZIKV,sample02,A2,NPC
+mock_1,SRR3191544,mock,sample03,WT,NPC
+mock_2,SRR3191545,mock,sample04,WT,NPC
