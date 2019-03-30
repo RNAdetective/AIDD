@@ -118,7 +118,7 @@ C.	If you choose the internal drive use these instructions to add an internal ha
 
 ___
 
-### Creating personal VM to run AIDD 
+### Creating personal VM to run AIDD or you can follow the same instructions to create an ubuntu instance to run on server such as amazon just start with step 5 and enter that command into your previously set up instance version of ubuntu 18 instance
 (advanced users who want to make adjustment to default settings)
 If you prefer to create your own virtualbox instead of downloading the premade image follow this next series of steps.  But you do not have to do these if you are going to use the premade virutalbox.
 
@@ -126,6 +126,10 @@ If you prefer to create your own virtualbox instead of downloading the premade i
 ```
 http://releases.ubuntu.com/18.04/
 ```
+if you wish to create a new VM click the desktop image
+if you wish to create a instance then click the instance image
+and wait for it to finish downloading before moving on to the next steps
+
 2. Go to create new machine in the oracle virtual machine window by clicking the new button
 
 * select a name, put in linux and ubuntu 64 
@@ -136,27 +140,48 @@ http://releases.ubuntu.com/18.04/
  
  * This will tell VM were to get install files from.
  * then install ubuntu following prompts until it is done.
- * Hit Continue make sure you erase disk options and keep clicking continue
- * Make sure you use username = user and password = password
- * Even if you follow the prompt for a system reset you still need to manually close you VM and re-start.
+   first click install
+   then use default english highlighted
+   then select minimal installation and make sure third-party software is turned off then click continue
+   select the option erase disk and install ubuntu then click install now
+   click continue when the warning message pops up
+   then click continue
+   userMake sure you use username = user and password = password you can also select to log in automatically but it really does not make a difference then click continue
+ * Now ubuntu is installing when it is finished it will ask you to reset even if you follow the prompt for a system reset you still need to manually close you VM by clicking on the X and make sure you poweroff not save the state and re-start but before you restart do step 4.
  
-4. Make sure you have set aside enough RAM and CPU to run the machine you must select at least 4G of RAM and 1CPU to run at bare minimum.  
+4. Make sure you have set aside enough RAM and CPU to run the machine you must select at least 6G of RAM and 1CPU to run at bare minimum (although at 16G is recommended to ensure accurate variant calling).  
 
-* (Although to run STAR aligner option you must select at least 40G of RAM).  
+* Please note to run STAR aligner option you must select at least 40G of RAM.  
 * Check the settings system.  
-* Then check motherboard and processor make sure all the blue markers are in the green for your machine.  
+* Then check motherboard and processor make sure all the blue markers are in the green for your machine if not then you need to find a computer with the required specs to run AIDD fully.  
 
-5.  Once you load your new virtual box open command prompt and copy paste the following commands
+5. Now restart your newly creaeted VM
+
+* click on the devices tab and from the drop down menu select install
+
+5.  Once you load your new virtual box open command prompt.  When your VM starts it will have a pop up just click next until you can click done then this will close that window. If it asks you to do updates click on no. Then from the devices tab select insert guest additions CD image. When it asks if you would like to run the CD image click yes then enter the password for user then click authenticate.  Let the command run then when prompt hit return to close the window.
+
+6. Next you need to get and run AIDD Instance setup scripts from github.  Download scripts by copy and paste the following command into the terminal
+
 ```
-wget https://github.com/RNAdetective/AIDD/raw/AIDDv2.0.0/Instancesetup.tar.gz
+wget https://github.com/RNAdetective/AIDD/raw/master/Instancesetup.tar.gz
 
 tar -xvzf Instancesetup.tar.gz
 
-bash /home/user/Instancesetup/set_up.sh
+bash /home/user/Instancesetup/set_up.sh /home/user
 ```
+you can change the home dirctory of where to put the AIDD folder for scripts and indexes this is useful when creating a instance that has a different user name then user
+
 6. The program will run and ask you for the following prompts
 
-* Follow instructions while setup runs. 
+* Follow instructions while setup runs 
+    first it will ask you to supply a password
+    oracle will prompt you to hit enter to install updates for java and to install both java versions needed for the pipeline
+    then do you want to continue type y
+    then a pop up window will ask you to hit ok then make sure you pick yes and hit enter
+    When operating system and basic tools are done updating then AIDDtools are downloaded and installed from static copies
+    then next pop up will ask you to hit enter
+    it finish after it downloads the AIDD scripts from github.
 
 7. once the operating system and programs are ready copy and paste the following to run the R package setup
 ```
