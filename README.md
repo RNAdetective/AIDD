@@ -162,7 +162,7 @@ and wait for it to finish downloading before moving on to the next steps
 
 * click on the devices tab and from the drop down menu select install
 
-6.  Once you load your new virtual box open command prompt.  When your VM starts it will have a pop up just click next until you can click done then this will close that window. If it asks you to do updates click on no. Then from the devices tab select insert guest additions CD image. When it asks if you would like to run the CD image click yes then enter the password for user then click authenticate.  Let the command run then when prompt hit return to close the window.
+6.  Once you load your new virtual box open command prompt.  When your VM starts it will have a pop up just click next until you can click done then this will close that window. If it asks you to do updates click on no. 
 
 7. Next you need to get and run AIDD Instance setup scripts from github.  Download scripts by copy and paste the following command into the terminal
 
@@ -186,7 +186,15 @@ you can change the home dirctory of where to put the AIDD folder for scripts and
     then next pop up will ask you to hit enter
     it finish after it downloads the AIDD scripts from github.
 
-Close the virtualbox and restart again make sure you go back and create a shared folder if you didnot make your virtual harddrive big enough to store all your data.
+Close the virtualbox and restart again Then from the devices tab select insert guest additions CD image. When it asks if you would like to run the CD image click yes then enter the password for user then click authenticate.  Let the command run then when prompt hit return to close the window.
+
+Then paste the following command into the terminal to add shared folders to your virtual image
+
+```
+sudo usermod -a -G group user
+```
+Then you should shutdown the VM
+make sure you go back and create a shared folder if you didnot make your virtual harddrive big enough to store all your data also make sure you adjust the processor and RAM according to the directions above to the right settings for AIDD and then restart the VM to run AIDD.
 
 ___
 
