@@ -64,18 +64,20 @@ https://drive.google.com/drive/folders/1v0gus46csuThHODeB2KkA8_NlnGXj2Ta?usp=sha
 * Do the same under the tab processors.  
 * The top green bar is how much CPU to give to virtualbox and this needs to be in the green as well. 
 
-7. Set up ashared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the instructions to create the shared folder AIDD on your computer.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.  You can also run AIDD in batches if space.
+7. Set up ashared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the instructions to create the shared folder AIDD on your computer.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.  You can also run AIDD in batches if space is a concern.
+
+### How to create a shared folder to store results
 
 A.	create a shared folder on your host system.  
 
-* Create your folder on your host system and make sure you give it share permissions.
+* Create your folder on your host system and make sure you give it share permissions to edit files.
 * Name your folder AIDD.
 * Go into the setting in the virtualbox and click on shared folders. 
 * Click on the folder icon with the + sign on top of it.  
 * This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  
 * This will create a pop up window and you can select your new shared folder AIDD. 
-* After you select the folder the pop up will close and you should make sure the auto-mount box is checked and make permanent box if you want the folder to stay shared for more then one session.  
-* Then click ok.  
+* After you select the folder the pop up will close and you should make sure the auto-mount box is checked and the read-only box is not checked 
+* Then click ok.
 * Your new folder should show up on the list then click ok.  
 * Now start the virtual box and you should see you new folder AIDD under devices in the folder menu.  
 * Then use this path for the pipeline it should be /media/sf_AIDD.
@@ -92,7 +94,8 @@ B.	If you choose the external drive make sure you set up the virtual box to reco
 * Make sure you have the right 2.0 or 3.0 option selected and click add device.  
 * Then select the appropriate device from the menu.  
 * Then apply changes and restart the virtualbox.  
-* The final path should be /media/user/whatever you named you external drive
+* The final path should be /media/user/whatever you named you external drive and this needs to be entered in the command prompt instead of /media/AIDD
+* Alternatively you can add a folder to the external drive and then share this folder as described in A
 
 C.	If you choose the internal drive use these instructions to add an internal hard drive space. 
 
