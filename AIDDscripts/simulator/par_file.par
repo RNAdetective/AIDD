@@ -1,7 +1,7 @@
 ## File locations
-REF_FILE_NAME   /home/user/sim/genome_reference/hg19.sorted.gtf
-GEN_DIR         /home/user/sim/simulator/genome_reference/chromFa
-TMP_DIR         /home/user/tmp
+REF_FILE_NAME   /home/user/sim/genome_references/GRCh37.gtf
+GEN_DIR         /home/user/sim/genome_references/chromFa
+TMP_DIR         /home/user/sim/tmp
 
 ## Library preparation
 # Expression
