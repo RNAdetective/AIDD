@@ -97,4 +97,3 @@ gsettings set org.gnome.desktop.background picture-uri "file://"$AIDDs"/AIDDlogo
 rm -r "$home_dir"/AIDDscripts
 cd
 sudo Rscript "$home_dir"/Instancescripts/set_up.R
-sudo usermod -G vboxsf -a user
