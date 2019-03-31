@@ -190,8 +190,22 @@ Close the virtualbox and restart again Then from the devices tab select insert g
 Then paste the following command into the terminal to add shared folders to your virtual image
 
 ```
-sudo usermod -a -G group user
+sudo usermod -a -G vboxsf user
 ```
+
+	# After this script is done copy and paste the following in the terminal to install the Rpackages needed to run AIDD
+
+```
+sudo su
+
+```
+#enter your password
+
+```
+Rscript /home/user/Instancesetup/set_up.R
+
+```
+
 Then you should shutdown the VM
 make sure you go back and create a shared folder if you didnot make your virtual harddrive big enough to store all your data also make sure you adjust the processor and RAM according to the directions above to the right settings for AIDD and then restart the VM to run AIDD.
 ___
