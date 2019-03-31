@@ -191,7 +191,7 @@ Close the virtualbox and restart again Then from the devices tab select insert g
 Then paste the following command into the terminal to add shared folders to your virtual image
 
 ```
-sudo usermod -a -G group user
+sudo usermod -a -G vboxsf user
 ```
 	
 # After this script is done copy and paste the following in the terminal to install the Rpackages needed to run AIDD
