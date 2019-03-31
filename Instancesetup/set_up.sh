@@ -22,7 +22,17 @@ rm "$tool".zip
 }
 sudo apt-get --yes update
 sudo apt-get --yes upgrade
-for tool in sra-toolkit fastx-toolkit samtools fastqc csvtools r-base-core python2.7 default-jdk oracle-java8-installer gdebi-core  libcurl4-openssl-dev libxml2-dev libssl-dev r-cran-rmysql libmysql++-dev ;
+##this updates java for the picard tool
+sudo apt install --yes default-jdk
+sudo apt-add-repository ppa:webupd8team/java
+sudo apt-get install oracle-java8-installer 
+##this insalls python
+sudo apt-get --yes install python2.7
+sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
+sudo apt-get --yes install build-essential python2.7-dev python-htseq
+sudo apt-get install python-pip
+pip install biopython --upgrade
+for tool in sra-toolkit fastx-toolkit samtools fastqc csvtools r-base-core gdebi-core  libcurl4-openssl-dev libxml2-dev libssl-dev r-cran-rmysql libmysql++-dev ;
 do
   intool="$tool"
   install_tool # installs tools
