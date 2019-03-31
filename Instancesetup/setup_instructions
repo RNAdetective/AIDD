@@ -60,6 +60,18 @@ you can change the home dirctory of where to put the AIDD folder for scripts and
     When operating system and basic tools are done updating then AIDDtools are downloaded and installed from static copies
     then next pop up will ask you to hit enter
     it finish after it downloads the AIDD scripts from github.
+	# After this script is done copy and paste the following in the terminal to install the Rpackages needed to run AIDD
+
+```
+sudo su
+
+```
+#enter your password
+
+```
+Rscript /home/user/Instancesetup/set_up.R
+
+```
 
 Close the virtualbox and restart again Then from the devices tab select insert guest additions CD image. When it asks if you would like to run the CD image click yes then enter the password for user then click authenticate.  Let the command run then when prompt hit return to close the window.
 
