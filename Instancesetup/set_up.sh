@@ -31,6 +31,7 @@ sudo apt-add-repository ppa:webupd8team/java #this updates java for the picard t
 sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1 # this insalls both versions of python
 sudo apt-get --yes install build-essential python2.7-dev python-htseq
 wget https://s3.amazonaws.com/rstudio-dailybuilds/rstudio-xenial-1.1.463-amd64.deb
+sudo gdebi rstudio-xenial-1.1.463-amd64.deb
 rm rstudio-xenial-1.1.463-amd64.deb
 new_dir="$home_dir"/AIDD
 create_dir
