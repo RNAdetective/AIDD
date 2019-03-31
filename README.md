@@ -258,6 +258,7 @@ ___
 
 ## Pipeline Flow Chart
 ![Screenshot](flow_chart.png)
+
 ## Built With
 * [SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
 * [Fastx-Toolkit] (http://hannonlab.cshl.edu/fastx_toolkit/)
