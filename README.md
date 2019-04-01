@@ -194,7 +194,7 @@ Then paste the following command into the terminal to add shared folders to your
 sudo usermod -a -G vboxsf user
 ```
 	
-# After this script is done copy and paste the following in the terminal to install the Rpackages needed to run AIDD
+### After this script is done copy and paste the following in the terminal to install the Rpackages needed to run AIDD
 
 ```
 sudo su
