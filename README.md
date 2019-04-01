@@ -47,11 +47,15 @@ https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_
 
 ### Installing
 
-3. Download our ready to go AIDD virtualbox.
+3. Download our ready to go AIDD virtualbox There are 6 zip files labeled .001-.006 make sure you download all of them. They are divided into 2G size files to aid in downloading.
+
 ```
 https://drive.google.com/drive/folders/1XOWh9H-v1nA6_Vl53PI6G2gKaVoZX6ls?usp=sharing
 ```
+
 4. Uncompress all 6 files.
+
+  This can be done by highlighting all six at once and right clicking and selecting the option extract here. Then when finished you will have a folder called AIDD in whichever directory you were currently in (Note you need to have 7zip installed to do the uncompression this way).
 
 5. Open Virtualbox manager and under the menu Machine select add.  A new pop window will allow you to find the file you just uncompressed.  Then click open.  AIDD will now appear on your list of virtualboxes.
 
