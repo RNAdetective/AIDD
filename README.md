@@ -47,17 +47,41 @@ https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_
 
 ### Installing
 
-3. Download our ready to go AIDD virtualbox There are 6 zip files labeled .001-.006 make sure you download all of them. They are divided into 2G size files to aid in downloading.
+3. Download our ready to go AIDD virtualbox from the following link.
 
 ```
 https://drive.google.com/drive/folders/1XOWh9H-v1nA6_Vl53PI6G2gKaVoZX6ls?usp=sharing
 ```
 
-4. Uncompress all 6 files.
+4. Uncompress the file.
 
-  This can be done by highlighting all six at once and right clicking and selecting the option extract here. Then when finished you will have a folder called AIDD in whichever directory you were currently in (Note you need to have 7zip installed to do the uncompression this way).
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step1.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+
+ When finished you will have a folder called AIDD in whichever directory you were currently in (Note you need to have 7zip installed to do the uncompression this way).
 
 5. Open Virtualbox manager and under the menu Machine select add.  A new pop window will allow you to find the file you just uncompressed.  Then click open.  AIDD will now appear on your list of virtualboxes.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step2.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+	
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step3.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+	
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step4.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
 
 6. Make sure you check your setting for the machine and you have the correct amount of resources allocated to the virtualbox including RAM and CPU.
 
@@ -68,6 +92,18 @@ https://drive.google.com/drive/folders/1XOWh9H-v1nA6_Vl53PI6G2gKaVoZX6ls?usp=sha
 * Do the same under the tab processors.  
 * The top green bar is how much CPU to give to virtualbox and this needs to be in the green as well. 
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step5.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step6.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+	
 7. Set up ashared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the instructions to create the shared folder AIDD on your computer.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.  You can also run AIDD in batches if space is a concern.
 
 ### How to create a shared folder to store results
@@ -78,13 +114,55 @@ A.	create a shared folder on your host system.
 * Name your folder AIDD.
 * Go into the setting in the virtualbox and click on shared folders. 
 * Click on the folder icon with the + sign on top of it.  
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step7.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+
 * This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  
 * This will create a pop up window and you can select your new shared folder AIDD. 
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step8.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+	
+* Make sure you share your folder in windows right click, then select properties from the drop down menu then click the sharing tab and click the share button
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step9.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+	
+	<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step10.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+
 * After you select the folder the pop up will close and you should make sure the auto-mount box is checked and the read-only box is not checked 
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step11.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
+
 * Then click ok.
 * Your new folder should show up on the list then click ok.  
 * Now start the virtual box and you should see you new folder AIDD under devices in the folder menu.  
 * Then use this path for the pipeline it should be /media/sf_AIDD.
+
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step12.jpg">
+ </p>
+ 
+<p align="center">Automated Isoform Diversity Detector<p align="center">
 
 ___
 
