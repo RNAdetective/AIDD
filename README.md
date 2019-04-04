@@ -58,7 +58,7 @@ https://drive.google.com/drive/folders/1XOWh9H-v1nA6_Vl53PI6G2gKaVoZX6ls?usp=sha
 4. Uncompress the file.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step1.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step1.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
@@ -68,19 +68,19 @@ https://drive.google.com/drive/folders/1XOWh9H-v1nA6_Vl53PI6G2gKaVoZX6ls?usp=sha
 5. Open Virtualbox manager and under the menu Machine select add.  A new pop window will allow you to find the file you just uncompressed.  Then click open.  AIDD will now appear on your list of virtualboxes.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step2.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step2.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
 	
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step3.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step3.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
 	
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step4.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step4.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
@@ -95,13 +95,13 @@ https://drive.google.com/drive/folders/1XOWh9H-v1nA6_Vl53PI6G2gKaVoZX6ls?usp=sha
 * The top green bar is how much CPU to give to virtualbox and this needs to be in the green as well. 
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step5.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step5.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step6.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step6.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
@@ -118,7 +118,7 @@ A.	create a shared folder on your host system.
 * Click on the folder icon with the + sign on top of it.  
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step7.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step7.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
@@ -127,7 +127,7 @@ A.	create a shared folder on your host system.
 * This will create a pop up window and you can select your new shared folder AIDD. 
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step8.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step8.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
@@ -135,13 +135,13 @@ A.	create a shared folder on your host system.
 * Make sure you share your folder in windows right click, then select properties from the drop down menu then click the sharing tab and click the share button
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step9.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step9.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
 	
 	<p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step10.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step10.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
@@ -149,7 +149,7 @@ A.	create a shared folder on your host system.
 * After you select the folder the pop up will close and you should make sure the auto-mount box is checked and the read-only box is not checked 
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step11.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step11.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
@@ -161,7 +161,7 @@ A.	create a shared folder on your host system.
 
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step12.jpg">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step12.png">
  </p>
  
 <p align="center">Automated Isoform Diversity Detector<p align="center">
