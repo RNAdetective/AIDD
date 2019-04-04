@@ -61,7 +61,7 @@ https://drive.google.com/drive/folders/1XOWh9H-v1nA6_Vl53PI6G2gKaVoZX6ls?usp=sha
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step1.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Step 4<p align="center">
 
  When finished you will have a folder called AIDD in whichever directory you were currently in (Note you need to have 7zip installed to do the uncompression this way).
 
@@ -71,19 +71,19 @@ https://drive.google.com/drive/folders/1XOWh9H-v1nA6_Vl53PI6G2gKaVoZX6ls?usp=sha
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step2.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Step 5<p align="center">
 	
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step3.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Step 5b<p align="center">
 	
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step4.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center"Step 5c<p align="center">
 
 6. Make sure you check your setting for the machine and you have the correct amount of resources allocated to the virtualbox including RAM and CPU.
 
@@ -98,13 +98,13 @@ https://drive.google.com/drive/folders/1XOWh9H-v1nA6_Vl53PI6G2gKaVoZX6ls?usp=sha
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step5.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Step 6<p align="center">
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step6.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Step 6b<p align="center">
 	
 7. Set up ashared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the instructions to create the shared folder AIDD on your computer.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.  You can also run AIDD in batches if space is a concern.
 
@@ -121,7 +121,7 @@ A.	create a shared folder on your host system.
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step7.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Step 1 shared folder setup<p align="center">
 
 * This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  
 * This will create a pop up window and you can select your new shared folder AIDD. 
@@ -130,7 +130,7 @@ A.	create a shared folder on your host system.
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step8.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Step 2 shared folder setup<p align="center">
 	
 * Make sure you share your folder in windows right click, then select properties from the drop down menu then click the sharing tab and click the share button
 
@@ -138,13 +138,13 @@ A.	create a shared folder on your host system.
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step9.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Steo 3 shared folder setup<p align="center">
 	
 	<p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step10.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Step 4 shared folder setup<p align="center">
 
 * After you select the folder the pop up will close and you should make sure the auto-mount box is checked and the read-only box is not checked 
 
@@ -152,7 +152,7 @@ A.	create a shared folder on your host system.
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step11.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Step 5 shared folder setup<p align="center">
 
 * Then click ok.
 * Your new folder should show up on the list then click ok.  
@@ -164,7 +164,7 @@ A.	create a shared folder on your host system.
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step12.png">
  </p>
  
-<p align="center">Automated Isoform Diversity Detector<p align="center">
+<p align="center">Step 6 shared folder setup<p align="center">
 
 ___
 
@@ -311,6 +311,12 @@ Step 1: Make sure AIDD virutalbox is up an running following the steps outlined 
 Step 2: Follow the instructions on the desktop.
 * 1.) Open PHENO_DATA.csv on the desktop and fill out for your experiment.
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/pheno.png">
+ </p>
+ 
+<p align="center">Set up your PHENO_DATA file<p align="center">
+
         * a.) On the desktop you will find a file PHENO_DATA.csv add your experimental information into this file
         
         * b.) column 1: the sample names for each sample you wish to use to label graphs and tables for the results.
@@ -327,17 +333,47 @@ Step 2: Follow the instructions on the desktop.
 
 * 2.) Insert any gene lists of interest into the insert_gene_of_interest folder on the desk top.  Make .csv files with the first column numbered 1-X.  Then in the second column list your genes you want on one bar graph.  Also open GOI.csv and add to the list of genes any you want line graph count graphs for as well as a included in the table of gene of interest results.
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/geneinterest.png">
+ </p>
+ 
+<p align="center">insert gene of interest files<p align="center">
+
 * 3.) Do the same for transcript lists of interest into the insert_transcript_of_interest fold making sure you add your transcript of interest to the TOI.csv file.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/transinterest.png">
+ </p>
+ 
+<p align="center">insert transcript of interest files<p align="center">
 
 * 4.) Add any pathway lists to the insert_gene_lists_for_pathways folder on the desktop.  Make a csv file that contains the first column labeled gene numbered 1-X.  Then in the second column labeled gene_name enter as many genes you want to include in that pathway.  Then name the file XXXXXXXX.csv (the name of your pathway) then add this name to the csv file pathway_list in the same format as the others on the list.
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/genepathway.png">
+ </p>
+ 
+<p align="center">insert gene lists you want to perform pathway DE analysis on files<p align="center">
+
 * 5.) repeat this same procedure but for the insert_transcript_lists_for_pathways folder on the desktop.  Making sure to add you pathway names to the csv file names pathwayT_list.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/transpathway.png">
+ </p>
+ 
+<p align="center">insert transcript lists you want to perform pathway DE analysis on files<p align="center">
 
 Step 3: copy and paste the following command into the command prompt
 
 ```
 bash /home/user/AIDD/AIDD/AIDD.sh 1 /home/user /media/AIDD
 ```
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/runAIDD.png">
+ </p>
+ 
+<p align="center">Run AIDD with defaults see manual to customize<p align="center">
+
 ___
 
 ## Pipeline Flow Chart
