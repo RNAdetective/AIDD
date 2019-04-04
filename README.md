@@ -41,8 +41,10 @@ These are the directions to download the premade AIDD virtualbox or to create a 
 https://www.virtualbox.org/wiki/Downloads 
 ```
 2. Download and install the extension pack as well.
+
 ```
 https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_Pack-5.2.6-120293.vbox-extpack
+
 ```
 
 ### Installing
