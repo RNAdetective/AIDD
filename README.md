@@ -307,7 +307,7 @@ ___
 
 To Run AIDD for RNAseq transcriptome diversity discovery copy and paste the following command and follow the on screen prompts.  For detailed instructions as well as ways to edit the script for even more options see the manual.
 
-Step 1: Make sure AIDD virutalbox is up an running following the steps outlined above.
+Step 1: Make sure AIDD virutalbox is up an running following the steps outlined above and make sure that you have opened this github page in AIDD by using the web browser (if you do not open a new web browser in AIDD and continue using the one on your main computer then you will not be able to copy and paste from github into the terminal so you will have to maually type the command into the terminal).
 
 Step 2: Follow the instructions on the desktop.
 * 1.) Open PHENO_DATA.csv on the desktop and fill out for your experiment.
