@@ -1,186 +1,2400 @@
 ---
-title: "AIDDQualityConrol"
+title: "AIDD TUTORIAL"
 output: html_document
 ---
 ##AIDD step 1: create folder directories to store final outputs.
 This creates the folders in the sf_AIDD directory including;
-bashScripts - this folder contains all the bashScripts used during the experiment.  Some of these get edited as AIDD runs.  For anyone wishing to edit the scripts they are found here.
-gene_lits - this folder contains the gene lists used as indexes for AIDD to run.  Any gene list you put in the desktop will be transfered here to use and can be easily stored with the rest of the experimental files for easy access later.
-index - this folder contains annotations and the ensembl gene names matched with ids to convert between the two.
-quality_control - is the QC folder including fastqc to determine quality of reads.  these is also alignment_metrics and insert_metrics which have quality control for the variant calling steps and include important information about quality of alignments.  Recalibration_plots show the quality control performed for variant calling.  there is also a log folder for errors and debugging.
-raw_data - this folder contains gtf files in ballgown and ballgown files to input into ballgown in ballgown_in.  bam_files are the raw bam files used for assembly by stringtie.  The counts folder contains the count matrix for each run with FPKM, TPM, and coverage.  snpEff and vcf_files are the output from variant calling.  snpEff if vcf files and text files from snpEff containing functional information for each variant found.  vcf_files has raw variants, filtered variants, and final variants as both vcf and tables.
-references - is the folder containing all references used during the experiment.
-Results - contains DESeq2 results including both gene level and transcript level.  Calibration is he quality control used for DE.  Counts are the graphs that demonstrate counts and where the gene_count_matrix is stored.  Differential_expression contains the DE up and down regulated tables, top60heatmap and volcano plots and PCA contains the PCA plots for the experiment.
-Rscript - has all Rscript used by AIDD similar to bashScripts.
-tmp - this folder can be deleted when you are done running the experiment.
-transcript_list - same as gene_list but for transcript level analysis.
-variant_list - same as gene_list but for variants and RNA editing.
-work_directory - this can be deleted when AIDD is finished.
+AIDD - where the scripts used for your dataset can be found as well as config files defining all the variables used in the script.
+
+When running AIDD you can select to run default options and that is what is used in this tutorial
+We are downloading our sra files (the other option would be to supply fastq files from an in house experiment)
+We are using paired end read (you can use single however variant calling is only set up for paired end reads)
+We are using HISAT2 and stringtie for alignment and assembly (other options include STAR, bowtie, salmon or kalisto however these are not recommended to use with variant calling due to amount of RAM needed to create the proper reference genomes would far exceed the capabilities of most computers and servers)
+We will also use variant calling at this time (you can run AIDD with just differential expression analysis when running the full pipeline)
+
+This first chunk will get you pheno_data file from the desktop and move it to the working directory that is created (for the tutorial this needs to be a shared folder /media/sf_AIDD on the main computer see the manual or github for more details on how to set this up) it will then create the main file directory system where all the results will be stored.
+
+Throughout the tutorial each chunk will have functions defined first, then any variables used in the script will be defined next and finally the script to run the functions will be last. There will be notes on which parts of the script can be changed depending on advanced user options that are not part of the options prompted for at the beginning of the pipeline when run from the terminal.
 ```{bash}
-bash /home/user/AIDD/bashScripts/prep/foldersystem.sh
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+} #creates a time and date stamp so the user can track how long AIDD takes to run each step it also tells the user which step is currently running.
+create_dir() {
+if [ ! -d "$new_dir" ];
+then
+  mkdir "$new_dir"
+fi
+} # this creates directories if they are not already present.
+assembly_dir_create() {
+INPUT="$dir_path"/PHENO_DATA.csv
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+read
+while IFS=, read -r samp_name run codition sample condition2 condition3
+do
+  mkdir "$dir_path"/raw_data/$ball/$sample/
+done
+rm -rf "$dir_path"/raw_data/$ball/sample/
+} < $INPUT
+IFS=$OLDIFS
+} # this function creates special directories for the transcriptome assembly step these need to be in this format or the python script to create the count matrix will not run.
+copy_file() {
+cp "$home_dir"/Desktop/"$j"/* "$dir_path"/indexes/"$i"_list/"$dp"/ # moves experimental gene/transcript list from the desktop to the correct index folder to be used for building own on the fly indexes for GEX and TEX tools
+} # this copies the index files from the desktop see below for more details
+get_file() {
+if [ -s "$to_move" ];
+then
+  cp "$to_move" "$file_move"
+else
+  echo1=$(echo "CANT FIND "$to_move" STARTING PROCESS TO CREATE IT")
+  mes_out
+fi
+} # gets to_move file and move to file_move
+moveindexes() {
+for i in gene transcript ; 
+do
+  for j in insert_"$i"_of_interest insert_"$i"_lists_for_pathways ;
+  do
+    file_dir=$(ls -A "$home_dir"/Desktop/$j/)
+    if [ ! -z "$file_dir" ];
+    then
+      if [ "$j" == insert_"$i"_of_interest ];
+      then
+        dp=DESeq2
+        copy_file
+      else
+        dp=pathway
+        copy_file
+      fi
+    else
+      echo "No indexes to move"
+    fi
+  done
+done
+} # this grabs any indexes the user has put in the desktop folders to the index folder in the working directory to be used for ExToolset once primary data analysis is complete. See instructions on the desktop, in the manual or github for how to create indexes and where they should be placed.
+home_dir=/home/user #this is where to find the AIDD folder with the scripts and config files
+dir_path=/media/sf_AIDD/AIDDtutorial # this is where the result directory is going to be created
+echo1=$(echo "CREATING DIRECTORIES")
+mes_out
+new_dir="$dir_path"
+create_dir # creates new directory to store results
+to_move="$home_dir"/Desktop/PHENO_DATA.csv
+file_move="$dir_path"/PHENO_DATA.csv
+  get_file # this step moves PHENO_DATA file from the desktop to working directory please see github, the desktop instructions or the AIDD manual for more details on how to fill this out but for the tutorial use the PHENO_DATA file that came with AIDD.
+for ndir in quality_control raw_data Results temp tmp working_directory ; # the next lines all create the file directory system for the results please do not change any of these or the pipeline will not know where to put the results.
+do
+  new_dir="$dir_path"/"$ndir"
+  create_dir # creates Results directory
+done
+new_dir="$dir_path"/quality_control # creates directories for quality control
+create_dir
+for ndir1 in alignment_metrics fastqc recalibration_plots insert_metrics logs filecheck filecheckVC ; 
+do
+  new_dir="$dir_path"/quality_control/"$ndir1" # creates directories for quality control
+  create_dir
+done
+for ndir2 in ballgown ballgown_in bam_files counts snpEff vcf_files;
+do
+  new_dir="$dir_path"/raw_data/"$ndir2"
+  create_dir
+  if [[ "$ndir2" == ballgown || "$ndir2" == ballgown_in ]];
+  then
+    ball="$ndir2"
+    assembly_dir_create
+  fi
+  if [ "$nd3" == vcf_files ];
+  then
+    for nd3 in final filtered raw ; 
+    do
+      new_dir="$dir_path"/raw_data/vcf_files/"$nd3"
+      create_dir        
+    done
+  fi
+done
+new_dir="$dir_path"/AIDD # creates directory for scripts and config files
+create_dir
+if [ -d "$home_dir"/AIDD/AIDD ];
+then
+  cp -r "$home_dir"/AIDD/AIDD/* "$dir_path"/AIDD # get AIDD scripts with ExToolset
+else
+  new_dir="$dir_path"/AIDD/ExToolset
+  create_dir
+  cp -r "$home_dir"/ExToolset/* "$dir_path"/AIDD/ExToolset # get ExToolset scripts
+fi
+if [ "$index" == "1" ];
+then
+moveindexes  # MOVE AIDD INDEXES TO EXPERIMENT DIRECTORY
+fi
 ```
+##Creating config files
+
+This should be run as is there are no options here for the tutorial. During a normal run of AIDD these will be changed according to the options specified before the start of the experiment with the prompts in the terminal. Changes made here can effect the entire pipeline's ability to run. This is the chunk that sets up the config files with all the file names and directories used throughout the entire pipeline. It will also generate a listofconditions csv file with all the conditions/variables defined in your experimental PHENO_DATA file. It will also create bar graphs showing how many samples are found in each condition and the names of those conditions for example if you have sex as one of your conditions it will create a file saying how many females and males you have in your experiment and then create a bar graph showing that. These are for your reference and are needed for ExToolset to run secondary analysis on the dataset.
+```{bash}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+remove_stuff() {
+if [ -f "$path" ];
+then
+ rm -f "$path"
+fi
+} # this removes $path
+config_text() {
+echo "home_dir=$home_dir
+dir_path=$dir_path
+ref_dir_path=$ref_dir_path
+pheno=$pheno
+pheno_url=$pheno_url
+instancebatch=$batch
+batch=$batchnumber
+indexes=$indexes
+indexes_url=$indexes_url
+sra=$sra
+fastq_dir_path=$fastq_dir_path
+scRNA=$scRNA
+miRNA=$miRNA
+miRNAtype=$miRNAtype
+library=$library
+aligner=$aligner
+assembler=$assembler
+variant=$variant
+bamfile=$bamfile
+ref=$ref
+human=$human
+ref_set=$ref_set
+ExToolset="$ExToolset"
+dirqc="$dirqc"
+dirqcalign="$dirqcalign"
+dirres="$dirres"
+dirraw="$dirraw"
+dirVC="$dirVC"
+dirVCsubs="$dirVCsubs"
+ExToolsetix="$ExToolsetix"
+summaryfile="$summaryfile"
+matrix_file="$matrix_file" 
+matrix_file2="$matrix_file2"
+matrix_fileedit="$matrix_fileedit"
+matrix_fileedit2="$matrix_fileedit2"
+matrix_file3a="$matrix_file3a"
+matrix_file3b="$matrix_file3b"
+matrix_file3="$matrix_file3"
+matrix_file4="$matrix_file4"
+matrix_file5="$matrix_file5"
+matrix_file6="$matrix_file6"
+matrix_file7="$matrix_file7"
+matrix_file8="$matrix_file8"
+matrix_file9="$matrix_file9"
+matrix_file10="$matrix_file10"
+matrix_file11="$matrix_file11"
+matrix_filefinal="$matrix_filefinal"
+raw_input1="$raw_input1"
+raw_input2="$raw_input2"
+raw_input3="$raw_input3"
+raw_input4="$raw_input4"
+DATE_WITH_TIME="$DATE_WITH_TIME"
+TIME_HOUR="$TIME_HOUR"
+TIME_MIN="$TIME_MIN"
+TIME_SEC="$TIME_SEC"
+data_summary_file1="$data_summary_file1"
+data_summary_file2="$data_summary_file2"
+data_summary_file3="$data_summary_file3"
+data_summary_file3a="$data_summary_file3a"
+data_summary_file4="$data_summary_file4"
+data_summary_file5="$data_summary_file5"
+data_summary_file6="$data_summary_file6"
+data_summary_file6a="$data_summary_file6a"
+data_summary_filefinal="$data_summary_filefinal"" >> "$dir_path"/AIDD/config.cfg
+}
+config_defaults() {
+echo "home_dir=Default Value
+dir_path=Default Value
+ref_dir_path=Default Value
+pheno=Default Value
+instancebatch=Default Value
+batch=Default Value
+indexes=Default Value
+indexes_url=Default Value
+sra=Default Value
+fastq_dir_path=Default Value
+scRNA=Default Value
+miRNA=Default Value
+miRNAtype=Default Value
+library=Default Value
+aligner=Default Value
+assembler=Default Value
+variant=Default Value 
+bamfile=Default Value
+ref=Default Value
+human=Default Value
+ref_set=Default Value
+ExToolset=Default Value
+dirqc=Default Value 
+dirqcalign=Default Value
+dirres=Default Value
+dirraw=Default Value
+dirVC=Default Value
+dirVCsubs=Default Value
+ExToolsetix=Default Value
+summaryfile=Default Value
+matrix_file=Default Value
+matrix_file2=Default Value
+matrix_fileedit=Default Value
+matrix_fileedit2=Default Value
+matrix_file3a=Default Value
+matrix_file3b=Default Value
+matrix_file3=Default Value
+matrix_file4=Default Value
+matrix_file5=Default Value
+matrix_file6=Default Value
+matrix_file7=Default Value
+matrix_file8=Default Value
+matrix_file9=Default Value
+matrix_file10=Default Value
+matrix_file11=Default Value
+matrix_filefinal=Default Value
+raw_input1=Default Value
+raw_input2=Default Value
+raw_input3=Default Value
+raw_input4=Default Value
+DATE_WITH_TIME=Default Value
+TIME_HOUR=Default Value
+TIME_MIN=Default Value
+TIME_SEC==Default Value
+data_summary_file1=Default Value
+data_summary_file2=Default Value
+data_summary_file3=Default Value
+data_summary_file3a=Default Value
+data_summary_file4=Default Value
+data_summary_file5=Default Value
+data_summary_file6=Default Value
+data_summary_file6a=Default Value
+data_summary_filefinal=Default Value" >> "$dir_path"/AIDD/config.cfg.defaults
+} 
+temp_file() {
+if [ -s "$dir_path"/temp.csv ];
+then
+  rm "$file_in"
+  mv "$dir_path"/temp.csv "$file_in"
+fi
+}
+run_tools() {
+    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+    then
+      if [ -f "$file_in" ]; # IF INPUT THERE
+      then
+        echo1=$(echo "FOUND "$file_in" STARTING "$tool"")
+        #mes_out
+        $tool # TOOL
+      else
+        echo1=$(echo "CANT FIND "$file_in" FOR_THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+      if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
+      then
+        echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
+        #mes_out # ERROR OUTPUT IS THERE
+      else 
+        echo1=$(echo "CANT FIND "$file_out" FOR THIS "$sample"")
+        #mes_out # ERROR INPUT NOT THERE
+      fi
+  else
+        echo1=FOUND_"$file_out"_FINISHED_"$tool"
+        mes_out # ERROR OUTPUT IS THERE
+  fi
+}
+Rbar() {
+Rscript "$ExToolset"/barchart.R "$file_in" "$file_out" "$bartype" "$pheno" "$freq" "$sum_file" "$sampname" "$file_out2" "$sum_file2"
+} # runs bargraph R script
+cond_file() {
+cat "$dir_path"/PHENO_DATA.csv | sed -e 1d | sed -e 's/ /_/g' | cut -d',' -f"$coln" | sort | uniq -ci | sed 's/ \+/,/g' | sed 's/^.//g' | sed '1i freq,name' >> "$dir_path"/"$nam".csv
+file_in="$dir_path"/"$nam".csv
+file_out="$dir_path"/"$nam".tiff
+bartype=cond
+tool=Rbar
+run_tools
+} # creates condition file
+make_cdef2() {
+echo "con_name1=$con_name1
+con_name2=$con_name2
+con_name3=$con_name3" >> "$dir_path"/AIDD/config.cfg.defaults
+} # adds conditions to config files
+home_dir=/home/user
+dir_path=/media/sf_AIDD/AIDDtutorial
+ref_dir_path="$home_dir"/AIDD/references  # this is where references are stored
+ExToolset="$dir_path"/AIDD/ExToolset/scripts
+ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
+dirqc="$dir_path"/quality_control; # qc directory 
+dirqcalign="$dirqc"/alignment_metrics
+dirres="$dir_path"/Results; #
+dirraw="$dir_path"/raw_data;
+dirVC="$dirres"/variant_calling;
+dirVCsubs="$dirVC"/substitutions;
+summaryfile="$dir_path"/quality_control/alignment_metrics/all_summaryPF_READS_ALIGNED.csv
+matrix_file="$dirres"/gene_count_matrix.csv; 
+matrix_file2="$dirres"/transcript_count_matrix.csv; 
+matrix_fileedit="$dirres"/gene_count_matrixedited.csv;
+matrix_fileedit2="$dirres"/transcript_count_matrixedited.csv;
+matrix_file3="$dirres"/"$level"ofinterest_count_matrix.csv;
+matrix_file3a="$dirres"/geneofinterest_count_matrix.csv;
+matrix_file3b="$dirres"/transcriptofinterest_count_matrix.csv;
+matrix_file4="$dirres"/excitome_count_matrix.csv;
+matrix_file5="$dirres"/genetrans_count_matrix.csv;
+matrix_file6="$dirres"/GTEX_count_matrix.csv;
+matrix_file7="$dirres"/nucleotide_count_matrix.csv; 
+matrix_file8="$dirres"/amino_acid_count_matrix.csv;
+matrix_file9="$dirres"/subs_count_matrix.csv;
+matrix_file10="$dirres"/impact_count_matrix.csv;
+matrix_file11="$dirres"/VEX_count_matrix.csv;
+matrix_filefinal="$dirres"/all_count_matrix.csv;
+data_summary_file1="$dirres"/geneofinterest/geneofinterestallsummaries.csv;
+data_summary_file2="$dirres"/transcriptofinterest/transcriptofinterest.csv;
+data_summary_file3="$dirres"/excitome/excitomeallsummaries.csv;
+data_summary_file3a="$dirres"/GTEXallsummaries.csv;
+data_summary_file4="$dirres"/nucleotide/nucleotideallsummaries.csv;
+data_summary_file5="$dirres"/amino_acid/amino_acidallsummaries.csv;
+data_summary_file6="$dirres"/impact/impactallsummaries.csv;
+data_summary_file6a="$dirres"/VEXallsummaries.csv;
+data_summary_filefinal="$dirres"/allsummaries.csv;
+echo1=$(echo "CREATING CONFIG FILES")
+mes_out
+for config in config.cfg config.cfg.defaults config.R listofconditions.csv ;
+do
+  path="$dir_path"/AIDD/"$config"
+  remove_stuff # get rid of existing config files
+done
+config_text # MAKES CONFIG TEXT
+config_defaults # MAKE CONFIG DEFAULTS TEXT
+file_in="$dir_path"/PHENO_DATA.csv
+cat "$file_in" | sed 's/ //g' | sed '/^$/d' >> "$dir_path"/temp.csv
+temp_file
+cat "$dir_path"/PHENO_DATA.csv | awk 'NR==1' | sed 's/,/ /g' | sed "s/ /\n/g" | sed '1d' | sed '1d' | sed '2d' | awk '{$2=NR}1' | awk '{$3=$2+2}1' | sed 's/ /,/g' >> "$dir_path"/AIDD/listofconditions.csv # creates list of conditions file 
+cd "$dir_path"/AIDD
+cat "$dir_path"/PHENO_DATA.csv | sed 's/_[0-9]*//g' >> "$dir_path"/PHENO_DATAtemp.csv
+allcon=$(awk -F, 'NR==1{print $1}' "$dir_path"/PHENO_DATAtemp.csv)
+nam="$allcon"
+cat "$dir_path"/PHENO_DATAtemp.csv | sed -e 1d | sed -e 's/ /_/g' | cut -d',' -f1 | sort | uniq -ci | sed 's/ \+/,/g' | sed 's/^.//g' | sed '1i freq,name' >> "$dir_path"/"$nam".csv
+file_in="$dir_path"/"$nam".csv
+file_out="$dir_path"/"$nam".tiff
+bartype=cond
+tool=Rbar
+run_tools
+con_name1=$(awk -F, 'NR==1{print $3}' "$dir_path"/PHENO_DATA.csv)
+coln=3
+nam="$con_name1"
+cond_file
+con_name2=$(awk -F, 'NR==1{print $5}' "$dir_path"/PHENO_DATA.csv)
+coln=5
+nam="$con_name2"
+cond_file
+con_name3=$(awk -F, 'NR==1{print $6}' "$dir_path"/PHENO_DATA.csv)
+coln=6
+nam="$con_name3"
+cond_file
+make_cdef2
+```
+
 ##Downloading references
-There are two options first option is to download each reference shown in the next few chunks.  the last chunk here shows how to download an already put together reference folder.  
-First there is the HISAT reference indexes.  First it downloads premade HISAT2 indexes from grch37 build then it uncompresses and renames them for the AIDD to be ale to find them.
+These steps are included here only to demonstrate how to download the files and which parts can be changed by the user if you require reference sets different from the options given by AIDD, GRCh37 ensemble release 75 is the default dataset due to HISAT2 reference genome build availability using any other reference set and snps and splice sites might not be accurately predicted. When at all possible use the HISAT2 references that are prebuilt with snp and transcript data these can be found on the HISAT2 website. Options included in AIDD are GRCh37, GRCh38 ensembl release 84, mouse, rat, or chimpanzee. Any others will need to be found manually just make sure you use the same ensembl release throughout. Also it is recommended to use ensembl references due to preferences of the tools AIDD utilizes any other references such as hg19 should be used only be user who know how to use the tools in AIDD and there are no instructions provided in the manual for these references.
+
+AIDD comes with GRCh37 ensemble release 75 reference set if you wish to download a different reference set then the old (GRCh37) will be stored in a reference folder with _old added to the name so you can save these for a later experiment if needed.
+
+If you don't change any of these options you can run this if you like but you do not have to the default GRCh37 is already downloaded ready to go in the proper folder.
 ```{bash}
-wget ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch37_snp_tran.tar.gz
-tar xzvf grch37_snp_tran.tar.gz
-mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.1.ht2 /media/sf_AIDD/references/genome.1.ht2
-mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.2.ht2 /media/sf_AIDD/references/genome.2.ht2
-mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.3.ht2 /media/sf_AIDD/references/genome.3.ht2
-mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.4.ht2 /media/sf_AIDD/references/genome.4.ht2
-mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.5.ht2 /media/sf_AIDD/references/genome.5.ht2
-mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.6.ht2 /media/sf_AIDD/references/genome.6.ht2
-mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.7.ht2 /media/sf_AIDD/references/genome.7.ht2
-mv /media/sf_AIDD/references/grch37_snp_tran/genome_snp_tran.8.ht2 /media/sf_AIDD/references/genome.8.ht2
-```
-This next chunk downloads fasta sequences for grch37.75 build from ensembl.org it then uncompresses and moves and renames it for AIDD.
-```{bash}
-wget ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh37.75.cdna.all.fa.gz
-gunzip Homo_sapiens.GRCh37.75.cdna.all.fa.gz
-mv /media/sf_AIDD/references/*.fa /media/sf_AIDD/references/ref.fa
-```
-This next chunk downloads the .gtf file for the grch37.75 build
-```{bash}
-wget ftp://ftp.ensembl.org/pub/release-75/gtf/homo_sapiens/Homo_sapiens.GRCh37.75.gtf.gz
-gunzip Homo_sapiens.GRCh37.75.gtf.gz
-mv /media/sf_AIDD/references/*.gtf /media/sf_AIDD/references/ref.gtf
-```
-This next chunk downloads the reference sequences for the grch37.75 primary assembly to use during variant calling.  GATK requires the sequences to be in karotype order so there is a python script to reorder the sequences and then picard creates a sequence dictionary to use during varinat calling.  the last step is creating a another index file for the fasta file using samtools.
-```{bash}
-wget -q ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
-gunzip Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz
-mv /media/sf_AIDD/references/*.primary_assembly.fa /media/sf_AIDD/references/ref1.fa
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+create_dir() {
+if [ ! -d "$new_dir" ];
+then
+  mkdir "$new_dir"
+fi
+} # this creates directories $new_dir
+HISAT_ref(){
+wget "$ftpsite"
+tar -vxzf "$set_ref".tar.gz
+for i in {1..8} ; do
+  mv "$ref_dir_path"/"$set_ref"/genome*."$i".ht2 "$ref_dir_path"/genome."$i".ht2
+done
+if [ -s "$ref_dir_path" ];
+then
+  rm "$set_ref".tar.gz
+else
+  echo "_________________________________________________________
+Can't find unziped HISAT2 file"
+fi
+}
+downloaded_ref() {
+wget "$ftpsite" -O "$ref_name".gz
+gunzip "$ref_name".gz
+if [ -s "$ref_dir_path"/"$ref_name" ] ;
+then
+  rm "$ref_name".gz
+else
+  echo "_________________________________________________________
+Can't find "$ref_name" file"
+fi
+}
+organize_ref() {
 perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>(\S+)\s/){$fh=IO::File->new(">$d/$1.fa");} print $fh $_;}`cat ref1.fa`; foreach $c(1..22,X,Y,MT){print `cat $d/$c.fa`}; print `cat $d/GL*`' > ref2.fa
-java -jar /home/user/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE=/media/sf_AIDD/references/ref2.fa OUTPUT=/media/sf_AIDD/references/ref2.dict
-samtools faidx /media/sf_AIDD/references/ref2.fa
-```
-This next chunk downloads the index and references files that were premade for the snpEff tools.  The first time you run AIDD this will format itself into a data folder in the reference file. 
-```{bash}
-wget https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh37.75.zip
-unzip snpEff_v4_3_GRCh37.75.zip
-```
-The last chunk downloads and uncompressed the snp files to filter known snp out before variant calling is finalized.  This allows us to use GATK for RNA seq data.
-```{bash}
-wget -q ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.b37.vcf.gz
-gunzip dbsnp_138.b37.vcf.gz
-mv dbsnp_138.b37.vcf dbsnp.vcf
-```
-Now the references are done and in the reference folder under sf_AIDD.  If you perfer to download the premade GRCh37 from AIDD follow the next chunck
-```{bash}
-wget https://drive.google.com/open?id=1A0ItKKoiA6MxCh9QdZBoScgxN_uEtzbN
+java -jar "$home_dir"/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE="$ref_dir_path"/ref2.fa OUTPUT="$ref_dir_path"/ref2.dict
+samtools faidx "$ref_dir_path"/ref2.fa
+}
+home_dir="$(config_get home_dir)"; # home directory
+dir_path="$(config_get dir_path)"; # working directory"
+ref_dir_path="$(config_get ref_dir_path)"; # reference directory
+new_dir="$ref_dir_path"
+create_dir
+ref_files="$(ls -1 "$ref_dir_path" | wc -l)"
+if [ ! "$ref_files" == 0 ];
+then
+  mv "$ref_dir_path" "$ref_dir_path"_old # THIS WILL STORY ANY OLD REFERENCES FOR LATER USE
+  mkdir "$ref_dir_path"
+fi
+cd "$ref_dir_path"
+ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch37_snp_tran.tar.gz # just copy paste the link for the HISAT2 prebuilt reference you want in here
+HISAT_ref # this gets genome references pre-built by HISAT2 if you are using STAR or another aligner you should either supply pre-built reference genomes which can be found on that aligners website or supplied by those developers. HISAT2 can be found here https://ccb.jhu.edu/software/hisat2/index.shtml
+ftpsite=ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh37.75.cdna.all.fa.gz # copy and paste from ensembl ftp site which ever reference matches the one used for alignment with HISAT or STAR if using those (this is the cdna library used please make sure you get this from the cdna not dna folder)
+ref_name=ref.fa # do not change this
+downloaded_ref
+ftpsite=ftp://ftp.ensembl.org/pub/release-75/gtf/homo_sapiens/Homo_sapiens.GRCh37.75.gtf.gz # this gtf file needs to match the genome reference from HISAT and the ref.fa from the previous download and can be found on the ensembl ftp site
+ref_name=ref.gtf #do not change this
+downloaded_ref
+ftpsite=ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz # this can be changed but has to match all three of the previous references (this is hte dna library used please make sure you get this from the dna folder not the cdna folder)
+ref_name=ref1.fa # do not change this
+downloaded_ref
+ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.b37.vcf.gz # this can be changed but again make sure the ensembl release matches the previous references (this is the snp database file that annotates the final vcf files with known snps)
+ref_name=dbsnp.vcf
+downloaded_ref
+wget https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh37.75.zip/download # this can be changed but again make sure the ensembl release matches the previous references this downloads the snpEff tool reference dataset and others can be found from this link http://snpeff.sourceforge.net/download.html.
+gunzip download
+organize_ref # this last step should not be changed it reorders the chromosomes in the files to run GATK for variant calling and if not organized the vcf files will not be filtered.
 ```
 ## Download the SRA files from NCBI
-Once the references are done the next chunk will download the SRA files for the experiment using the SRAtoolkit.  It will then using the SRAtoolkit will convert sra to the two paired fastq files.  FastQC will then be used to check quality of the reads.  These outputs will be in the /media/sf_AIDD/quality_control/fastqc folder.  You need to check these you run your experiment before the next chunk which is trimming the read.  This script reads the PHENO_DATA file on the desktop and it runs the loop for each SRA file in the PENO_DATA.csv.
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-echo "Now downloading sra files this can take  few hours depending on size of files"
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-    prefetch "$run"
-    mv /home/user/ncbi/public/sra/"$run".sra /media/sf_AIDD/working_directory/"$run".sra
-    fastq-dump /media/sf_AIDD/working_directory/$run.sra -I --split-files --read-filter pass -O /media/sf_AIDD/working_directory/
-    rm /media/sf_AIDD/working_directory/"$run".sra
-    mv /media/sf_AIDD/working_directory/"$run"_pass_1.fastq /media/sf_AIDD/working_directory/"$run"_1.fastq
-    mv /media/sf_AIDD/working_directory/"$run"_pass_2.fastq /media/sf_AIDD/working_directory/"$run"_2.fastq
-    fastqc /media/sf_AIDD/working_directory/"$run"_1.fastq /media/sf_AIDD/working_directory/"$run"_2.fastq --outdir=/media/sf_AIDD/quality_control/fastqc
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/downloads_sra.log
-```
-##Trimming the reads
-This next loop runs again from all the runs listed in the PHENO_DATA.csv file on the desktop.  It is set to trim 13 nucleotides from the front and 2 nucleotides off the back.  To pick these I used the fastQC analysis.  After the trimming which can take awhile the new fasta files are then analysed by fastQC to re asses the quality.  these again can be found in /media/sf_AIDD/quality_control/fastqc folder with the run numbers followed by _trim.  These are then ready for alignment.
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-fastx_trimmer -f 13 -l 73 -i /media/sf_AIDD/working_directory/"$run"_1.fastq -o /media/sf_AIDD/working_directory/"$run"_trim_1.fastq    
-fastx_trimmer -f 13 -l 73 -i /media/sf_AIDD/working_directory/"$run"_2.fastq -o /media/sf_AIDD/working_directory/"$run"_trim_2.fastq
-fastqc /media/sf_AIDD/working_directory/"$run"_trim_1.fastq /media/sf_AIDD/working_directory/"$run"_trim_2.fastq --outdir=/media/sf_AIDD/quality_control/fastqc
-rm /media/sf_AIDD/working_directory/"$run"_1.fastq
-rm /media/sf_AIDD/working_directory/"$run"_2.fastq
-mv /media/sf_AIDD/working_directory/"$run"_trim_1.fastq /media/sf_AIDD/working_directory/"$run"_1.fastq
-mv /media/sf_AIDD/working_directory/"$run"_trim_2.fastq /media/sf_AIDD/working_directory/"$run"_2.fastq
+Once the references are done the next chunk will download the SRA files for the experiment from ncbi sra database (there is an option in the main AIDD pipleine that will allow for a user to supply fastq files if you wish to use experimental data or already have files downloaded. See the manual or github on where to put these files and which options to use with AIDD.) This chunk should not be edited and is designed to try to download 3 times if it still fails after 3 attempts it will tell you and then move on to the next sample as specified in the PHENO_DATA file.
 
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/trim.log
-```
-## HISAT2 alignment
-The next chunk will run HISAT2 with pre downloaded indexes.  This is set to run with standard defaults and will also produce alignments with compatible with cufflinks.  The alignment also creates a summary file to check alignment stats this can found in /media/sf_AIDD/quality_control/alignment_metrics.
+AIDD is designed to download all sra files at once before moving on in an effort to reduce the amount of time the computer needs to be connected to the internet once this chunk is done AIDD will no longer require the internet until the final snpEff chunk.
 ```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+download() {
+runfoldername=${run:0:3}
+runfolder=${run:0:6}
+cd "$wd"/
+wget ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/"$runfoldername"/"$runfolder"/"$run"/"$run".sra
+cd "$dir_path"/AIDD
+}
+source config.shlib; # load the config library functions that we defined in a prevous step
+dir_path=$(config_get dir_path)
+echo "$dir_path"
+INPUT="$dir_path"/AIDDtutorial/PHENO_DATA.csv
 OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+read
+while IFS=, read -r samp_name run condition sample condition2 condition3
 do
-    hisat2 -q -x /media/sf_AIDD/references/genome -p3 --dta-cufflinks -1 /media/sf_AIDD/working_directory/"$run"_1.fastq -2 /media/sf_AIDD/working_directory/"$run"_2.fastq -t --summary-file /media/sf_AIDD/quality_control/alignment_metrics/"$run".txt -S /media/sf_AIDD/working_directory/"$run".sam
-done < $INPUT
+  cd /media/sf_AIDD/AIDDtutorial/AIDD
+  source config.shlib; # load the config library functions
+  dir_path="$(config_get dir_path)"; # main directory
+  wd="$dir_path"/working_directory; # working directory
+  home_dir="$(config_get home_dir)"; # home directory
+  ref_dir_path="$(config_get ref_dir_path)"; # reference directory
+  dirqc="$dir_path"/quality_control; # qc directory
+  AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
+  rdvcf="$dir_path"/raw_data/vcf_files # directory for vcf files
+  rdbam="$dir_path"/raw_data/bam_files # directory for bam files
+  rdsnp="$dir_path"/raw_data/snpEff #directory for snp files
+  javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
+  fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
+  sra="$(config_get sra)"; # downloading sra files or have your own
+  file_sra="$run".sra;
+    if [ ! -f "$wd"/"$file_sra" ]; # IF SRA FILE IS NOT THERE
+    then
+      download # this tries to download it from ncbi
+    fi
+    if [ -f "$wd"/"$file_sra" ]; # IF SRA FILE IS THERE
+    then
+      echo1=$("FOUND "$file_sra" FINISHED WITH DOWNLOADING "$sample"") 
+      mes_out # ERROR OUTPUT IS THERE
+    else 
+      download
+    fi  
+    if [ ! -f "$wd"/"$file_sra" ]; # IF OUT IS NOT THERE
+    then
+      download
+    else 
+      echo1=$(echo "FOUND "$file_sra" NOW STARTING NEXT SAMPLE")
+      mes_out
+    fi
+done
+echo1=$(echo "DONE WITH THE INTERNET NOW STARTING ALIGNING AND ASSEMBLY")
+mes_out
+} < $INPUT
 IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/HISAT2.log
+cd "$dir_path"/AIDD
 ```
-## Stringtie assembly
-This next chunk takes the sam file output from HISAT and converts it to bam format for the input of stringtie.  Stringtie is then run on the bam file for transcriptome assembly.  Stringtie will produce input for ballgown which is in the /media/sf_AIDD/raw_data/ballgown_in folder.  It will also generate count tables which are in the /media/sf_AIDD/raw_data/counts folder.  GTF files are also made in the /media/sf_AIDD/raw_data/ballgown these are sorted into folder by sample number in the PHENO_DATA file.  This is the correct folder directory to run the python script.
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-    java -Djava.io.tmpdir=/media/sf_AIDD/tmp -jar /home/user/AIDD/AIDD_tools/picard.jar SortSam INPUT=/media/sf_AIDD/working_directory/"$run".sam OUTPUT=/media/sf_AIDD/raw_data/bam_files/"$run".bam SORT_ORDER=coordinate
-    stringtie /media/sf_AIDD/raw_data/bam_files/"$run".bam -p3 -G /media/sf_AIDD/references/ref.gtf -A /media/sf_AIDD/raw_data/counts/"$run".tab -l -B -b /media/sf_AIDD/raw_data/ballgown_in/"$sample"/"$run" -e -o /media/sf_AIDD/raw_data/ballgown/"$sample"/"$sample".gtf
-    
-   
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/assembly.log
-```
-## python script for creating gene_count_matrix
-This next chunk takes the data from all the runs GTF files in the ballgown folder and combines the count data in a matrix for DESeq2
-```{bash}
-cd /media/sf_AIDD/raw_data/
-python /home/user/AIDD/AIDD_tools/bin/prepDE.py -g /media/sf_AIDD/Results/DESeq2/gene/counts/gene_count_matrix.csv -t /media/sf_AIDD/Results/DESeq2/transcript/counts/transcript_count_matrix.csv
-```
-##create gene_count_matrix with proper labels.
-The next chunk adds the correct labels onto the gene_count_matrix file.  The labels can be found in the first column of the PHENO_DATA file on the desktop.  This can be used for any size dataset if you follow the AIDD.sh script that is fully automated and  
-```{r}
-table1 <- read.csv("/media/sf_AIDD/Results/DESeq2/gene/counts/gene_count_matrix.csv")
-table2 <- read.csv("/media/sf_AIDD/index/g_names.csv")
-Data <- read.csv("/media/sf_AIDD/PHENO_DATA.csv", row.names=1)
-table3 <- merge(table2, table1, by="gene_id")
-table3$gene_id <- NULL
-table5 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
-write.csv(table3, "/media/sf_AIDD/Results/DESeq2/gene/counts/gene_count_matrixedited.csv", row.names=FALSE)
+##Preparing fastq files for alignment
 
-table1 <- read.csv("/media/sf_AIDD/Results/DESeq2/transcript/counts/transcript_count_matrix.csv")
-colnames(table1)[1] <- "transcript_id"
-table2 <- read.csv("/media/sf_AIDD/index/t_names.csv")
-Data <- read.csv("/media/sf_AIDD/PHENO_DATA.csv", row.names=1)
-table3 <- merge(table2, table1, by="transcript_id")
-table3$transcript_id <- NULL
-table5 <- colnames(table3)[c(2:5)] <- rownames(Data)[c(1:4)]
-write.csv(table3, "/media/sf_AIDD/Results/DESeq2/transcript/counts/transcript_count_matrixedited.csv", row.names=FALSE)
+This next chunk will convert sra file format to the usable fastq format. During this step it will also filter out reads that do not pass sratoolkit quality control measures. This step should not be changed except for trimming options the only options here are for single or paired end reads and this can be chosen as a main option in AIDD please the manual or github instructions for more details about how to select single end reads. 
+
+Once converted to fastq then quality control is performed using fastqc. These results can be found in the quality control folder and should be used to determine if trimming is needed for your samples. The trimming is currently set to do 100 base pair reads and will trim 12 off the beginning and 3 or more of the end. Again these need to be changed according to your fastqc reports.
+
+Fastqc will be used again to make sure trimming was done correctly and those reports can be found in the same quality control folder but will have _trim added to their file name.
+
+```{bash}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+run_tools2o() {
+    if [[ ! -f "$file_out" && ! -f "$file_out2" ]]; # IF OUTPUT FILE IS NOT THERE
+    then
+      if [ -f "$file_in" ]; # IF INPUT THERE
+      then
+        echo1=$(echo "FOUND "$file_in" STARTING "$tool"")
+        mes_out
+        $tool # TOOL
+      else
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+      if [[ -f "$file_out" && -f "$file_out2" ]]; # IF OUTPUT IS THERE
+      then
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+      else 
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+  else
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+  fi
+}
+run_tools2i2o() {
+if [[ ! -f "$file_out" && ! -f "$file_out2" ]]; # IF OUTPUT FILE IS NOT THERE
+      then
+      if [[ -f "$file_in" && -f "$file_in2" ]]; # IF INPUT THERE
+      then
+        echo1=$(echo "FOUND "$file_in" STARTING "$tool"")
+        mes_out
+        $tool # TOOL
+      else
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+      if [[ -f "$file_out" && -f "$file_out2" ]]; # IF OUTPUT IS THERE
+      then
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+      else 
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+  else
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+  fi
+}
+fastqdumppaired() { 
+fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/ 
+mv "$wd"/$file_fastqpaired1pass "$wd"/$file_fastqpaired1 
+mv "$wd"/$file_fastqpaired2pass "$wd"/$file_fastqpaired2
+ }
+ fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
+ setjavaversion() {
+JDK8=/usr/lib/jvm/java-8-oracle/jre/  
+JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+                                                                                                                 
+case $use_java in
+  8)
+     export JAVA_HOME="$JDK8"
+     export PATH=$JAVA_HOME/bin:$PATH     ;
+  ;;
+  11)
+     export JAVA_HOME="$JDK11"
+     export PATH=$JAVA_HOME/bin:$PATH     ;
+  ;;
+  *)
+     error java version can only be 1.8 or 1.11
+  ;;
+esac
+}
+
+source config.shlib; # load the config library functions that we defined in a prevous step
+dir_path=$(config_get dir_path)
+INPUT="$dir_path"/AIDDtutorial/PHENO_DATA.csv
+OLDIFS=$IFS
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+read
+while IFS=, read -r samp_name run condition sample condition2 condition3
+do
+  cd /media/sf_AIDD/AIDDtutorial/AIDD
+  source config.shlib; # load the config library functions
+  dir_path="$(config_get dir_path)"; # main directory
+  wd="$dir_path"/working_directory; # working directory
+  home_dir="$(config_get home_dir)"; # home directory
+  ref_dir_path="$(config_get ref_dir_path)"; # reference directory
+  dirqc="$dir_path"/quality_control; # qc directory
+  AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
+  export PATH=$PATH:$AIDDtool/bin
+  javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
+  fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
+  ref_dir_path="$(config_get ref_dir_path)"; # directory for where to put the reference files
+  sra="$(config_get sra)"; # downloading sra files or have your own
+  file_sra="$run".sra;
+  file_fastqpaired1="$run"_1.fastq;
+  file_fastqpaired2="$run"_2.fastq;
+  file_fastqpaired1pass="$run"_pass_1.fastq;
+  file_fastqpaired2pass="$run"_pass_2.fastq;
+  file_fastqpaired1trim="$run"_trim_1.fastq;
+  file_fastqpaired2trim="$run"_trim_2.fastq;
+  tool=fastqdumppaired
+  file_in="$wd"/$file_sra
+  file_out="$wd"/$file_fastqpaired1
+  file_out2="$wd"/$file_fastqpaired2
+  run_tools2o
+  tool=fastqcpaired
+  file_in="$wd"/$file_fastqpaired1
+  file_in2="$wd"/$file_fastqpaired2
+  file_out=$dirqc/fastqc/"$run"_1_fastqc.html
+  file_out2=$dirqc/fastqc/"$run"_2_fastqc.html
+  use_java=11 # the most current java version needs to be used here for fastqc
+  setjavaversion
+  run_tools2i2o
+  use_java=8 # then java 8 is set for variant calling later in the pipeline.
+  setjavaversion
+  tool=trimpaired
+  file_in="$wd"/$file_fastqpaired1
+  file_in2="$wd"/$file_fastqpaired2
+  file_out=$dirqc/fastqc/"$run"_trim_1_fastqc.html 
+  file_out2=$dirqc/fastqc/"$run"_trim_2_fastqc.html
+  use_java=11
+  setjavaversion  
+  start=12; # these can be changed for trimming if needed this is where to start (how many to trim off beginning)
+  end=97; # these can be changed for trimming if needed this is where to end reads (how many to trim off the end) 
+  run_tools2i2o
+  use_java=8
+  setjavaversion
+  echo1=$(echo "DONW WITH "$sample" NOW STARTING NEXT SAMPLE")
+  mes_out
+done
+echo1=$(echo "DONE WITH FASTQ PREP STARTING ALIGNMENT AND ASSEMBLY NEXT")
+mes_out
+} < $INPUT
+IFS=$OLDIFS
 ```
+## HISAT2 alignment and Stringtie assembly
+The next chunk will run HISAT2 with pre downloaded indexes.  This is set to run with standard defaults and will also produce alignments with compatible with cufflinks.  The alignment also creates a summary file to check alignment stats this can found in /media/sf_AIDD/quality_control/alignment_metrics. These will be summarized with ExToolset to use for normalizaion of variant calling results. Find the function HISAT2() and this is the command lined used. This can be changed according to the HISAT2 manual which can be found here (https://ccb.jhu.edu/software/hisat2/manual.shtml)
+
+Stringtie is the default assembly tool and again the function assem_string() can be altered according to the stringtie manual found here (http://ccb.jhu.edu/software/stringtie/index.shtml?t=manual).
+
+Changes to these options are not recommended these are set to do the most accurate alignment which is critical for accurate variant calling in later steps.
+```{bash}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+run_tools2i() {
+    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+      then
+      if [[ -f "$file_in" && -f "$file_in2" ]]; # IF INPUT THERE
+      then
+        echo1=$(echo "FOUND "$file_in" STARTING "$tool"")
+        mes_out
+        $tool # TOOL
+      else
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+      if [ -f "$file_out" ]; # IF OUTPUT IS THERE
+      then
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+      else 
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+  else
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+  fi
+}
+run_tools() {
+    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+    then
+      if [ -f "$file_in" ]; # IF INPUT THERE
+      then
+        echo1=$(echo "FOUND $file_in STARTING $tool")
+        mes_out
+        $tool # TOOL
+      else
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+      if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
+      then
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+      else 
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+  else
+        echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+  fi
+}
+HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/"$file_fastqpaired1" -2 "$wd"/"$file_fastqpaired2" -t --summary-file $dirqc/alignment_metrics/"$run".txt -S "$wd"/"$file_sam" ; } # this is the hisat2 command line prompt and can be changed based on options in the manual but do not alter directories of where files are stored AIDD will not be able to find them for later steps
+samtobam() { java -Djava.io.tmpdir="$dir_path"/tmp -jar "$AIDDtool"/picard.jar SortSam INPUT="$wd"/"$file_sam" OUTPUT="$rdbam"/$file_bam SORT_ORDER=coordinate ; }
+assem_string() { stringtie "$rdbam"/"$file_bam" -p3 -G "$ref_dir_path"/ref.gtf -A "$dir_path"/raw_data/counts/"$file_tab" -l -B -b "$dir_path"/raw_data/ballgown_in/"$sample"/"$run" -e -o "$dir_path"/raw_data/ballgown/"$sample"/"$file_name_gtf" ; } # this is the stringtie command line prompt and can be changed based on options in the manual but do not alter directories of where files are stored AIDD will not be able to find them for later steps.
+source config.shlib; # load the config library functions that we defined in a prevous step
+dir_path=$(config_get dir_path)
+INPUT="$dir_path"/AIDDtutorial/PHENO_DATA.csv
+OLDIFS=$IFS
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+read
+while IFS=, read -r samp_name run condition sample condition2 condition3
+do
+  cd /media/sf_AIDD/AIDDtutorial/AIDD
+  source config.shlib; # load the config library functions
+  dir_path="$(config_get dir_path)"; # main directory
+  wd="$dir_path"/working_directory; # working directory
+  home_dir="$(config_get home_dir)"; # home directory
+  ref_dir_path="$(config_get ref_dir_path)"; # reference directory
+  dirqc="$dir_path"/quality_control; # qc directory
+  AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
+  export PATH=$PATH:$AIDDtool/bin
+  javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
+  fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
+  ref_dir_path="$(config_get ref_dir_path)"; # directory for where to put the reference files
+  file_fastqpaired1="$run"_1.fastq;
+  file_fastqpaired2="$run"_2.fastq;
+  file_sam="$run".sam;
+  file_bam="$run".bam;
+  file_tab="$run".tab;
+  file_name_gtf="$sample".gtf;
+  tool=HISAT2_paired
+  file_in="$wd"/$file_fastqpaired1
+  file_in2="$wd"/$file_fastqpaired2    
+  file_out="$wd"/$file_sam
+  rm -f "$wd"/"$file_sra"
+  run_tools2i
+  tool=samtobam
+  file_in="$wd"/$file_sam    
+  file_out="$rdbam"/$file_bam
+  rm -f "$wd"/*.fastq
+  run_tools
+  tool=assem_string
+  file_in="$rdbam"/"$file_bam"    
+  file_out="$dir_path"/raw_data/counts/"$file_tab" 
+  run_tools
+  echo1=$(echo "DONW WITH "$sample" NOW STARTING NEXT SAMPLE")
+  mes_out
+done
+echo1=$(echo "DONE WITH ALIGNMENT AND ASSEMBLY NOW STARTING VARIANT CALLING STEP 1")
+mes_out
+} < $INPUT
+IFS=$OLDIFS
+```
+## VARIANT CALLING STEP 1 preparing the previously aligned and assembled bam file.
+
+This next chunk gets the bam files from stringtie ready for GATK haplotype caller. This can take up to an hour or more for each sample that is why multiple steps are combined into one chunk
+Step1:The prep_bam_2() Add the read groups that will be used to keep filtering criteria including:
+The user can add more read groups if necessary but it is not recommended to change these they are already set to GATK best practices for RNA sequencing variant calling. https://software.broadinstitute.org/gatk/documentation/article.php?id=3891
+Step2: The prep_bam_3() This reorders the file into the correct chromosome order so it is the same as the reference genome. Do not change this if the files are not in the right order GATK cannot call variants.
+Step3: prep_align_sum() This function collects and presents alignment summary metrics including read depth, accuracy of alignment and others. These are all in the quality control folder. 
+Step4: markduplicates() This function marks the duplicates in the bam file for more accurate variant calling and filtering later on. This step takes the longest time to run.
+The functions after step 4 will provide visualization of alignment summary metrics including tables and bar graphs of read depths so samples below the threshold read depth for accurate variant calling we recommend at least 30 million reads. These files are then used in ExToolset to normalize variants found.
+```{bash}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+run_tools() {
+    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+    then
+      if [ -f "$file_in" ]; # IF INPUT THERE
+      then
+        echo1=$(echo "FOUND $file_in STARTING $tool")
+        mes_out
+        $tool # TOOL
+      else
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample""
+        mes_out # ERROR INPUT NOT THERE
+      fi
+      if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
+      then
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+      else 
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+  else
+        echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+  fi
+}
+prep_bam_2() {
+java $javaset -jar $AIDDtool/picard.jar AddOrReplaceReadGroups I="$rdbam"/$file_bam O="$wd"/$file_bam_2 RGID=4 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=20 ##this will set up filtering guidelines in bam files 
+}
+prep_bam_3() { 
+  java -jar $AIDDtool/picard.jar ReorderSam I="$wd"/$file_bam_2 O="$wd"/$file_bam_3 R="$ref_dir_path"/ref2.fa CREATE_INDEX=TRUE
+}
+prep_align_sum() {
+    ##this collect alignment metrics and piut them in quality control for user to look at for accuracy
+    java -jar $AIDDtool/picard.jar CollectAlignmentSummaryMetrics R="$ref_dir_path"/ref2.fa I="$wd"/$file_bam_3 O="$wd"/"$run"_alignment_metrics.txt
+    java -jar $AIDDtool/picard.jar CollectInsertSizeMetrics INPUT="$wd"/$file_bam_3 OUTPUT="$wd"/"$run"_insert_metrics.txt HISTOGRAM_FILE="$wd"/"$run"_insert_size_histogram.pdf
+##creates depth file for quality control on variant calling.
+echo1=$(echo "STARTING SAMTOOLS TO CHECK READ DEPTH")
+mes_out
+    samtools depth "$wd"/$file_bam_3 > "$wd"/"$run"depth_out.txt
+    mv "$wd"/"$run"_alignment_metrics.txt $dirqc/alignment_metrics/
+    mv "$wd"/"$run"_insert_metrics.txt $dirqc/insert_metrics/
+    mv "$wd"/"$run"_insert_size_histogram.pdf $dirqc/insert_metrics/
+}
+markduplicates(){
+    java $javaset -jar $AIDDtool/picard.jar MarkDuplicates INPUT="$wd"/$file_bam_3 OUTPUT="$wd"/$file_bam_dup METRICS_FILE="$wd"/"$run"metrics.txt
+}
+combine_file() {
+cat "$file_in" | sed '1!{/^CAT/d;}' | cut -d',' -f"$col_num" >> "$file_out"
+}
+Rbar() {
+Rscript "$sim_scripts"/barchart.R "$file_in" "$file_out" "$bartype"
+}
+summary_split() {
+source config.shlib; # load the config library functions that we defined in a prevous step
+dir_path=$(config_get dir_path)
+echo "$dir_path"
+INPUT="$dir_path"/AIDDtutorial/PHENO_DATA.csv
+OLDIFS=$IFS  
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+read
+while IFS=, read samp_name run condition sample condition2 condition3 
+do
+  wkd="$dirqc"/alignment_metrics
+  cat "$wkd"/"$run"_alignment_metrics.txt | sed '/^#/d' | sed 's/PAIR/'$run'/g' | sed '/^FIR/d' | sed '/^SEC/d' | sed 's/\t/,/g' | sed '1d' >> "$wkd"/"$run"_alignment_metrics.csv
+done
+} < $INPUT
+IFS=$OLDIFS
+}
+sum_combine() {
+wkd="$dirqc"/alignment_metrics
+cat "$wkd"/*.csv | sed '/^$/d' >> "$wkd"/all_summary.csv
+sed -i '1!{/^CAT/d;}' "$wkd"/all_summary.csv
+file_in="$wkd"/all_summary.csv
+file_out="$wkd"/all_summaryfilter.csv
+col_num=$(echo "1,6,7,13,18,20,21,22,23")
+tool=combine_file
+run_tools
+file_in="$wkd"/all_summary.csv
+file_out="$wkd"/all_summarynorm.csv
+col_num=$(echo "1,2")
+tool=combine_file
+run_tools
+file_in="$wkd"/all_summarynorm.csv
+file_out="$wkd"/all_summarynorm.tiff
+bartype=$(echo "single")
+tool=Rbar
+run_tools
+}
+sum_divid() {
+for colnum in 2 3 4 5 6 7 8 9 ; do
+colname=$(awk -F, 'NR==1{print $'$colnum'}' "$wkd"/all_summaryfilter.csv);
+file_in="$wkd"/all_summaryfilter.csv
+file_out="$wkd"/all_summary"$colname".csv
+col_num=$(echo "1,"$colnum"")
+tool=combine_file
+run_tools
+file_in="$wkd"/all_summary"$colname".csv
+file_out="$wkd"/all_summary"$colname".tiff
+bartype=$(echo "single")
+tool=Rbar
+run_tools
+done
+}
+source config.shlib; # load the config library functions that we defined in a prevous step
+dir_path=$(config_get dir_path)
+echo "$dir_path"
+INPUT="$dir_path"/AIDDtutorial/PHENO_DATA.csv
+  OLDIFS=$IFS  
+  {
+  [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+  read
+  while IFS=, read -r samp_name run condition sample condition2 condition3
+  do
+    cd /media/sf_AIDD/AIDDtutorial/AIDD
+    source config.shlib; # load the config library functions
+    dir_path="$(config_get dir_path)"; # main directory
+    wd="$dir_path"/working_directory; # working directory
+    home_dir="$(config_get home_dir)"; # home directory
+    ref_dir_path="$(config_get ref_dir_path)"; # reference directory
+    dirqc="$dir_path"/quality_control; # qc directory  
+    AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
+    rdvcf="$dir_path"/raw_data/vcf_files # directory for vcf files
+    rdbam="$dir_path"/raw_data/bam_files # directory for bam files
+    rdsnp="$dir_path"/raw_data/snpEff #directory for snp files
+    javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
+    fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
+    file_bam="$run".bam;
+    file_bam_2="$run"_2.bam;
+    file_bam_3="$run"_3.bam;
+    file_pdf="$run"_insert_size_histogram.pdf;
+    file_bam_dup="$run"_dedup_reads.bam;
+    sum_file="$dirqc"/alignment_metrics/"$run".txt 
+    tool=prep_bam_2
+    file_in="$rdbam"/$file_bam    
+    file_out="$wd"/$file_bam_2
+    run_tools
+    tool=prep_bam_3    
+    file_in="$wd"/$file_bam_2    
+    file_out="$wd"/$file_bam_3
+    run_tools
+    tool=prep_align_sum
+    file_in="$wd"/$file_bam_3   
+    file_out="$wd"/$file_pdf
+    rm -f "$wd"/"$file_bam_2"
+    run_tools
+    tool=markduplicates
+    file_in="$wd"/$file_bam_3    
+    file_out="$wd"/$file_bam_dup
+    run_tools
+  done
+  echo1=$(echo "DONE WITH VARIANT CALLING PART1 NOW STARTING VARIANT CALLING PART2")
+  mes_out
+  } < $INPUT
+  IFS=$OLDIFS
+echo1=$(echo "COLLECTING ALIGNMENT SUMMARIES")
+mes_out
+if [ ! -s "$matrix_file" ]; # can't find edited matrix
+then
+  INPUT="$dir_path"/PHENO_DATA.csv
+  OLDIFS=$IFS
+  {
+  [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+  read
+  while IFS=, read -r samp_name run condition sample condition2 condition3
+  do
+      summary_split
+  done
+  } < $INPUT
+  IFS=$OLDIFS
+  sum_combine
+  sum_divid
+  cd "$dir_path"/AIDD
+else
+  echo1=$(echo "found "$matrix_file" moving on")
+  mes_out
+fi
+```
+## VARIANT CALLING PART2:haplotype caller and filtering round 1.
+
+During this next chunk the variant calling is started with haplotype caller from GATK the command line for haplotype caller can found in haplotype1() and can be changed using GATK manual found here https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php
+although it is not recommended to change these parameters because it is done according to best practices.
+multiple steps are also included in this chunk to make it easier to run the tutorial. This chunk can take up to two hours a sample.
+
+The function haplotype1() first builds a bam index file for the bam file which allows for faster variant calling. Then the haplotypecaller tool from GATK is used with reference genome files and snp database reference to annotate the vcf file. The vcf file is then also stored as a table for easier data processing.
+The function filter1() first selects only snps and then only indels. It then uses VariantFiltration tools to filter based on QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0 which is:
+
+
+
+
+After these the newly filtered files are used to annotate the orignal bam file with the base recalibration tool
+the printreads tool is used to store these in a new bam file.
+This new bam file can then be used to perform variant calling haplotype caller round 2.
+```{bash}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+run_tools() {
+    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+    then
+      if [ -f "$file_in" ]; # IF INPUT THERE
+      then
+        echo1=$(echo "FOUND $file_in STARTING $tool")
+        mes_out
+        $tool # TOOL
+      else
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample""
+        mes_out # ERROR INPUT NOT THERE
+      fi
+      if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
+      then
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+      else 
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+  else
+        echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+  fi
+}
+haplotype1() {
+    java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$wd"/$file_bam_dup
+    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/$file_vcf_raw
+    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_variants.table
+}
+filter1() {
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -selectType SNP -o "$wd"/"$run"raw_snps.vcf
+    cp "$wd"/"$run"raw_snps.vcf "$rdvcf"/
+    ##runs variants to table for easier viewing of vcf files
+    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_snps.table
+    ##select more variants for filtering
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -selectType INDEL -o "$wd"/"$run"raw_indels.vcf
+    ##starting filtering steps
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_snps.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$wd"/"$run"filtered_snps.vcf
+    ##moves and converts vcf filtered snp file into table
+    cp "$wd"/"$run"filtered_snps.vcf "$rdvcf"/
+    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"filtered_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"filtered_snps.table
+    ##more filtering
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_indels.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o "$wd"/"$run"filtered_indels.vcf
+    ##rns base recalibrator to create new bam files with filtering taken into account
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T BaseRecalibrator -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -knownSites "$wd"/"$run"filtered_snps.vcf -knownSites "$wd"/"$run"filtered_indels.vcf --filter_reads_with_N_cigar -o "$wd"/"$run"recal_data.table
+    ##moves and converts vcf files
+    cp "$wd"/"$run"recal_data.table $dirqc/recalibration_plots/
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T BaseRecalibrator -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -knownSites "$wd"/"$run"filtered_snps.vcf -knownSites "$wd"/"$run"filtered_indels.vcf -BQSR "$wd"/"$run"recal_data.table --filter_reads_with_N_cigar -o "$wd"/"$run"post_recal_data.table
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T AnalyzeCovariates -R "$ref_dir_path"/ref2.fa -before "$wd"/"$run"recal_data.table -after "$wd"/"$run"post_recal_data.table -plots "$wd"/"$run"recalibration_plots.pdf
+    ##creates new bam file containing filtering data.
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T PrintReads -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -BQSR "$wd"/"$run"recal_data.table --filter_reads_with_N_cigar -o "$wd"/$file_bam_recal
+}
+source config.shlib; # load the config library functions that we defined in a prevous step
+dir_path=$(config_get dir_path)
+echo "$dir_path"
+INPUT="$dir_path"/AIDDtutorial/PHENO_DATA.csv
+  OLDIFS=$IFS  
+  {
+  [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+  read
+  while IFS=, read -r samp_name run condition sample condition2 condition3
+  do
+    cd /media/sf_AIDD/AIDDtutorial/AIDD
+    source config.shlib; # load the config library functions
+    dir_path="$(config_get dir_path)"; # main directory
+    wd="$dir_path"/working_directory; # working directory
+	home_dir="$(config_get home_dir)"; # home directory
+    ref_dir_path="$(config_get ref_dir_path)"; # reference directory
+    dirqc="$dir_path"/quality_control; # qc directory
+    AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
+    rdvcf="$dir_path"/raw_data/vcf_files # directory for vcf files
+    rdbam="$dir_path"/raw_data/bam_files # directory for bam files
+    rdsnp="$dir_path"/raw_data/snpEff #directory for snp files
+    javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
+    fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
+    ref_dir_path="$(config_get ref_dir_path)"; # directory for where to put the reference files
+    file_bam_dup="$run"_dedup_reads.bam;
+    file_bam_recal="$run"recal_reads.bam;
+    file_vcf_raw="$run"raw_variants.vcf;
+    tool=haplotype1
+    file_in="$wd"/$file_bam_dup    
+    file_out="$wd"/$file_vcf_raw
+    rm -f "$wd"/"$file_bam_3"
+    run_tools
+    tool=filter1
+    file_in="$wd"/$file_vcf_raw    
+    file_out="$wd"/$file_bam_recal
+    run_tools
+    echo1=$(echo "DONE WITH "$sample" NOW STARTING NEXT SAMPLE")
+    mes_out
+  done
+  echo1=$(echo "DONE WITH VARIANT CALLING PART2 NOW STARTING VARIANT CALLING PART3")
+  mes_out
+  } < $INPUT
+  IFS=$OLDIFS
+```
+## VARIANT CALLING PART3:haplotype caller and filtering round 2.
+
+This does the same as round 1 but with the newly annotated bam file from round 1.
+haplotype2() has same settings as haplotype1()
+filter2() has the same filter settings as filter1() except the print reads tool is not used and the final vcf files are stored in vcf_files folder in the folder raw_data.
+
+```{bash}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+run_tools() {
+    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+    then
+      if [ -f "$file_in" ]; # IF INPUT THERE
+      then
+        echo1=$(echo "FOUND $file_in STARTING $tool")
+        mes_out
+        $tool # TOOL
+      else
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample""
+        mes_out # ERROR INPUT NOT THERE
+      fi
+      if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
+      then
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+      else 
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+  else
+        echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+  fi
+}
+haplotype2() {
+  java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_recal --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/"$file_vcf_raw_recal"
+  java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_variants_recal.table   
+}
+filter2() {
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -selectType SNP -o "$wd"/"$file_vcf_recal"
+    cp "$wd"/"$file_vcf_recal" "$rdvcf"/
+    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_recal -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_snps_recal.table
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -selectType INDEL -o "$wd"/"$run"raw_indels_recal.vcf
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_recal" --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$wd"/"$file_vcf_finalAll"
+    cp "$wd"/"$file_vcf_finalAll" "$rdvcf"/
+    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_finalAll" -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"filtered_snps_finalAll.table
+    ##this finishes filtering indels
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_indels_recal.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o "$wd"/"$run"filtered_indels_recal.vcf
+}
+source config.shlib; # load the config library functions that we defined in a prevous step
+dir_path=$(config_get dir_path)
+echo "$dir_path"
+  INPUT="$dir_path"/AIDDtutorial/PHENO_DATA.csv
+  OLDIFS=$IFS  
+  {
+  [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+  read
+  while IFS=, read -r samp_name run condition sample condition2 condition3
+  do
+    cd /media/sf_AIDD/AIDDtutorial/AIDD
+    source config.shlib; # load the config library functions
+    dir_path="$(config_get dir_path)"; # main directory
+    wd="$dir_path"/working_directory; # working directory
+	home_dir="$(config_get home_dir)"; # home directory
+    ref_dir_path="$(config_get ref_dir_path)"; # reference directory
+    dirqc="$dir_path"/quality_control; # qc directory
+    AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
+    rdvcf="$dir_path"/raw_data/vcf_files # directory for vcf files
+    rdbam="$dir_path"/raw_data/bam_files # directory for bam files
+    rdsnp="$dir_path"/raw_data/snpEff #directory for snp files
+    javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
+    fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
+    ref_dir_path="$(config_get ref_dir_path)"; # directory for where to put the reference files 
+    file_bam_recal="$run"recal_reads.bam;
+    file_vcf_raw_recal="$run"raw_variants_recal.vcf;
+    file_vcf_recal="$run"raw_snps_recal.vcf;
+    file_vcf_finalAll="$run"filtered_snps_finalAll.vcf;
+    file_vcf_finalADAR="$run"filtered_snps_finalADARediting.vcf;
+    file_vcf_finalAPOBEC="$run"filtered_snps_finalAPOBECediting.vcf;
+    tool=haplotype2
+    file_in="$wd"/$file_bam_recal    
+    file_out="$wd"/$file_vcf_raw_recal
+    rm -f "$wd"/"$file_bam_dup"
+    run_tools
+    tool=filter2
+    file_in="$wd"/$file_vcf_raw_recal    
+    file_out="$wd"/$file_vcf_finalAll
+    run_tools
+    echo2=$(echo "DONE WITH "$sample" NOW STARTING NEXT SAMPLE")
+    mes_out
+  done
+  echo1=$(echo "DONE WITH VARIANT CALLING PART3 NOW STARTING VARIANT CALLING PART4")
+  mes_out
+  } < $INPUT
+  IFS=$OLDIFS
+```
+##  VARIANT CALLING PART4: snpEff prediction on structure and function.
+
+This next chunk will predict variants effect (from ADAR editing) on protein structure and function.
+excitome() will filter vcf file for A to G substitutions and T to C substitutions then it combines these to make ADARediting vcf files. Then C to T subsitutions and G to A substitutions then it combines these to make APOBECediting vcf files.
+snpEff() will use snpEff tool to predict effect of ADARediting variants and APOBECediting variants on protein structure and function.
+```{bash}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+run_tools() {
+    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+    then
+      if [ -f "$file_in" ]; # IF INPUT THERE
+      then
+        echo1=$(echo "FOUND $file_in STARTING $tool")
+        mes_out
+        $tool # TOOL
+      else
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample""
+        mes_out # ERROR INPUT NOT THERE
+      fi
+      if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
+      then
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+      else 
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+  else
+        echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
+        mes_out # ERROR OUTPUT IS THERE
+  fi
+}
+excitome_vcf() { 
+## filter out everything that is not ADAR mediated editing
+awk -F "\t" '/^#/' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalinfo.vcf #
+awk -F "\t" ' { if (($4 == "A") && ($5 == "G")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalAG.vcf
+awk -F "\t" '{ if (($4 == "T") && ($5 == "C")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalTC.vcf
+cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalAG.vcf "$rdvcf"/"$run"filtered_snps_finalTC.vcf > "$rdvcf"/"$file_vcf_finalADAR"
+awk -F "\t" ' { if (($4 == "C") && ($5 == "T")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalCT.vcf
+awk -F "\t" '{ if (($4 == "G") && ($5 == "A")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalGA.vcf
+cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalCT.vcf "$rdvcf"/"$run"filtered_snps_finalGA.vcf > "$rdvcf"/"$file_vcf_finalAPOBEC"
+}
+snpEff() {
+    java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf"/"$file_vcf_final""$snptype".vcf -stats "$dir_path"/raw_data/snpEff/"$snp_stats""$snptype" -csvStats "$dir_path"/raw_data/snpEff/"$snp_csv""$snptype".csv > "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf
+    ##converts final annotationed vcf to table for easier processing
+    java "$javaset"  -jar "$AIDDtool"/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf -F CHROM -F POS -F ID -F REF -F ALT -F QUAL -F AC -F ANN -o "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".table
+}
+source config.shlib; # load the config library functions that we defined in a prevous step
+dir_path=$(config_get dir_path)
+echo "$dir_path"
+  INPUT="$dir_path"/AIDDtutorial/PHENO_DATA.csv
+  OLDIFS=$IFS  
+  {
+  [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+  read
+  while IFS=, read -r samp_name run condition sample condition2 condition3
+  do
+  cd /media/sf_AIDD/AIDDtutorial/AIDD
+    source config.shlib; # load the config library functions
+    dir_path="$(config_get dir_path)"; # main directory
+    wd="$dir_path"/working_directory; # working directory
+    home_dir="$(config_get home_dir)"; # home directory
+    ref_dir_path="$(config_get ref_dir_path)"; # reference directory
+    dirqc="$dir_path"/quality_control; # qc directory
+    AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
+    rdvcf="$dir_path"/raw_data/vcf_files # directory for vcf files
+    rdsnp="$dir_path"/raw_data/snpEff # directory for snpEff files
+    rdbam="$dir_path"/raw_data/bam_files # directory for bam files
+    javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
+    fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
+    ref_dir_path="$(config_get ref_dir_path)"; # directory for where to put the reference files 
+    file_vcf_final="$run"filtered_snps_final;
+    file_vcf_finalAll="$run"filtered_snps_finalAll.vcf
+    file_vcf_finalADAR="$run"filtered_snps_finalADARediting.vcf
+    file_vcf_finalAPOBEC="$run"filtered_snps_finalAPOBECediting.vcf
+    snpEff_out="$run"filtered_snps_finalAnn;
+    snp_csv=snpEff"$run";
+    snp_stats="$run";
+    snpEff_in="$run"filtered_snps_final;
+    tool=excitome_vcf
+    file_in="$wd"/$file_vcf_finalAll  
+    file_out="$rdvcf"/$file_vcf_finalADAR
+    run_tools
+    for snptype in All AG TC CT GA ADARediting APOBECediting ; # DO ALL VARIANTS, ADAR VARIANTS, AND APOBEC VARIANTS
+    do
+      tool=snpEff
+      file_in="$wd"/"$file_vcf_final""$snptype".vcf    
+      file_out="$wd"/"$snp_out""$snptype".vcf
+      run_tools 
+    done  
+    echo1=$(echo "DONE WITH "$sample" NOW STARTING NEXT SAMPLE")
+    mes_out
+  done
+  echo1=$(echo "DONE WITH VARIANT_CALLING_PART_4 NOW CLEANING UP FILES")
+  mes_out
+  } < $INPUT
+  IFS=$OLDIFS
+```
+## ExToolset Part 1: Checks for raw data.
+
+This next chunk starts secondary analysis of raw data by checking to make sure all samples have all the right raw data.
+It is not recommended to change anything here it checks for gtf files to create gene and trancsript count matrix, it checks for read depth csv files from summary metrics, and then it checks for the snpEff output file for each sample.
+```{bash}
+create_dir() {
+if [ ! -d "$new_dir" ];
+then
+  mkdir "$new_dir"
+fi
+} # this creates directories $new_dir
+temp_dir() {
+if [ -d "$dir_path"/raw_data/ballgown/"$sample"/tmp.XX*/ ]; # IF TEMP_DIR IN SAMPLE FOLDER
+then
+  echo1=$(echo "FOUND TEMP DIRECTORY IN FOLDER FOR "$sample"")
+  mes_out
+  rm -f -R "$dir_path"/raw_data/ballgown/"$sample"/tmp.XX*/ #DELETE TMP_DIR
+fi
+} # deletes any temp directories created in error from stringtie
+create_filecheck() {
+if [ ! "$type1" == "none" ];
+then
+  if [ -s "$type1" ];
+  then
+    echo ""$run""$snptype"1,yes" >> "$filecheckVC"/filecheck"$snptype"1.csv
+  else
+    echo ""$run""$snptype"1,no" >> "$filecheckVC"/filecheck"$snptype"1.csv
+  fi
+fi
+if [ ! "$type2" == "none" ];
+then
+  if [ -s "$type2" ];
+  then
+    echo ""$run""$snptype"2,yes" >> "$filecheckVC"/filecheck"$snptype"2.csv
+  else
+    echo ""$run""$snptype"2,no" >> "$filecheckVC"/filecheck"$snptype"2.csv
+  fi
+fi
+} # creates file check matrix each sample creates row in the new csv yes means files is there no means it is not
+checkfile() {
+  missing=$(grep -o 'no' "$in_file" | wc -l)
+  if [ ! "$missing" == "0" ];
+  then
+    echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
+    mes_out
+  else
+    echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
+    mes_out
+  fi
+}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+cd "$dir_path"/AIDD
+echo1=$(echo "CHECKING DATA")
+mes_out
+source config.shlib; # load the config library functions that we defined in a prevous step
+dir_path=$(config_get dir_path)
+echo "$dir_path"
+INPUT="$dir_path"/AIDDtutorial/PHENO_DATA.csv
+OLDIFS=$IFS
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+read
+while IFS=, read -r samp_name run condition sample condition2 condition3
+do
+  cd /media/sf_AIDD/AIDDtutorial/AIDD
+  source config.shlib; # load the config library functions
+  home_dir=$(config_get home_dir);
+  dir_path=$(config_get dir_path); 
+  dirqc=$(config_get dirqc);
+  dirraw=$(config_get dirraw);
+  dirVC=$(config_get dirVC);
+  dirVCsubs=$(config_get dirVCsubs);
+  raw_input1="$dir_path"/raw_data/ballgown/"$sample"/"$sample".gtf
+  raw_input2="$dirqc"/alignment_metrics/"$run"_alignment_metrics.txt
+  new_dir="$dirqc"
+  create_dir
+  new_dir="$dirqc"/filecheck
+  create_dir
+  new_dir="$dirqc"/filecheckVC
+  create_dir
+  filecheckVC="$dirqc"/filecheck
+  type1="$raw_input1"
+  type2=none
+  snptype=gtf
+  temp_dir # delete temp directories if present
+  create_filecheck
+  type1=none
+  type2="$raw_input2"
+  snptype=summary
+  create_filecheck
+  for snptype in AG GA CT TC ADARediting APOBECediting All ;
+  do
+    filecheckVC="$dirqc"/filecheckVC
+    raw_input3="$dirraw"/snpEff/snpEff"$run""$snptype".csv
+    type1="$raw_input3"
+    type2=none
+    create_filecheck
+    filecheckVC="$dirqc"/filecheckVC
+    raw_input4="$dir_path"/raw_data/snpEff/snpEff"$run""$snptype".genes.txt
+    type2="$raw_input4"
+    type1=none
+    create_filecheck
+  done
+done 
+} < $INPUT
+IFS=$OLDIFS
+raw_check1="$dirqc"/filecheck/filecheckgtf1.csv #gtf
+raw_check2="$dirqc"/filecheck/filechecksummary2.csv #align
+for in_file in "$raw_check1" "$raw_check2" ;
+do
+  checkfile
+done
+for snptype in AG GA CT TC ADARediting APOBECediting All ;
+do
+  raw_check3="$dirqc"/filecheckVC/filecheck"$snptype"1.csv #snpeff.csv
+  for in_file in "$raw_check3" ;
+  do
+    checkfile
+  done
+done
+for snptype in AG GA CT TC ADARediting APOBECediting All ;
+do
+  raw_check4="$dirqc"/filecheckVC/filecheck"$snptype"2.csv #snpeff.txt
+  for in_file in "$raw_check4" ;
+  do
+    checkfile
+  done
+done
+```
+## ExToolset part 2: Creating gene and transcript count matrix
+
+This next chunk will use a python script downloaded with stringtie to create a gene count matrix and transcript count matrix in the proper format for DESeq2 analysis. It then will create a gene of interest count matrix with user defined gene and transcripts of interest (to supply these follow the instructions on the desktop or in the manual on github)
+The last matrix is the excitome matrix of all the gene involved in the excitome including ADAR family members)
+
+```{bash}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+creatematrix() {
+cd "$dir_path"/raw_data/
+python "$ExToolset"/prepDE.py -g "$dirres"/gene_count_matrix.csv -t "$dirres"/transcript_count_matrix.csv
+cd "$dir_path"/AIDD/
+} # runs python script to summarize gtf files in count matrix
+matrixeditor() {
+Rscript "$ExToolset"/matrixedit.R "$file_out" "$file_in" "$index_file" "$pheno_file" "$Rtool" "$level_id" "$level_name" "$filter_type" "$level"
+} # creates matrix counts with names instead of ids and checks to make sure they are there
+temp_file() {
+if [ -s "$dir_path"/temp.csv ];
+then
+  rm "$file_in"
+  mv "$dir_path"/temp.csv "$file_in"
+fi
+}
+mergeR() {
+Rscript "$ExToolset"/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" #creates level of interest files
+} # Runs multimerge R
+
+echo1=$(echo "CREATING GTEX MATRIX")
+mes_out
+if [[ ! -s "$matrix_file" || ! -s "$matrix_file2" ]]; # can't find edited matrix
+then
+  #any_no= # count how many lines contain no "$filecheckVC"/filecheck"$snptype"1.csv
+  #if [ "$any_no" == "0" ];
+  #then
+    creatematrix
+  #else
+  #  echo "Please check for misssing files"
+  #fi
+else
+  echo1=$(echo "ALREADY FOUND "$matrix_file" AND "$matrix_file2"")
+  mes_out
+fi # THIS WILL CREATE GENE_COUNT_MATRIX AND TRANSCRIPT_COUNT_MATRIX
+cd "$dir_path"/AIDD
+for level in gene transcript ;
+do
+  if [[ -s "$matrix_file" && -s "$matrix_file2" ]];
+  then
+    if [[ ! -s "$matrix_fileedit" || ! -s "$matrix_fileedit2" ]];
+    then
+      file_out="$dirres"/"$level"_count_matrixedited.csv
+      file_in="$dirres"/"$level"_count_matrix.csv
+      index_file="$ExToolsetix"/index/"$level"_names.csv
+      pheno_file="$dir_path"/PHENO_DATA.csv
+      Rtool=GTEX
+      level_id=$(echo ""$level"_id");
+      level_name=$(echo ""$level"_name");
+      filter_type=$(echo "protein_coding");
+      level="$level"
+      sed -i 's/-/_/g' "$index_file"
+      echo1=$(echo "CREATING "$file_out"")
+      mes_out
+      matrixeditor
+    else
+      echo1=$(echo "ALREADY FOUND "$matrix_fileedit" OR "$matrix_fileedit2"")
+      mes_out
+    fi
+  else
+    echo1=$(echo "CANT FIND "$matrix_file" OR "$matrix_file2"")
+    mes_out
+  fi
+done # NOW HAVE GENE AND TRANSCRIPT OF INTEREST FILES AND EDITED COUNT_MATRIX FILES
+INPUT="$dir_path"/PHENO_DATA.csv
+OLDIFS=$IFS
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+read
+while IFS=, read -r samp_name run condition sample condition2 condition3
+do
+  source config.shlib;
+  home_dir=$(config_get home_dir);
+  dir_path=$(config_get dir_path);
+  dirres=$(config_get dirres);
+  for level in gene transcript ;
+  do
+    file_out="$dirres"/"$level"_count_matrixedited.csv
+    cat "$file_out" | sed 's/'$sample'/'$samp_name'/g' >> "$dir_path"/temp.csv
+    file_in="$file_out"
+    temp_file
+  done
+done 
+} < $INPUT
+IFS=$OLDIFS
+for level in gene transcript ;
+do
+  if [[ -s "$matrix_fileedit" && -s "$matrix_fileedit2" ]];
+  then
+    if [ ! -s "$matrix_file3" ];
+    then
+      cur_wkd="$dirres"
+      summaryfile=none
+      Rtool=transpose
+      Rtype=single2f
+      file_out="$dirres"/"$level"ofinterest_count_matrix.csv #3
+      mergefile="$ExToolsetix"/"$level"_list/DESeq2/"$level"ofinterest.csv #7
+      phenofile="$dirres"/"$level"_count_matrixedited.csv #8
+      level_name=$(echo ""$level"_name")
+      sed -i 's/-/_/g' "$mergefile"
+      echo1=$(echo "CREATING "$file_out"")
+      mes_out
+      mergeR
+      sed -i 's/   //g' "$file_out"
+      sed -i 's/  //g' "$file_out"
+      sed -i '2d' "$file_out"
+    else
+      echo1=$(echo "ALREADY FOUND "$matrix_file3"")
+      mes_out
+    fi
+  else
+    echo1=$(echo "CANT FIND "$matrix_fileedit" OR "$matrix_fileedit2"")
+    mes_out
+  fi
+done
+if [ -s "$matrix_file" ];
+then
+  if [ ! -s "$matrix_file4" ];
+  then
+    cur_wkd="$dirres"
+    summaryfile=none
+    Rtool=transpose
+    Rtype=single2f
+    file_out="$dirres"/excitome_count_matrix.csv
+    mergefile="$ExToolsetix"/gene_list/DESeq2/excitome.csv
+    phenofile="$dirres"/gene_count_matrixedited.csv
+    level_name=$(echo "gene_name")
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    mergeR
+    sed -i '2d' "$file_out"
+  else
+    echo1=$(echo "ALREADY FOUND "$matrix_file4"")
+    mes_out
+  fi
+else
+  echo1=$(echo "CANT FIND "$matrix_file"") 
+  mes_out
+fi # NOW HAVE EXCTIOME MATRIX
+if [[ -s "$matrix_file3a" && -s "$matrix_file3b" ]];
+then
+  if [ ! -s "$matrix_file5" ];
+  then
+    cur_wkd="$dirres"
+    summaryfile=none
+    Rtool=finalmerge
+    Rtype=single2f
+    level_name=$(echo "gene_name")
+    file_out="$dirres"/genetrans_count_matrix.csv
+    mergefile="$dirres"/geneofinterest_count_matrix.csv
+    phenofile="$dirres"/transcriptofinterest_count_matrix.csv
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    mergeR
+  else
+    echo1=$(echo "ALREADY FOUND "$matrix_file5"")
+    mes_out
+  fi
+else
+  echo1=$(echo "CANT FIND "$matrix_file3a" OR "$matrix_file3b"") 
+  mes_out
+fi # NOW HAVE genetrans MATRIX
+if [[ -s "$matrix_file5" && -s "$matrix_file4" ]];
+then
+  if [ ! -s "$matrix_file6" ];
+  then
+    cur_wkd="$dirres"
+    summaryfile=none
+    Rtool=finalmerge
+    Rtype=single2f
+    file_out="$dirres"/GTEX_count_matrix.csv
+    mergefile="$dirres"/genetrans_count_matrix.csv
+    phenofile="$dirres"/excitome_count_matrix.csv
+    level_name=$(echo "gene_name")
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    mergeR
+  else
+    echo1=$(echo "ALREADY FOUND "$matrix_file6"")
+    mes_out
+  fi
+else
+  echo1=$(echo "CANT FIND "$matrix_file5" OR "$matrix_file4"") 
+  mes_out
+fi # NOW HAVE GTEX MATRIX
+```
+##ExToolset part3: Creating 
+
+
+```{bash}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+create_dir() {
+if [ ! -d "$new_dir" ];
+then
+  mkdir "$new_dir"
+fi
+} # this creates directories $new_dir
+matrixeditor() {
+Rscript "$ExToolset"/matrixedit.R "$file_out" "$file_in" "$index_file" "$pheno_file" "$Rtool" "$level_id" "$level_name" "$filter_type" "$level"
+} # creates matrix counts with names instead of ids and checks to make sure they are there
+mergeR() {
+Rscript "$ExToolset"/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" #creates level of interest files
+} # Runs multimerge R
+temp_file() {
+if [ -s "$dir_path"/temp.csv ];
+then
+  rm "$file_in"
+  mv "$dir_path"/temp.csv "$file_in"
+fi
+}
+echo1=$(echo "CREATING G_VEX MATRIX")
+mes_out
+new_dir="$dirVC"
+create_dir
+new_dir="$dirVCsubs"
+create_dir
+if [[ ! -s "$matrix_file7"  && ! -s "$matrix_file8" ]]; # can't find edited matrix
+then
+  cd "$dir_path"/AIDD
+  INPUT="$dir_path"/PHENO_DATA.csv
+  OLDIFS=$IFS
+  {
+  [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+  read
+  while IFS=, read -r samp_name run condition sample condition2 condition3
+  do
+    source config.shlib;
+    home_dir=$(config_get home_dir);
+    dir_path=$(config_get dir_path); 
+    dirqc=$(config_get dirqc);
+    dirraw=$(config_get dirraw);
+    dirVC=$(config_get dirVC);
+    dirVCsubs=$(config_get dirVCsubs);
+    echo1="STARTING G_VEX FOR "$run" VARIANTS"
+    mes_out
+    for snptype in AG GA CT TC ADARediting APOBECediting All ;
+    do
+      #any_no= # count how many lines contain no "$filecheckVC"/filecheck"$snptype"1.csv
+      #if [ "$any_no" == "0" ];
+      #then
+        raw_input3="$dirraw"/snpEff/snpEff"$run""$snptype".csv
+        cat "$raw_input3" | sed '1d' | sed 's/# />/g' | sed 's/\//_/g' | sed  '/^\s*$/d' | sed 's/Base/'$run'nucleotide_count_matrixprep/g' | sed 's/Amino/'$run'amino_acid_count_matrixprep/g' >> "$dirVCsubs"/"$run""$snptype".csv
+      #else
+        #echo "Can't find files for GVEX" ; exit ;
+      #fi
+      new_dir="$dirVCsubs"/raw/
+      create_dir
+      new_dir="$dirVCsubs"/raw/"$run""$snptype"
+      create_dir
+      cd "$dirVCsubs"/raw/"$run""$snptype"
+      csplit -s -z "$dirVCsubs"/"$run""$snptype".csv '/>/' '{*}' # take the sample new csv file and split"
+      for i in xx* ; do \
+        n=$(sed 's/>// ; s/ .*// ; 1q' "$i") ; \
+        mv "$i" "$n.csv" ; \
+        sed -i '1d' ""$n".csv"
+      done # now you have split files for each sample in the folder
+      cd "$dir_path"/AIDD/
+      for level in nucleotide amino_acid ;
+      do
+        new_dir="$dirVC"/"$level"
+        create_dir
+        file_in="$dirVCsubs"/raw/"$run""$snptype"/"$run""$level"_count_matrixprep.csv # this has the raw matrix for need to vector
+        new_wkd="$dirVC"/"$level"/merge"$snptype"
+        new_dir="$new_wkd"
+        create_dir
+        sed -i 's/  //g'  "$file_in"
+        sed -i 's/ //g' "$file_in"
+        
+        index_file="$ExToolsetix"/index/"$level"_names.csv
+        pheno_file="$new_wkd"/"$run""$level"_count_matrixprep.csv # output file directory name
+        Rtool=G_VEX
+        matrixeditor 
+        cat "$pheno_file" | cut -d',' -f2,3 | sed '1d' | sed '1i sub_names,'$run'' >> "$dir_path"/temp.csv
+        if [ -s ""$dir_path"/temp.csv" ];
+        then
+          rm "$pheno_file"
+        fi
+        mv "$dir_path"/temp.csv "$pheno_file"
+      done
+    done
+  done 
+  } < $INPUT
+  IFS=$OLDIFS
+  summaryfile="$dir_path"/quality_control/alignment_metrics/all_summaryPF_READS_ALIGNED.csv
+  run=$(awk -F',' 'NR==2 { print $2 }' "$dir_path"/PHENO_DATA.csv)
+  sed -i 's/'$run'/'$run'.x/g' "$summaryfile"
+  if [ -s "$summaryfile" ];
+  then
+    for snptype in AG GA CT TC ADARediting APOBECediting All ;
+    do
+      for level in nucleotide amino_acid ;
+      do
+        cur_wkd="$dirVC"/"$level"/merge"$snptype";
+        file_out="$dirVC"/"$level"/"$level""$snptype"_count_matrix.csv
+        cd "$dirVC"/"$level"/merge"$snptype"
+        Rtool=G_VEX
+        Rtype=multi
+        names=$(echo "sub_names")
+        mergefile=none
+        phenofile=none
+        echo1=$(echo "CREATING "$file_out"")
+        mes_out
+        mergeR
+        summary=$(head -n 1 "$file_out" | awk -F',' '{ print NF }')
+        totcol=$(expr "$summary" - "1")
+        newcol_num=$(expr "$summary" + "1")
+        for sub_col in $(seq "2" "$totcol") ;
+        do
+          newcol_num=$(expr "$totcol" + "$sub_col")
+          subname=$(awk -F',' 'NR==1 { print $'$sub_col' }' "$file_out")
+          norm=$(echo "10000")
+          cat "$file_out" | awk -F',' '{$'$newcol_num' = sprintf("%.5f", $'$sub_col' / $'$summary' * '$norm')}1' | sed 's/-nan/'$subname'norm/g' | sed 's/      /,/g' | sed 's/  /,/g' | sed 's/ /,/g' | sed 's/.x//g' | awk -F',' '!x[$1]++' >> "$dir_path"/temp2.csv
+          if [ -s ""$dir_path"/temp2.csv" ];
+          then
+            rm "$file_out"
+            mv "$dir_path"/temp2.csv "$file_out"
+          fi
+        done
+      done
+    done
+  sed -i 's/.x//g' "$summaryfile"
+  sed -i 's/.y//g' "$summaryfile"
+  else
+    echo1=$(echo "CANT FIND "$summaryfile"")
+    mes_out
+  fi
+  cd "$dir_path"/AIDD/ 
+  for level in nucleotide amino_acid ;
+  do
+    snptype=All
+    final_file="$dirVC"/"$level"/"$level""$snptype"_count_matrix.csv
+    if [ -s "$final_file" ];
+    then
+      final_file2="$dirres"/"$level"_count_matrix.csv
+      cp "$final_file" "$final_file2"
+      if [ "$level" == "amino_acid" ];
+      then
+        cat "$final_file2" | sed 's/.x//g' | sed 's/.y//g' | cut -d',' --complement -f2-15 >> "$dir_path"/temp.csv
+        file_in="$final_file2"
+        temp_file
+      fi
+      if [ "$level" == "nucleotide" ];
+      then
+        cat "$final_file2" | sed 's/.x//g' | sed 's/.y//g' | cut -d',' --complement -f2-18 >> "$dir_path"/temp.csv
+        file_in="$final_file2"
+        temp_file
+      fi
+    fi
+  done
+else
+  echo1=$(echo "ALREADY FOUND "$matrix_file7" OR "$matrix_file7"")
+  mes_out
+fi # NOW YOU HAVE AMINO_ACID AND NUCLEOTIDE MATRIX  
+if [[ -s "$matrix_file7" && -s "$matrix_file8" ]];
+then
+  if [ ! -s "$matrix_file9" ]; # can't find edited matrix
+  then
+    cur_wkd="$dirVC"
+    summaryfile="$dirres"/amino_acid_count_matrix.csv #
+    Rtool=none
+    Rtype=single
+    file_out="$dirres"/subs_count_matrix.csv
+    mergefile="$dirres"/nucleotide_count_matrix.csv #file_in
+    phenofile="$dir_path"/PHENO_DATA.csv
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    mergeR
+    sed -i 's/\n//g' "$file_out"
+  else
+    echo1=$(echo "ALREADY FOUND "$matrix_file9"")
+    mes_out
+  fi
+else
+  echo1=$(echo "CANT FIND "$matrix_file7" OR "$matrix_file8"")
+  mes_out
+fi
+```
+##ExToolset part4: Impact 
+
+```{bash}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
+create_dir() {
+if [ ! -d "$new_dir" ];
+then
+  mkdir "$new_dir"
+fi
+} # this creates directories $new_dir
+matrixeditor() {
+Rscript "$ExToolset"/matrixedit.R "$file_out" "$file_in" "$index_file" "$pheno_file" "$Rtool" "$level_id" "$level_name" "$filter_type" "$level"
+} # creates matrix counts with names instead of ids and checks to make sure they are there
+mergeR() {
+Rscript "$ExToolset"/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" #creates level of interest files
+} # Runs multimerge R
+temp_file() {
+if [ -s "$dir_path"/temp.csv ];
+then
+  rm "$file_in"
+  mv "$dir_path"/temp.csv "$file_in"
+fi
+}
+filter_impact() {
+#any_no= # count how many lines contain no "$filecheckVC"/filecheck"$snptype"2.csv
+#if [ "$any_no" == "0" ];
+#then
+addcondition=$(echo ""$con_name1"_"$condition"_"$con_name2"_"$condition2"_"$con_name3"_"$condition3"_"$con_name4"_"$condition4"")
+  cat "$raw_input4" | sed '1,2d' | sed 's/	/,/g' | sed 's/    /,/g' | sed 's/  /,/g' | sed 's/ /,/g' | cut -d',' -f"$col_num" | sed '1i\ '$impact''$variable''$snptype'' | sed '/,0$/d' | sort -t, -u | sed 's/ /,/g' >> "$VC_dir"/"$level"/"$impact"/"$run""$snptype""$addcondition".csv
+count=$(cat "$VC_dir"/"$level"/"$impact"/"$run""$snptype""$addcondition".csv | wc -l)
+  new_dir="$VC_dir"/final
+  create_dir
+  if [ ! -s "$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv ];
+  then
+    echo "run,"$level""$impact""$snptype",readdepth" >> "$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv
+  fi
+  echo ""$run","$count","$readdepth"" >> "$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv
+#else
+  #echo "Can't find files for GVEX" ; exit ;
+#fi
+} # this will create impact files for each sample
+echo1=$(echo "CREATING I_VEX MATRIX")
+mes_out
+cd "$dir_path"/AIDD
+summaryfile="$dir_path"/quality_control/alignment_metrics/all_summaryPF_READS_ALIGNED.csv
+sed -i 's/name/CATEGORY/g' "$summaryfile"
+if [ ! -s "$matrix_file10" ]; # can't find edited matrix
+then 
+  if [ -s "$summaryfile" ];
+  then
+    cur_wkd="$dirres"/variant_calling
+    Rtool=none
+    Rtype=onesingle
+    file_out="$dir_path"/PHENO_DATAalign.csv
+    mergefile=none
+    phenofile="$dir_path"/PHENO_DATA.csv
+    sed -i 's/.x//g' "$summaryfile"
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    mergeR
+    file_in="$dir_path"/PHENO_DATAalign.csv
+    file_out="$dir_path"/readdepth.tiff
+    bartype=readdepth
+    tool=Rbar
+    run_tools
+    file_in="$dir_path"/PHENO_DATAalign.csv
+    cat "$file_in" | awk -F',' '!x[$0]++' >> "$dir_path"/temp.csv
+    temp_file
+    INPUT="$dir_path"/PHENO_DATAalign.csv
+    OLDIFS=$IFS
+    {
+    IFS=,
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+    read
+    while read  run samp_name condition sample condition2 condition3 readdepth
+    do
+      source config.shlib
+      dir_path="$(config_get dir_path)"; # main directory
+      home_dir="$(config_get home_dir)"; # home directory
+      dirqc="$dir_path"/quality_control; # qc directory 
+      wkd="$dirres";
+      VC_dir="$dirres"/variant_calling/impact
+      con_name1=$(config_get con_name1);
+      con_name2=$(config_get con_name2);
+      con_name3=$(config_get con_name3);
+      echo1=$(echo "Now starting "$run" which is "$con_name1"="$condition", "$con_name2"="$condition2", "$con_name3"="$condition3", and has read depth of "$readdepth"")
+
+      mes_out
+      new_dir="$VC_dir"
+      create_dir
+      for level in gene transcript ;
+      do
+        new_dir="$VC_dir"/"$level"
+        create_dir
+        for impact in high_impact moderate_impact ;
+        do
+          new_dir="$VC_dir"/"$level"/"$impact"
+          create_dir      
+          for snptype in AG GA CT TC APOBECediting ADARediting All ;
+          do
+            raw_input4="$dir_path"/raw_data/snpEff/snpEff"$run""$snptype".genes.txt
+            if [[ "$level" == "gene" && "$impact" == "high_impact" ]];
+            then
+              col_num="2,5"
+              filter_impact
+            fi
+            if [[ "$level" == "gene" && "$impact" == "moderate_impact" ]];
+            then
+              col_num="2,7"
+              filter_impact
+            fi
+            if [[ "$level" == "transcript" && "$impact" == "high_impact" ]];
+            then
+              col_num="3,5"
+              filter_impact
+            fi
+            if [[ "$level" == "transcript" && "$impact" == "moderate_impact" ]];
+            then
+              col_num="3,7"
+              filter_impact
+            fi
+          done
+        done
+      done
+    done
+    } < $INPUT
+    IFS=$OLDIFS # creates count matrix
+    source config.shlib
+    dir_path="$(config_get dir_path)"; # main directory
+    home_dir="$(config_get home_dir)"; # home directory
+    VC_dir="$dirres"/variant_calling/impact
+    for level in gene transcript ;
+    do
+      for impact in high_impact moderate_impact ;
+      do
+        for snptype in All GA AG CT TC APOBECediting ADARediting ;
+        do
+          file_in="$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv
+          #cat "$file_in" | awk -F',' '!x[$1]++' >> "$dir_path"/temp.csv
+          #temp_file
+          #file_in="$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv
+          summary=$(head -n 1 "$file_in" | awk -F',' '{ print NF }')
+          counts=$(expr "$summary" - "1")
+          newcol_num=$(expr "$summary" + "1")
+          norm=$(echo "10000")
+          cut_col=$(echo "1,"$newcol_num"")
+          cat "$file_in" | awk -F',' '{$'$newcol_num' = sprintf("%.5f", $'$counts' / $'$summary' * '$norm')}1'| sed 's/-nan/'$level''$impact''$snptype'normalized/g' | sed 's/ /,/g' | cut -d',' -f"$cut_col" | sort | uniq >> "$dir_path"/temp.csv
+          temp_file
+        done
+      done
+    done
+    cd "$VC_dir"/final
+    cur_wkd="$VC_dir"
+    Rtool=$(echo "I_VEX")
+    Rtype=$(echo "multi")
+    summaryfile=none
+    names=$(echo "run")
+    file_out="$dirres"/variant_calling/impact/impact_count_matrix.csv
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    mergeR
+    file_in="$dirres"/variant_calling/impact/impact_count_matrix.csv
+    cat "$file_in" | cut -d',' --complement -f2 | sed 's/.y//g' >> "$dir_path"/temp.csv
+    temp_file
+    cp "$file_in" "$dirres"/
+  else
+    echo1=$(echo "CANT FIND "$summaryfile"")
+    mes_out
+  fi
+else
+  echo1=$(echo "ALREADY HAVE "$matrix_file10"")
+  mes_out
+fi
+if [ ! -s "$matrix_file11" ];
+then
+  if [[ -s "$matrix_file10" && -s "$matrix_file9" ]];
+  then
+    cur_wkd="$dirres"/variant_calling
+    summaryfile=none
+    Rtool=finalmerge
+    Rtype=single2f
+    file_out="$dirres"/VEX_count_matrix.csv
+    mergefile="$dirres"/subs_count_matrix.csv
+    phenofile="$dirres"/impact_count_matrix.csv
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    mergeR
+  else
+    echo1=$(echo "CANT FIND "$matrix_file10" OR "$matrix_file9"")
+    mes_out
+  fi
+else
+  echo1=$(echo "ALREADY FOUND "$matrix_file11"")
+  mes_out
+fi
+if [ ! -s "$matrix_filefinal" ];
+then
+  if [ -s "$matrix_file11" ];
+  then
+    cd "$dir_path"/AIDD
+    INPUT="$dir_path"/PHENO_DATA.csv
+    OLDIFS=$IFS
+    {
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+    read
+    while IFS=, read -r samp_name run condition sample condition2 condition3
+    do
+      source config.shlib;
+      home_dir=$(config_get home_dir);
+      dir_path=$(config_get dir_path);
+      dirres=$(config_get dirres);
+      for level in gene transcript ;
+      do
+        file_out="$dirres"/VEX_count_matrix.csv
+        cat "$file_out" | sed 's/'$run'/'$samp_name'/g' >> "$dir_path"/temp.csv
+        file_in="$file_out"
+        temp_file
+      done
+    done 
+    } < $INPUT
+    IFS=$OLDIFS
+    cur_wkd="$dirres"/variant_calling
+    summaryfile=none
+    Rtool=finalmerge
+    Rtype=single2f
+    file_out="$dirres"/all_count_matrix.csv
+    mergefile="$dirres"/VEX_count_matrix.csv
+    phenofile="$dirres"/GTEX_count_matrix.csv
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    mergeR
+  else
+    echo1=$(echo "CANT FIND "$matrix_file11"")
+    mes_out
+  fi
+else
+  echo1=$(echo "ALREADY FOUND "$matrix_filefinal"")
+  mes_out
+fi
+```
+## ExToolset part5: Create bar graphs for all counts in excitome
+
+```{bash}
+source config.shlib;
+home_dir=$(config_get home_dir);
+dir_path=$(config_get dir_path);
+dirres=$(config_get dirres);
+dirresall="$dirres"/all
+new_dir="$dirresall"
+create_dir
+ExToolset="$dir_path"/AIDD/ExToolset/scripts
+ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
+allcm="$dirres"/all_count_matrix.csv
+allcmedit="$dirresall"/all_count_matrixedit.csv
+allindex="$dirresall"/allindex.csv
+file_in="$allcm"
+file_out="$allcmedit"
+tool=editmatrix
+run_tools
+file_in="$allcmedit"
+file_out="$allindex"
+tool=createindex
+run_tools
+INPUT="$allindex"
+OLDIFS=$IFS
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+read
+while IFS=, read -r freq
+do
+  source config.shlib;
+  home_dir=$(config_get home_dir);
+  dir_path=$(config_get dir_path);
+  dirres=$(config_get dirres);
+  con_name1=$(config_get con_name1);
+  con_name2=$(config_get con_name2);
+  con_name3=$(config_get con_name3);
+  con_name4=$(echo "sampname");
+  echo1=$(echo "STARTING ANOVA FOR "$freq"")
+  mes_out
+  for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4";
+  do
+    dirrescon="$dirres"/all/"$cond_name";
+    new_dir="$dirrescon";
+    create_dir
+    file_in="$dirres"/all/all_count_matrixedit.csv;
+    file_out="$dirrescon"/"$freq"summary.tiff;
+    bartype=ANOVA
+    pheno="$dir_path"/PHENO_DATA.csv
+    count_of_interest="$freq"
+    sum_file="$dirrescon"/"$freq"summary.csv
+    condition_name="$cond_name"
+    sum_file2="$dirrescon"/"$freq"ANOVA.txt
+    tool=Rbar
+    sum_file="$dirres"/all/"$cond_name"/"$freq"summary.csv
+    sed -i 's/freq_name/'$freq'/g' "$ExToolset"/barchart.R
+    sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
+    run_tools
+    sed -i 's/'$freq'/freq_name/g' "$ExToolset"/barchart.R 
+    sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
+    if [ -s "$dirrescon"/"$freq"ANOVA.txt ];
+    then
+      line=$(echo "11")
+      pvalue=$(sed -n "$line p" "$dirrescon"/"$freq"ANOVA.txt)
+      justp=${pvalue#*:}
+      if [ ! -s "$dirres"/all/"$cond_name"allANOVA.csv ];
+      then
+        echo "variable,ANOVApvalue" >> "$dirres"/all/"$cond_name"allANOVA.csv
+      fi
+      echo ""$freq","$justp"" >> "$dirres"/all/"$cond_name"allANOVA.csv
+    fi
+  done
+done 
+} < $INPUT
+IFS=$OLDIFS
+con_name1=$(config_get con_name1);
+con_name2=$(config_get con_name2);
+con_name3=$(config_get con_name3);
+con_name4=$(echo "sampname");
+for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4" ;
+do
+  echo1=$(echo "STARTING SUMMARY COLLECTION FOR "$cond_name"")
+  mes_out
+  cat "$dirres"/all/"$cond_name"/*summary.csv | sed '2,${/^sampname/d;}' >> "$dirres"/all/"$cond_name"allsummaries.csv
+  file_in="$dirres"/all/"$cond_name"allsummaries.csv
+  file_out="$dirres"/all/"$cond_name"allsummaries.tiff
+  bartype=substitutions
+  tool=Rbar
+  sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
+  run_tools
+  sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
+done
+```
+## ExToolset part 6: Create scatterplots and correlation matrix for the excitome
+
+```{bash}
+INPUT="$ExToolsetix"/index/scatterplots.csv
+OLDIFS=$IFS
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+read
+while IFS=, read -r scatter_x scatter_y
+do
+  source config.shlib;
+  home_dir=$(config_get home_dir);
+  dir_path=$(config_get dir_path);
+  dirres=$(config_get dirres);
+  ExToolset="$dir_path"/AIDD/ExToolset/scripts
+  file_in="$dirres"/all_count_matrix.csv;
+  dirrescorr="$dirres"/all/correlations
+  new_dir="$dirrescorr"
+  create_dir
+  con_name1=$(config_get con_name1);
+  con_name2=$(config_get con_name2);
+  con_name3=$(config_get con_name3);
+  con_name4=$(echo "sampname");
+  echo1=$(echo "STARTING CORRELATION FOR "$scatter_x" AND "$scatter_y"")
+  mes_out
+  file_out="$dirrescorr"/"$scatter_x""$scatter_y"scatterplot.tiff
+  file_out2="$dirrescorr"/"$scatter_x""$scatter_y"scatterplot.txt
+  bartype=scatter
+  tool=Rbar
+  sed -i 's/scatter_x/'$scatter_x'/g' "$ExToolset"/barchart.R
+  sed -i 's/scatter_y/'$scatter_y'/g' "$ExToolset"/barchart.R
+  sed -i 's/cond_1/'$con_name1'/g' "$ExToolset"/barchart.R
+  sed -i 's/cond_2/'$con_name2'/g' "$ExToolset"/barchart.R
+  sed -i 's/cond_4/'$con_name4'/g' "$ExToolset"/barchart.R
+  run_tools
+  sed -i 's/'$scatter_x'/scatter_x/g' "$ExToolset"/barchart.R
+  sed -i 's/'$scatter_y'/scatter_y/g' "$ExToolset"/barchart.R
+  sed -i 's/'$con_name1'/cond_1/g' "$ExToolset"/barchart.R
+  sed -i 's/'$con_name2'/cond_2/g' "$ExToolset"/barchart.R
+  sed -i 's/'$con_name4'/cond_4/g' "$ExToolset"/barchart.R
+done 
+} < $INPUT
+IFS=$OLDIFS
+####################################################################################################################
+# RUNS EXTOOLSET FOR CORRELATION SUMMARY
+####################################################################################################################
+  echo1=$(echo "STARTING CORRELATION SUMMARIES")
+  mes_out
+INPUT="$ExToolsetix"/index/scatterplots.csv
+OLDIFS=$IFS
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+read
+while IFS=, read -r scatter_x scatter_y
+do
+  source config.shlib;
+  home_dir=$(config_get home_dir);
+  dir_path=$(config_get dir_path);
+  dirres=$(config_get dirres);
+  dirrescorr="$dirres"/all/correlations
+  ExToolset="$dir_path"/AIDD/ExToolset/scripts
+  file_in="$dirrescorr"/"$name"corr.txt
+  file_out="$dirrescorr"/all_corr_data.cvs
+  name=$(echo ""$scatter_x""$scatter_y"")
+  corr_file="$dirrescorr"/"$name"scatterplot.txt
+  pcorr=$(cat "$corr_file" | awk '/   cor/{nr[NR+1]}; NR in nr')
+  new_file="$dir_path"/correlations/temp.csv
+  lowCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $2}') 
+  highCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $3}')
+  p_value=$(cat "$corr_file" | awk '/p-value /{nr[NR]}; NR in nr' | sed 's/ //g' | sed 's/p-value=/p-value</g' | sed 's/</,/g' | awk -F ',' 'NR=1{print $4}')
+  echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirres"/all/all_corr_data.csv
+done 
+} < $INPUT
+IFS=$OLDIFS
+cat "$dirres"/all/all_corr_data.csv | sort -k5 |  >> "$dirres"/all/all_corr_datasig.csv
+```
+## ExToolset part 7: Impact gene lists
+
+creates gene and transcript lists for each condition of genes or transcripts that contain at least one variant with high or moderate impact on protein structure or function.
+
+```{bash}
+dir_path=/home/user/AIDDtest
+dirresVC="$dir_path"/Results/variant_calling
+con_name1=$(config_get con_name1); #suicide
+con_name2=$(config_get con_name2); #sex
+con_name3=$(config_get con_name3); #MDD
+for level in gene transcript ;
+do
+  for impact in moderate_impact high_impact ;
+  do
+    for cond_2 in male female ;
+    do
+      new_dir="$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"
+      create_dir
+      cp "$dirresVC"/impact/"$level"/"$impact"/*"$con_name2"_"$cond_2"* "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"
+      for cond_1 in yes no ;
+      do
+        new_dir="$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"
+        create_dir
+        cp "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/*"$con_name1"_"$cond_1"* "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"/
+        for snptype in All AG GA TC CT APOBEC ADAR ;
+        do
+          new_dir="$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"/"$snptype"
+          create_dir
+          cp "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"/*"$snptype"*.csv "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"/"$snptype"/
+        done
+      done
+      for cond_3 in yes no ;
+      do
+        new_dir="$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"
+        create_dir
+        cp "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/*"$con_name3"_"$cond_3"* "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"/
+        for snptype in All AG GA TC CT APOBEC ADAR ;
+        do
+          new_dir="$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"/"$snptype"
+          create_dir
+          cp "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"/*"$snptype"*.csv "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"/"$snptype"/
+        done
+      done
+    done
+  done
+done
+for level in gene transcript ;
+do
+  for impact in moderate_impact high_impact ;
+  do
+    for snptype in All AG GA TC CT APOBEC ADAR ;
+    do
+      for cond_2 in male female ;
+      do
+        for cond_3 in yes no ;
+        do
+          new_dir="$dirresVC"/impact/final
+          create_dir
+          new_dir="$dirresVC"/impact/final/genelists
+          create_dir
+          new_dir="$dirresVC"/impact/final/genelists/"$snptype"
+          create_dir
+          cat "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"/"$snptype"/* | cut -d',' -f1 | sort -t',' -u | sed '1d' | sed '1i '$level''$impact''$con_name2'_'$cond_2''$con_name3'_'$cond_3''$snptype'' >> "$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_name3"_"$cond_3""$snptype".csv
+          counts=$(cat "$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_name3"_"$cond_3""$snptype".csv | sed '1d' | wc -l)
+          if [ ! -s "$dirresVC"/impact/allgenelistssummary"$con_name3".csv ];
+          then
+            echo "level,impact,"$con_name2","$con_name3",snptype,counts" >> "$dirresVC"/impact/allgenelistssummary"$con_name3".csv
+          fi
+          echo "$level","$impact","$cond_2","$cond_3","$snptype","$counts" >> "$dirresVC"/impact/allgenelistssummary"$con_name3".csv
+        done
+        for cond_1 in yes no ;
+        do
+          new_dir="$dirresVC"/impact/final
+          create_dir
+          new_dir="$dirresVC"/impact/final/genelists
+          create_dir
+          new_dir="$dirresVC"/impact/final/genelists/"$snptype"
+          create_dir
+          cat "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"/"$snptype"/* | cut -d',' -f1 | sort -t',' -u | sed '1d' | sed '1i '$level''$impact''$con_name2'_'$cond_2''$con_name1'_'$cond_1''$snptype'' >> "$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_name1"_"$cond_1""$snptype".csv
+          counts=$(cat "$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_name1"_"$cond_1""$snptype".csv | sed '1d' | wc -l)
+          if [ ! -s "$dirresVC"/impact/allgenelistssummary"$con_name1".csv ];
+          then
+            echo "level,impact,"$con_name2","$con_name1",snptype,counts" >> "$dirresVC"/impact/allgenelistssummary"$con_name1".csv
+          fi
+          echo "$level","$impact","$cond_2","$cond_1","$snptype","$counts" >> "$dirresVC"/impact/allgenelistssummary"$con_name1".csv
+        done
+      done
+    done
+  done
+done
+for level in gene transcript ;
+do
+  for impact in moderate_impact high_impact ;
+  do
+    for snptype in All AG GA TC CT APOBEC ADAR ;
+    do
+      for cond_2 in male female ;
+      do
+        for con_nam in "$con_name3" "$con_name1" ;
+        do
+          file1="$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_nam"_yes"$snptype".csv
+          file2="$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_nam"_no"$snptype".csv
+          paste -d, "$file2" <(cut -d, -f1 "$file1") >> "$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_nam""$snptype".csv
+        done
+      done
+    done
+  done
+done
+for level in gene transcript ;
+do
+  for impact in moderate_impact high_impact ;
+  do
+    for snptype in All AG ADAR ;
+    do
+      for cond_2 in male female ;
+      do
+        for con_nam in "$con_name3" "$con_name1" ;
+        do
+          file_in="$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_nam""$snptype".csv
+          file_out="$dirresVC"/impact/final/genelists/"$snptype"/VENND"$level""$impact""$con_name2"_"$cond_2""$con_nam""$snptype".csv
+          bartype=Venn
+          file_out2="$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_nam""$snptype".tiff
+          tool=Rbar
+          column_nam1=$(echo ""$level""$impact""$con_name2"_"$cond_2""$con_nam"_yes"$snptype"")
+          column_nam2=$(echo ""$level""$impact""$con_name2"_"$cond_2""$con_nam"_no"$snptype"")
+          set_column_name=$(echo ""$column_nam1","$column_nam2"")
+          sed 's/set_column_name/'$set_column_name'/g' "$ExToolset"/barcharts.R
+          run_tools
+          sed 's/'$set_column_name'/set_column_name/g' "$ExToolset"/barcharts.R
+        done
+      done
+    done
+  done
+done
+```
+
 ## load the R libraries
 Once the matrix is ready R can be used to perform DE.  First the proper packages need to be loaded.
 ```{r}
@@ -498,197 +2712,3 @@ dev.off()
 ```{r}
 
 ```
-## these next steps start variant calling
-The first step of variant calling is adding groups to the bam files for filtering later.  Then it reorders the bam file in karyotype order and then creates metrics files to use in later downstream qualtiy control and filtering steps.
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-    java -jar /home/user/AIDD/AIDD_tools/picard.jar AddOrReplaceReadGroups I=/media/sf_AIDD/raw_data/bam_files/"$run".bam O=/media/sf_AIDD/working_directory/"$run"_2.bam RGID=4 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=20
-    java -jar /home/user/AIDD/AIDD_tools/picard.jar ReorderSam I=/media/sf_AIDD/working_directory/"$run"_2.bam O=/media/sf_AIDD/working_directory/"$run"_3.bam R=/media/sf_AIDD/references/ref2.fa CREATE_INDEX=TRUE
-    java -jar /home/user/AIDD/AIDD_tools/picard.jar CollectAlignmentSummaryMetrics R=/media/sf_AIDD/references/ref2.fa I=/media/sf_AIDD/working_directory/"$run"_3.bam O=/media/sf_AIDD/working_directory/"$run"_alignment_metrics.txt
-    cp /media/sf_AIDD/working_directory/"$run"_alignment_metrics.txt /media/sf_AIDD/quality_control/alignment_metrics/
-    java -jar /home/user/AIDD/AIDD_tools/picard.jar CollectInsertSizeMetrics INPUT=/media/sf_AIDD/working_directory/"$run"_3.bam OUTPUT=/media/sf_AIDD/working_directory/"$run"_insert_metrics.txt HISTOGRAM_FILE=/media/sf_AIDD/working_directory/"$run"_insert_size_histogram.pdf
-    cp /media/sf_AIDD/working_directory/"$run"_insert_metrics.txt /media/sf_AIDD/quality_control/insert_metrics/
-    cp /media/sf_AIDD/working_directory/"$run"_insert_size_histogram.pdf /media/sf_AIDD/quality_control/insert_metrics/
-    samtools depth /media/sf_AIDD/working_directory/"$run"_3.bam > /media/sf_AIDD/working_directory/"$run"depth_out.txt
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/prepbam.log
-```
-## mark duplicates
-this chunk is used to mark duplicates in the bam files for more accurate variant calling.
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp -jar /home/user/AIDD/AIDD_tools/picard.jar MarkDuplicates INPUT=/media/sf_AIDD/working_directory/"$run"_3.bam OUTPUT=/media/sf_AIDD/working_directory/"$run"_dedup_reads.bam METRICS_FILE=/media/sf_AIDD/working_directory/"$run"metrics.txt
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/markduplicates.log
-```
-## haplotype caller
-This chunk starts the variant calling after first making an index.  The raw variants are then stored as vcf file or table.  These are unfilterd and include base counts.  The next step will perform filtering.
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-    java -jar /home/user/AIDD/AIDD_tools/picard.jar BuildBamIndex INPUT=/media/sf_AIDD/working_directory/"$run"_dedup_reads.bam
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T HaplotypeCaller -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"_dedup_reads.bam --dbsnp /media/sf_AIDD/references/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 -A BaseCounts --max_alternate_alleles 40 -o /media/sf_AIDD/working_directory/"$run"raw_variants.vcf
-    cp /media/sf_AIDD/working_directory/"$run"raw_variants.vcf /media/sf_AIDD/raw_data/vcf_files/
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"raw_variants.table
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/haplotype.log
-```
-## filter step 1
-This steps first separates the variants into indels and snps.  These are then stored as vcf files and tables still as raw variants.  These are still unfiltered.  Then the next steps filter with QD < 20, FS < 60.0, MQ < 40.0, MQRankSum < -12.5, ReadPosRankSum < -8.0 and SOR > 4.0 with the basic snp filter.  The next series of steps creates tables using base recalibrator that will be used to create recalibration plots to visualize the filtering.  These can be found in the quality control folder.  Then finally a new bam file is created with recal reads that have been filtered so haplotype calling can be done a second time.
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants.vcf -selectType SNP -o /media/sf_AIDD/working_directory/"$run"raw_snps.vcf
-    cp /media/sf_AIDD/working_directory/"$run"raw_snps.vcf /media/sf_AIDD/raw_data/vcf_files/
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"raw_snps.table
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants.vcf -selectType INDEL -o /media/sf_AIDD/working_directory/"$run"raw_indels.vcf
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_snps.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0 || SOR > 4.0' --filterName "basic_snp_filter" -o /media/sf_AIDD/working_directory/"$run"filtered_snps.vcf
-    cp /media/sf_AIDD/working_directory/"$run"filtered_snps.vcf /media/sf_AIDD/raw_data/vcf_files/
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"filtered_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"filtered_snps.table
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_indels.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0 || SOR > 10.0' --filterName "basic_indel_filter" -o /media/sf_AIDD/working_directory/"$run"filtered_indels.vcf
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"_dedup_reads.bam -knownSites /media/sf_AIDD/working_directory/"$run"filtered_snps.vcf -knownSites /media/sf_AIDD/working_directory/"$run"filtered_indels.vcf --filter_reads_with_N_cigar -o /media/sf_AIDD/working_directory/"$run"recal_data.table
-    cp /media/sf_AIDD/working_directory/"$run"recal_data.table /media/sf_AIDD/quality_control/recalibration_plots/
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T BaseRecalibrator -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"_dedup_reads.bam -knownSites /media/sf_AIDD/working_directory/"$run"filtered_snps.vcf -knownSites /media/sf_AIDD/working_directory/"$run"filtered_indels.vcf -BQSR /media/sf_AIDD/working_directory/"$run"recal_data.table --filter_reads_with_N_cigar -o /media/sf_AIDD/working_directory/"$run"post_recal_data.table
-    cp /media/sf_AIDD/working_directory/"$run"post_recal_data.table /media/sf_AIDD/quality_control/recalibration_plots/
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T AnalyzeCovariates -R /media/sf_AIDD/references/ref2.fa -before /media/sf_AIDD/working_directory/"$run"recal_data.table -after /media/sf_AIDD/working_directory/"$run"post_recal_data.table -plots /media/sf_AIDD/working_directory/"$run"recalibration_plots.pdf
-    cp /media/sf_AIDD/working_directory/"$run"recalibration_plots.pdf /media/sf_AIDD/quality_control/recalibration_plots/
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T PrintReads -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"_dedup_reads.bam -BQSR /media/sf_AIDD/working_directory/"$run"recal_data.table --filter_reads_with_N_cigar -o /media/sf_AIDD/working_directory/"$run"recal_reads.bam
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/filter.log
-```
-## haplotype caller number 2
-This is the second round of variant calling with the same options as the first round but with the recall reads.  The are stored as both vcf files and tables.
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T HaplotypeCaller -R /media/sf_AIDD/references/ref2.fa -I /media/sf_AIDD/working_directory/"$run"recal_reads.bam --dbsnp /media/sf_AIDD/references/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 -A BaseCounts --max_alternate_alleles 40 -o /media/sf_AIDD/working_directory/"$run"raw_variants_recal.vcf
-    cp /media/sf_AIDD/working_directory/"$run"raw_variants_recal.vcf /media/sf_AIDD/raw_data/vcf_files/
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants_recal.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"raw_variants_recal.table    
-
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/haplotype2.log
-```
-## filter step 2
-This is the second filtering step has the same parameters as before with the recal variants.  Then they are separated into indels and snps and then filtered resulting in the final file which is then used for snpEff.
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants_recal.vcf -selectType SNP -o /media/sf_AIDD/working_directory/"$run"raw_snps_recal.vcf
-    cp /media/sf_AIDD/working_directory/"$run"raw_snps_recal.vcf /media/sf_AIDD/raw_data/vcf_files/
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_snps_recal.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"raw_snps_recal.table
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T SelectVariants -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_variants_recal.vcf -selectType INDEL -o /media/sf_AIDD/working_directory/"$run"raw_indels_recal.vcf
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_snps_recal.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0 || SOR > 4.0' --filterName "basic_snp_filter" -o /media/sf_AIDD/working_directory/"$run"filtered_snps_final.vcf
-    cp /media/sf_AIDD/working_directory/"$run"filtered_snps_final.vcf /media/sf_AIDD/raw_data/vcf_files/
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"filtered_snps_final.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"filtered_snps_final.table
-    java -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantFiltration -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"raw_indels_recal.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0 || SOR > 10.0' --filterName "basic_indel_filter" -o /media/sf_AIDD/working_directory/"$run"filtered_indels_recal.vcf
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/filter2.log
-```
-## snpEff
-This chunk performs the protein effect prediction using snpEff and prebuilt annotations and references using the GRCh37.75 ensembl primary build.  
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp -jar /home/user/AIDD/AIDD_tools/snpEff.jar -v GRCh37.75 /media/sf_AIDD/working_directory/"$run"filtered_snps_final.vcf -stats /media/sf_AIDD/raw_data/snpEff/"$run" -csvStats /media/sf_AIDD/raw_data/snpEff"$run".csv > /media/sf_AIDD/raw_data/snpEff/"$run"filtered_snps_final.ann.vcf
-
-    java -d64 -Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir=/media/sf_AIDD/tmp  -jar /home/user/AIDD/AIDD_tools/GenomeAnalysisTK.jar -T VariantsToTable -R /media/sf_AIDD/references/ref2.fa -V /media/sf_AIDD/working_directory/"$run"filtered_snps_final.ann.vcf -F CHROM -F POS -F ID -F QUAL -F AC -F BaseCounts -o /media/sf_AIDD/raw_data/vcf_files/"$run"filtered_snps_final.ann.table
-
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/snpEff.log
-```
-## bedtools
-
-this next chunk will use bedtools to make a bedgraph file for viewing the genome.
-```{bash}
-main_function() {
-export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-INPUT=/media/sf_AIDD/working_directory/PHENO_DATA.csv
-OLDIFS=$IFS
-IFS=,
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-while read  x run condition sample t_name2
-do
-    bedtools genomecov -bga -ibam /media/sf_AIDD/working_directory/"$run"recal_reads.bam > /media/sf_AIDD/working_directory/"$run"genomecov.bedgraph
-    mv /media/sf_AIDD/working_directory/snpEff_* /media/sf_AIDD/working_directory/"$run"
-
-done < $INPUT
-IFS=$OLDIFS
-}
-main_function 2>&1 | tee -a /media/sf_AIDD/quality_control/logs/snpEff.log
-```
-## snpEff tables
-This chunk uses R to take the output from snpEff and convert it to a table and select only genes with at least one high impact variant and put it into its own table and then moderate impact is put it in it's own table.  These can then be used for venn diagrams or for gene enrichment analysis.  These can also be matched with excitome list to see if any of the genes within the excitome list have moderate or high impact variants.
-```{r}
-genes <- read.table("insert_run.genes.txt")
-colnames <- read.csv("/media/sf_AIDD/index/VCnames.csv")
-genes2 <- colnames(genes)[c(1:28)] <- colnames(colnames)[c(1:28)]
-write.csv(genes, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/insert_run.genes.csv", row.names=FALSE)
-genes[,2:4]<- list(NULL)
-genes[,3:25]<- list(NULL)
-genes2 <- aggregate(genes[, 2], list(genes$gene_name), sum)
-colnames(genes2)[1] <- "gene_name"
-colnames(genes2)[2] <- "HIGH"
-genes2[genes2 == 0] <- NA
-genes3 <- na.omit(genes2)
-head(genes3)
-write.csv(genes3, "/media/sf_AIDD/Results/variant_calling/haplotype/gene/insert_runHIGH.csv", row.names=FALSE)
-```
-## 
