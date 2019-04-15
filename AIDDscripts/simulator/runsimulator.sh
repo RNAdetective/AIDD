@@ -1,13 +1,9 @@
 export PATH=$PATH:~/AIDD/AIDD_tools/flux-simulator-1.2.1/bin
-dir_create() {
-for i in par_files PHENO_DATA sim_out tmp correlations summary ballgown DE file_check; 
-do
-  mkdir "$dir_path"/"$i"/
-  if [ "$i" == AIDD ];
-  then
-    mkdir "$dir_path"/AIDD/counts
-  fi
-done
+create_dir() {
+if [ ! -d "$new_dir" ];
+then
+  mkdir "$new_dir"
+fi
 }
 create_par() {
 cat "$sim_scripts"/par_file.par | sed 's/read_num/'$num'000000/g' | sed 's/read_len/'$len'/g' >> "$par_dir"/"$name".par
@@ -28,7 +24,7 @@ then
   do
     if [ ! -s "$dir_ref"/"$i".fa ];
     then
-      wget ftp://ftp.ensembl.org/pub/release-84/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.chromosome."$i".fa.gz -O "$i"raw.fa.gz
+      wget ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.chromosome."$i".fa.gz -O "$i"raw.fa.gz
       gunzip "$i"raw.fa.gz
       cat "$dir_ref"/"$i"raw.fa | sed '1d' | sed '1i >'$i'' > "$dir_ref"/"$i".fa
       rm "$dir_ref"/"$i"raw.fa
@@ -38,6 +34,24 @@ fi
 }
 sim_tool() {
 export FLUX_MEM="30G"; flux-simulator -p "$par_dir"/"$name".par
+}
+setjavaversion() {
+JDK8=/usr/lib/jvm/java-8-oracle/jre/  
+JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+                                                                                                                 
+case $use_java in
+  8)
+     export JAVA_HOME="$JDK8"
+     export PATH=$JAVA_HOME/bin:$PATH     ;
+  ;;
+  11)
+     export JAVA_HOME="$JDK11"
+     export PATH=$JAVA_HOME/bin:$PATH     ;
+  ;;
+  *)
+     error java version can only be 1.8 or 1.11
+  ;;
+esac
 }
 move_files() {
 mv "$par_dir"/"$name"* "$wkd"/
@@ -158,24 +172,39 @@ else
   echo ""$file_out" found moving on"
 fi
 } 
-dir_path=/home/user/sim
-sim_scripts="$dir_path"/simulator
 ###########################################################################################
 # RUN FLUX SIMULATOR
 ###########################################################################################
-dir_create # creates directory
+dir_path="$2"
+home_dir="$1"
+new_dir="$dir_path"
+create_dir
+sim_scripts="$dir_path"/simulator
+new_dir="$sim_scripts"
+create_dir
+cp "$home_dir"/AIDD/AIDD/simulator/* "$sim_scripts"/
+for i in par_files PHENO_DATA sim_out tmp correlations summary ballgown DE file_check AIDD genome_references ; 
+do
+  new_dir="$dir_path"/"$i"/
+  create_dir
+  if [ "$i" == AIDD ];
+  then
+    new_dir="$dir_path"/AIDD/counts
+    create_dir
+  fi
+done
 INPUT="$sim_scripts"/experiments.csv
 OLDIFS=$IFS
 {
 [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
 while IFS=, read -r num len sample
 do
-  dir_path=/home/user/sim
-  ref_path=/home/user/AIDD/references
-  home_dir=/home/user
+  dir_path="$2"
+  ref_path="$home_dir"/AIDD/references
+  home_dir="$1"
   name="$num"M"$len"length
   wkd="$dir_path"/sim_out/"$name"
-  tools=/home/user/AIDD/AIDD_tools
+  tools="$home_dir"/AIDD/AIDD_tools
   sim_scripts="$dir_path"/simulator
   par_dir="$dir_path"/par_files
   scripts_dir="$home_dir"/AIDD/AIDD/scripts
@@ -212,13 +241,15 @@ do
       file_in="$wkd"/"$name".fastq
       file_out="$wkd"/"$name"_1.fastq
       run_tools
-      source "$scripts_dir"/setjavaversion.sh 11
+      use_java=8
+      setjavaversion
       tool=fastqcpaired
       file_in="$wkd"/"$name"_1.fastq
       file_out="$wkd"/"$name"_1_fastqc.html
       run_tools
-      source "$scripts_dir"/setjavaversion.sh 8
-      export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+      use_java=11
+      setjavaversion
+      export PATH=$PATH:"$home_dir"/AIDD/AIDD_tools/bin
       tool=HISAT2_paired
       file_in="$wkd"/"$name"_1.fastq
       file_out="$wkd"/"$name".sam

@@ -1,7 +1,7 @@
 ## File locations
-REF_FILE_NAME   /home/user/sim/genome_references/GRCh37.gtf
-GEN_DIR         /home/user/sim/genome_references/chromFa
-TMP_DIR         /home/user/sim/tmp
+REF_FILE_NAME   /media/sf_AIDD/sim/genome_references/GRCh37.gtf
+GEN_DIR         /media/sf_AIDD/sim/genome_references/chromFa
+TMP_DIR         /media/sf_AIDD/sim/tmp
 
 ## Library preparation
 # Expression
