@@ -71,7 +71,7 @@ snpEff_in="$run"filtered_snps_final;
 ####################################################################################################################
 mes_out() {
 DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
-echo "'$DATE_WITH_TIME' $echo1 $echo2 $echo3 $echo4
+echo "'$DATE_WITH_TIME' $echo1
 ___________________________________________________________________________"
 }
 download() {
@@ -80,6 +80,24 @@ runfolder=${run:0:6}
 cd "$wd"/
 wget ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/"$runfoldername"/"$runfolder"/"$run"/"$run".sra
 cd "$dir_path"/AIDD
+}
+setjavaversion() {
+JDK8=/usr/lib/jvm/java-8-oracle/jre/  
+JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+                                                                                                                 
+case $use_java in
+  8)
+     export JAVA_HOME="$JDK8"
+     export PATH=$JAVA_HOME/bin:$PATH     ;
+  ;;
+  11)
+     export JAVA_HOME="$JDK11"
+     export PATH=$JAVA_HOME/bin:$PATH     ;
+  ;;
+  *)
+     error java version can only be 1.8 or 1.11
+  ;;
+esac
 }
 fastqdumppaired() { 
 fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/ 
@@ -101,10 +119,7 @@ assem_string() { stringtie "$rdbam"/"$file_bam" -p3 -G "$ref_dir_path"/ref.gtf -
 temp_dir() {
   if [ -d "$dir_path"/raw_data/ballgown/$sample/tmp.XX*/ ]; # IF TEMP_DIR IN SAMPLE FOLDER
   then
-  echo1=FOUND
-  echo2=tempdir
-  echo3=ALREADLY
-  echo4=IN_FOLDER
+  echo1=$(echo "FOUND tempdir ALDREADY IN FOLDER")
   mes_out
   rm -f -R "$dir_path"/raw_data/ballgown/$sample/tmp.XX*/ #DELETE TMP_DIR
   fi
@@ -151,10 +166,7 @@ prep_align_sum() {
     java -jar $AIDDtool/picard.jar CollectAlignmentSummaryMetrics R="$ref_dir_path"/ref2.fa I="$wd"/$file_bam_3 O="$wd"/"$run"_alignment_metrics.txt
     java -jar $AIDDtool/picard.jar CollectInsertSizeMetrics INPUT="$wd"/$file_bam_3 OUTPUT="$wd"/"$run"_insert_metrics.txt HISTOGRAM_FILE="$wd"/"$run"_insert_size_histogram.pdf
 ##creates depth file for quality control on variant calling.
-echo1=STARTING
-echo2=SAMTOOLS
-echo3=TO_CHECK
-echo4=READ_DEPTH
+echo1=$(echo "STARTING SAMTOOLS TO CHECK READ DEPTH")
 mes_out
     samtools depth "$wd"/$file_bam_3 > "$wd"/"$run"depth_out.txt
     mv "$wd"/"$run"_alignment_metrics.txt $dirqc/alignment_metrics/
@@ -292,38 +304,23 @@ run_tools() {
     then
       if [ -f "$file_in" ]; # IF INPUT THERE
       then
-        echo1=FOUND
-        echo2=$file_in
-        echo3=STARTING
-        echo4=$tool
+        echo1=$(echo "FOUND $file_in STARTING $tool")
         mes_out
         $tool # TOOL
       else
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample""
         mes_out # ERROR INPUT NOT THERE
       fi
       if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
       then
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
         mes_out # ERROR OUTPUT IS THERE
       else 
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
         mes_out # ERROR INPUT NOT THERE
       fi
   else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
+        echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
         mes_out # ERROR OUTPUT IS THERE
   fi
 }
@@ -332,38 +329,23 @@ run_tools2o() {
     then
       if [ -f "$file_in" ]; # IF INPUT THERE
       then
-        echo1=FOUND
-        echo2="$file_in"
-        echo3=STARTING
-        echo4="$tool"
+        echo1=$(echo "FOUND "$file_in" STARTING "$tool"")
         mes_out
         $tool # TOOL
       else
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
         mes_out # ERROR INPUT NOT THERE
       fi
       if [[ -f "$file_out" && -f "$file_out2" ]]; # IF OUTPUT IS THERE
       then
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
         mes_out # ERROR OUTPUT IS THERE
       else 
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
         mes_out # ERROR INPUT NOT THERE
       fi
   else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
         mes_out # ERROR OUTPUT IS THERE
   fi
 }
@@ -372,38 +354,23 @@ if [[ ! -f "$file_out" && ! -f "$file_out2" ]]; # IF OUTPUT FILE IS NOT THERE
       then
       if [[ -f "$file_in" && -f "$file_in2" ]]; # IF INPUT THERE
       then
-        echo1=FOUND
-        echo2=$file_in
-        echo3=STARTING
-        echo4=$tool
+        echo1=$(echo "FOUND "$file_in" STARTING "$tool"")
         mes_out
         $tool # TOOL
       else
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
         mes_out # ERROR INPUT NOT THERE
       fi
       if [[ -f "$file_out" && -f "$file_out2" ]]; # IF OUTPUT IS THERE
       then
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
         mes_out # ERROR OUTPUT IS THERE
       else 
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
         mes_out # ERROR INPUT NOT THERE
       fi
   else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
         mes_out # ERROR OUTPUT IS THERE
   fi
 }
@@ -412,38 +379,23 @@ run_tools2i() {
       then
       if [[ -f "$file_in" && -f "$file_in2" ]]; # IF INPUT THERE
       then
-        echo1=FOUND
-        echo2=$file_in
-        echo3=STARTING
-        echo4=$tool
+        echo1=$(echo "FOUND "$file_in" STARTING "$tool"")
         mes_out
         $tool # TOOL
       else
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
         mes_out # ERROR INPUT NOT THERE
       fi
       if [ -f "$file_out" ]; # IF OUTPUT IS THERE
       then
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
         mes_out # ERROR OUTPUT IS THERE
       else 
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
+        echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
         mes_out # ERROR INPUT NOT THERE
       fi
   else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
+        echo1=$(echo "FOUND "$file_out" FINISHED WITH "$tool"")
         mes_out # ERROR OUTPUT IS THERE
   fi
 }
@@ -486,10 +438,7 @@ do
     fi
     if [ -f "$wd"/"$file_sra" ]; # IF OUTPUT IS THERE
     then
-      echo1=FOUND
-      echo2=$file_sra
-      echo3=FINISHED
-      echo4=DOWNLOADING_$sample
+      echo1=$("FOUND "$file_sra" FINISHED WITH DOWNLOADING "$sample"")
       mes_out # ERROR OUTPUT IS THERE
     else 
       download
@@ -499,17 +448,11 @@ do
       fi  
     fi
   else
-    echo1=FOUND
-    echo2=$file_sra
-    echo3=NOW_STARTING
-    echo4=NEXT_SAMPLE
+    echo1=$(echo "FOUND "$file_sra" NOW STARTING NEXT SAMPLE")
     mes_out
   fi
 done
-echo1=DONE_WITH
-echo2=INTERNET
-echo3=NOW_STARTING
-echo4=ALIGN_AND_ASSEMBLE
+echo1=$(echo "DONE WITH THA INTERNET NOW STARTING ALIGNING AND ASSEMBLY")
 mes_out
 } < $INPUT
 IFS=$OLDIFS
@@ -582,12 +525,6 @@ do
     file_in="$wd"/$file_sra   
     file_out="$wd"/$file_fastq
     run_tools
-  else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
   fi
 ####################################################################################################################
 # MOVEFASTQPAIRED
@@ -610,12 +547,6 @@ do
     file_in=$fastq_dir_path/$file_fastq   
     file_out="$wd"/$file_fastq
     run_tools
-  else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
   fi
 ####################################################################################################################
 # PAIRED QUALITY CONTROL
@@ -627,9 +558,11 @@ do
     file_in2="$wd"/$file_fastqpaired2
     file_out=$dirqc/fastqc/"$run"_1_fastqc.html
     file_out2=$dirqc/fastqc/"$run"_2_fastqc.html
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 11
+    use_java=11
+    setjavaversion
     run_tools2i2o
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
+    use_java=8
+    setjavaversion
   fi
 ####################################################################################################################
 #  SINGLE QUALITY CONTROL
@@ -640,15 +573,11 @@ do
     file_in="$wd"/$file_fastq    
     file_out=$dirqc/fastqc/"$run"_fastqc.html
     rm -f "$wd"/"$file_sra"
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 11
+    use_java=11
+    setjavaversion
     run_tools
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
-  else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
+    use_java=8
+    setjavaversion
   fi
 ####################################################################################################################
 # PAIRED TRIMMING
@@ -660,11 +589,13 @@ do
     file_in2="$wd"/$file_fastqpaired2
     file_out=$dirqc/fastqc/"$run"_trim_1_fastqc.html 
     file_out2=$dirqc/fastqc/"$run"_trim_2_fastqc.html
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 11  
+    use_java=11
+    setjavaversion  
     start=12
     end=97  
     run_tools2i2o
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
+    use_java=8
+    setjavaversion
   fi
 ####################################################################################################################
 # TRIMMING SINGLE
@@ -674,17 +605,13 @@ do
     tool=trimsingle
     file_in="$wd"/$file_fastq    
     file_out=$dirqc/fastqc/"$run"_trim_fastqc.html
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 11
+    use_java=11
+    setjavaversion
     start=12
     end=97
     run_tools
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
-  else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
+    use_java=8
+    setjavaversion
   fi
 ####################################################################################################################
 # ALIGNMENT HISAT2 PAIRED
@@ -728,12 +655,6 @@ do
     file_in="$wd"/$file_fastq    
     file_out="$wd"/$file_sam
     run_tools
-  else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
   fi
 ####################################################################################################################
 #  samtobam
@@ -759,16 +680,10 @@ do
 ####################################################################################################################
 #  FINISH
 ####################################################################################################################
-echo2="$sample"
-echo4=next"$sample"
-echo1=DONE_WITH
-echo3=STARTING
+echo1=$(echo "DONW WITH "$sample" NOW STARTING NEXT SAMPLE")
 mes_out
 done
-echo1=DONE_WITH
-echo2=ALGIN_AND_ASSEMBLE
-echo3=STARTING
-echo4=VARIANTCALLINGSTEP1
+echo1=$(echo "DONE WITH ALIGNMENT AND ASSEMBLY NOW STARTING VARIANT CALLING STEP 1")
 mes_out
 } < $INPUT
 IFS=$OLDIFS
@@ -838,10 +753,7 @@ then
 #  DISPLAY MESSAGES
 ####################################################################################################################
   done
-  echo2=VARIANT_CALLING_PART_1
-  echo4=VARIANT_CALLING_PART_2
-  echo1=DONE_WITH
-  echo3=STARTING
+  echo1=$(echo "DONE WITH VARIANT CALLING PART1 NOW STARTING VARIANT CALLING PART2")
   mes_out
   } < $INPUT
   IFS=$OLDIFS
@@ -899,17 +811,11 @@ then
 ####################################################################################################################
 # DISPLAY MESSAGES
 ####################################################################################################################
-    echo2="$sample"
-    echo4=next"$sample"
-    echo1=DONE_WITH
-    echo3=STARTING
+    echo1=$(echo "DONE WITH "$sample" NOW STARTING NEXT SAMPLE")
     mes_out
   done
-    echo2=VARIANT_CALLING_PART_2
-    echo4=VARIANT_CALLING_PART_3
-    echo1=DONE_WITH
-    echo3=STARTING
-    mes_out
+  echo1=$(echo "DONE WITH VARIANT CALLING PART2 NOW STARTING VARIANT CALLING PART3")
+  mes_out
   } < $INPUT
   IFS=$OLDIFS
 ####################################################################################################################
@@ -962,17 +868,11 @@ then
 ####################################################################################################################
 # DISPLAY MESSAGES
 ####################################################################################################################
-    echo2="$sample"
-    echo4=next"$sample"
-    echo1=DONE_WITH
-    echo3=STARTING
+    echo2=$(echo "DONE WITH "$sample" NOW STARTING NEXT SAMPLE")
     mes_out
   done
-    echo2=VARIANT_CALLING_PART_3
-    echo4=VARIANT_CALLING_PART_4
-    echo1=DONE_WITH
-    echo3=STARTING
-    mes_out
+  echo1=$(echo "DONE WITH VARIANT CALLING PART3 NOW STARTING VARIANT CALLING PART4")
+  mes_out
   } < $INPUT
   IFS=$OLDIFS
 ####################################################################################################################
@@ -1029,17 +929,11 @@ then
 ####################################################################################################################
 # DISPLAY MESSAGES
 ####################################################################################################################
-    echo2="$sample"
-    echo4=next"$sample"
-    echo1=DONE_WITH
-    echo3=STARTING
+    echo1=$(echo "DONE WITH "$sample" NOW STARTING NEXT SAMPLE")
     mes_out
   done
-    echo2=VARIANT_CALLING_PART_4
-    echo4=CLEANING_UP_FILES
-    echo1=DONE_WITH
-    echo3=STARTING
-    mes_out
+  echo1=$(echo "DONE WITH VARIANT_CALLING_PART_4 NOW CLEANING UP FILES")
+  mes_out
   } < $INPUT
   IFS=$OLDIFS
 ####################################################################################################################
@@ -1049,19 +943,13 @@ bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh 1 "$home_dir" "$dir_path"
 ####################################################################################################################
 # CLEANING UP AND COMPRESSING FILES AFTER VARIANT CALLING
 ####################################################################################################################
-  echo1=DONE_WITH  
-  echo2=AIDD_ANALYSIS_FULLY_COMPLETE
-  echo3=STARTING
-  echo4=NOW_CLEANING_UP_AND_COMPRESSING_RESULTS
+  echo1=$(echo "DONE WITH AIDD ANALYSIS STARTING TO CLEAN UP AND COMPRESS RESULTS")  
   mes_out
   for i in raw final filtered; do
   mv $dir_path/raw_data/vcf_files/*"$i"* $dir_path/raw_data/vcf_files/"$i"/
   done
-  #compress_AIDD
-  echo1=DONE_WITH
-  echo2=ENTIRE_AIDD_EXCITOME_ANALYSIS_AND_FILE_CLEANUP
-  echo3=STARTING
-  echo4=A_NEW_EXPERIMENT_WILL_REQUIRE_AN_EMPTY_DIRECTORY
+  compress_AIDD
+  echo1=$(echo "DONE WITH ENTIRE AIDD EXCITOME ANALYSIS NAD FILE CLEANUP STARTING A NEW EXPERIMENT WILL REQUIRE AN EMPTY DIRECTORY")
   mes_out
 fi
 ####################################################################################################################
@@ -1073,17 +961,10 @@ fi
 ####################################################################################################################
 if [ "$variant" == 2 ];
 then
-  echo1=DONE_WITH
-  echo2=AIDD_ANALYSIS_WITHOUT_VARIANTS_COMPLETE
-  echo3=STARTING
-  echo4=NOW_CLEANING_UP_AND_COMPRESSING_RESULTS
+  echo1=$(echo "DONE WITH AIDD ANALYSIS WITHOUT VARIANTS COMPLETE STARTING CLEANING UP AND COMPRESSING RESULTS")
   mes_out
-  #compress_AIDD
-  echo1=DONE_WITH
-  echo2=ENTIRE_AIDD_EXCITOME_ANALYSIS_WITHOUT_VARIANTS_AND_FILE_CLEANUP
-  echo3=STARTING
-  echo4=A_NEW_EXPERIMENT_WILL_REQUIRE_AN_EMPTY_DIRECTORY
-  echo3=STARTING
+  compress_AIDD
+  echo1=$(echo "DONE WITH ENTIRE AIDD EXCITOME ANALYSIS WITHOUT VARIANTS STARTING A NEW EXPERIMENT WILL REQUIRE AN EMPTY DIRECTORY")
   mes_out
 fi
 exit
