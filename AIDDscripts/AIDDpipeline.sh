@@ -632,7 +632,6 @@ do
     source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 11
     run_tools
     source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
-  else
   fi
 ####################################################################################################################
 # PAIRED TRIMMING
