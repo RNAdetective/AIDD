@@ -69,10 +69,23 @@ snpEff_in="$run"filtered_snps_final;
 ####################################################################################################################
 ####################################################################################################################
 ####################################################################################################################
+create_dir() {
+if [ ! -d "$new_dir" ];
+then
+  mkdir "$new_dir"
+fi
+} # this creates directories $new_dir
+Rbar() {
+Rscript "$ExToolset"/barchart.R "$file_in" "$file_out" "$bartype" "$pheno" "$freq" "$sum_file" "$sampname" "$file_out2" "$sum_file2"
+} # runs bargraph R script
 mes_out() {
+dirqc="$dir_path"/quality_control
 DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
-echo "'$DATE_WITH_TIME' $echo1 $echo2 $echo3 $echo4
+echo "'$DATE_WITH_TIME' $echo1
 ___________________________________________________________________________"
+new_dir="$dirqc"/time_check
+create_dir
+echo "'$DATE_WITH_TIME',"$run","$file_in","$tool"" >> "$dirqc"/time_check/"$run"time_check.csv
 }
 download() {
 runfoldernameup=${run:0:3}
@@ -102,15 +115,11 @@ STAR_single() { echo "STAR some text line on how to run" ; }
 samtobam() { java -Djava.io.tmpdir="$dir_path"/tmp -jar "$AIDDtool"/picard.jar SortSam INPUT="$wd"/"$file_sam" OUTPUT="$rdbam"/$file_bam SORT_ORDER=coordinate ; }
 assem_string() { stringtie "$rdbam"/"$file_bam" -p3 -G "$ref_dir_path"/ref.gtf -A "$dir_path"/raw_data/counts/"$file_tab" -l -B -b "$dir_path"/raw_data/ballgown_in/"$sample"/"$run" -e -o "$dir_path"/raw_data/ballgown/"$sample"/"$file_name_gtf" ; }
 temp_dir() {
-  if [ -d "$dir_path"/raw_data/ballgown/$sample/tmp.XX*/ ]; # IF TEMP_DIR IN SAMPLE FOLDER
-  then
-  echo1=FOUND
-  echo2=tempdir
-  echo3=ALREADLY
-  echo4=IN_FOLDER
-  mes_out
+if [ -d "$dir_path"/raw_data/ballgown/$sample/tmp.XX*/ ]; # IF TEMP_DIR IN SAMPLE FOLDER
+then
+  echo "FOUND tempdir ALREADLY IN FOLDER"
   rm -f -R "$dir_path"/raw_data/ballgown/$sample/tmp.XX*/ #DELETE TMP_DIR
-  fi
+fi
 }
 create_filecheck() {
 if [ -s "$type1" ];
@@ -147,22 +156,16 @@ prep_bam_2() {
 java $javaset -jar $AIDDtool/picard.jar AddOrReplaceReadGroups I="$rdbam"/$file_bam O="$wd"/$file_bam_2 RGID=4 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=20 ##this will set up filtering guidelines in bam files 
 }
 prep_bam_3() { 
-  java -jar $AIDDtool/picard.jar ReorderSam I="$wd"/$file_bam_2 O="$wd"/$file_bam_3 R="$ref_dir_path"/ref2.fa CREATE_INDEX=TRUE
+java $javaset -jar $AIDDtool/picard.jar ReorderSam I="$wd"/$file_bam_2 O="$wd"/$file_bam_3 R="$ref_dir_path"/ref2.fa CREATE_INDEX=TRUE
 }
 prep_align_sum() {
-    ##this collect alignment metrics and piut them in quality control for user to look at for accuracy
-    java -jar $AIDDtool/picard.jar CollectAlignmentSummaryMetrics R="$ref_dir_path"/ref2.fa I="$wd"/$file_bam_3 O="$wd"/"$run"_alignment_metrics.txt
-    java -jar $AIDDtool/picard.jar CollectInsertSizeMetrics INPUT="$wd"/$file_bam_3 OUTPUT="$wd"/"$run"_insert_metrics.txt HISTOGRAM_FILE="$wd"/"$run"_insert_size_histogram.pdf
-##creates depth file for quality control on variant calling.
-echo1=STARTING
-echo2=SAMTOOLS
-echo3=TO_CHECK
-echo4=READ_DEPTH
-mes_out
-    samtools depth "$wd"/$file_bam_3 > "$wd"/"$run"depth_out.txt
-    mv "$wd"/"$run"_alignment_metrics.txt $dirqc/alignment_metrics/
-    mv "$wd"/"$run"_insert_metrics.txt $dirqc/insert_metrics/
-    mv "$wd"/"$run"_insert_size_histogram.pdf $dirqc/insert_metrics/
+java -jar $AIDDtool/picard.jar CollectAlignmentSummaryMetrics R="$ref_dir_path"/ref2.fa I="$wd"/$file_bam_3 O="$dirqc"/alignment_metrics/"$run"_alignment_metrics.txt 
+}
+prep_align_sum2() {
+java -jar $AIDDtool/picard.jar CollectInsertSizeMetrics INPUT="$wd"/$file_bam_3 OUTPUT=$dirqc/insert_metrics/"$run"_insert_metrics.txt HISTOGRAM_FILE=$dirqc/insert_metrics/"$run"_insert_size_histogram.pdf ##this collect alignment metrics and piut them in quality control for user to look at for accuracy
+}
+prep_align_sum3() {
+samtools depth "$wd"/$file_bam_3 > "$wd"/"$run"depth_out.txt ##creates depth file for quality control on variant calling.
 }
 combine_file() {
 cat "$file_in" | sed '1!{/^CAT/d;}' | cut -d',' -f"$col_num" >> "$file_out"
@@ -222,58 +225,95 @@ done
 markduplicates(){
     java $javaset -jar $AIDDtool/picard.jar MarkDuplicates INPUT="$wd"/$file_bam_3 OUTPUT="$wd"/$file_bam_dup METRICS_FILE="$wd"/"$run"metrics.txt
 }
-
-
 compress_AIDD() {
-      rm -f -r "$wd" # REMOVE UNNEEDED DIRECTORIES
-      rm -f -r "$dir_path"/tmp # REMOVE UNNEEDED DIRECTORIES
-      rm -f -r "$dir_path"/temp # REMOVE UNNEEDED DIRECTORIES
-      tar -cvzf "$dir_path"/"$AIDD".tar.gz "$dir_path"
-      split -d -b 8G "$dir_path"/"$AIDD".tar.gz """$dir_path""/"$AIDD".tar.gz." # REMOVE UNNEEDED DIRECTORIES
-      ##add gdrive command here to upload bam files
+for unwanted in "$wd" "$dir_path"/tmp "$dir_path"/temp ;
+do 
+  rm -f -r "$unwanted" # REMOVE UNNEEDED DIRECTORIES
+done
+tar -cvzf "$dir_path"/"$AIDD".tar.gz "$dir_path"
+split -d -b 8G "$dir_path"/"$AIDD".tar.gz """$dir_path""/"$AIDD".tar.gz." # REMOVE UNNEEDED DIRECTORIES
+##add gdrive command here to upload bam files
 }
 haplotype1() {
-    java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$wd"/$file_bam_dup
-    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/$file_vcf_raw
-    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_variants.table
+java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$wd"/$file_bam_dup
+}
+haplotype1B() {
+java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/$file_vcf_raw
+}
+haplotype1C() {
+java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_variants.table
 }
 filter1() {
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -selectType SNP -o "$wd"/"$run"raw_snps.vcf
-    cp "$wd"/"$run"raw_snps.vcf "$rdvcf"/
-    ##runs variants to table for easier viewing of vcf files
-    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_snps.table
-    ##select more variants for filtering
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -selectType INDEL -o "$wd"/"$run"raw_indels.vcf
-    ##starting filtering steps
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_snps.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$wd"/"$run"filtered_snps.vcf
-    ##moves and converts vcf filtered snp file into table
-    cp "$wd"/"$run"filtered_snps.vcf "$rdvcf"/
-    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"filtered_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"filtered_snps.table
-    ##more filtering
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_indels.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o "$wd"/"$run"filtered_indels.vcf
-    ##rns base recalibrator to create new bam files with filtering taken into account
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T BaseRecalibrator -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -knownSites "$wd"/"$run"filtered_snps.vcf -knownSites "$wd"/"$run"filtered_indels.vcf --filter_reads_with_N_cigar -o "$wd"/"$run"recal_data.table
-    ##moves and converts vcf files
-    cp "$wd"/"$run"recal_data.table $dirqc/recalibration_plots/
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T BaseRecalibrator -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -knownSites "$wd"/"$run"filtered_snps.vcf -knownSites "$wd"/"$run"filtered_indels.vcf -BQSR "$wd"/"$run"recal_data.table --filter_reads_with_N_cigar -o "$wd"/"$run"post_recal_data.table
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T AnalyzeCovariates -R "$ref_dir_path"/ref2.fa -before "$wd"/"$run"recal_data.table -after "$wd"/"$run"post_recal_data.table -plots "$wd"/"$run"recalibration_plots.pdf
-    ##creates new bam file containing filtering data.
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T PrintReads -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -BQSR "$wd"/"$run"recal_data.table --filter_reads_with_N_cigar -o "$wd"/$file_bam_recal
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -selectType SNP -o "$wd"/"$run"raw_snps.vcf
+}
+filter1B() {
+java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_snps.table ##select more variants for filtering
+}
+filter1C() {
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -selectType INDEL -o "$wd"/"$run"raw_indels.vcf ##starting filtering steps
+}
+filter1D() {
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_snps.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$wd"/"$run"filtered_snps.vcf ##moves and converts vcf filtered snp file into table
+}
+filter1E() {
+java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"filtered_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"filtered_snps.table ##more filtering
+}
+filter1F() {
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_indels.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o "$wd"/"$run"filtered_indels.vcf ##rns base recalibrator to create new bam files with filtering taken into account
+}
+filter1G() {
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T BaseRecalibrator -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -knownSites "$wd"/"$run"filtered_snps.vcf -knownSites "$wd"/"$run"filtered_indels.vcf --filter_reads_with_N_cigar -o "$wd"/"$run"recal_data.table ##moves and converts vcf files
+}
+filter1H() {
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T BaseRecalibrator -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -knownSites "$wd"/"$run"filtered_snps.vcf -knownSites "$wd"/"$run"filtered_indels.vcf -BQSR "$wd"/"$run"recal_data.table --filter_reads_with_N_cigar -o "$wd"/"$run"post_recal_data.table
+}
+filter1I() {
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T AnalyzeCovariates -R "$ref_dir_path"/ref2.fa -before "$wd"/"$run"recal_data.table -after "$wd"/"$run"post_recal_data.table -plots "$wd"/"$run"recalibration_plots.pdf ##creates new bam file containing filtering data.
+}
+filter1J() {
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T PrintReads -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -BQSR "$wd"/"$run"recal_data.table --filter_reads_with_N_cigar -o "$wd"/$file_bam_recal
+}
+move_vcf() {
+mv "$wd"/$file_vcf_raw "$rdvcf"/
+mv "$wd"/"$run"filtered_snps.vcf "$rdvcf"/
+mv "$wd"/"$run"recal_data.table $dirqc/recalibration_plots/
+mv "$wd"/"$run"raw_snps.vcf "$rdvcf"/
+rm "$wd"/"$run"raw_indels.vcf
+rm "$wd"/"$run"filtered_indels.vcf
+if [ -f "$wd"/"$run"recalibration_plots.pdf ];
+then
+  rm "$wd"/"$run"recal_data.table
+  rm "$wd"/"$run"post_recal_data.table
+fi
 }
 haplotype2() {
-  java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_recal --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/"$file_vcf_raw_recal"
-  java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_variants_recal.table   
+java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_recal --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/"$file_vcf_raw_recal"
+}
+haplotype2B() {
+java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_variants_recal.table   
 }
 filter2() {
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -selectType SNP -o "$wd"/"$file_vcf_recal"
-    cp "$wd"/"$file_vcf_recal" "$rdvcf"/
-    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_recal -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_snps_recal.table
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -selectType INDEL -o "$wd"/"$run"raw_indels_recal.vcf
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_recal" --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$wd"/"$file_vcf_finalAll"
-    cp "$wd"/"$file_vcf_finalAll" "$rdvcf"/
-    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_finalAll" -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"filtered_snps_finalAll.table
-    ##this finishes filtering indels
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_indels_recal.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o "$wd"/"$run"filtered_indels_recal.vcf
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -selectType SNP -o "$wd"/"$file_vcf_recal"
+}
+filter2B() {
+java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_recal -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_snps_recal.table
+}
+filter2C() {
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -selectType INDEL -o "$wd"/"$run"raw_indels_recal.vcf
+}
+filter2D() {
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_recal" --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$wd"/"$file_vcf_finalAll"
+}
+filter2E() {
+java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_finalAll" -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"filtered_snps_finalAll.table
+}
+filter2F() {
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_indels_recal.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o "$wd"/"$run"filtered_indels_recal.vcf
+}
+move_vcf2() {
+mv "$wd"/"$file_vcf_raw_recal" "$rdvcf"/
+mv "$wd"/"$file_vcf_recal" "$rdvcf"/
+mv "$wd"/"$file_vcf_finalAll" "$rdvcf"/
 }
 excitome_vcf() { 
 ## filter out everything that is not ADAR mediated editing
@@ -285,170 +325,126 @@ awk -F "\t" ' { if (($4 == "C") && ($5 == "T")) { print } }' "$rdvcf"/"$file_vcf
 awk -F "\t" '{ if (($4 == "G") && ($5 == "A")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalGA.vcf
 cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalCT.vcf "$rdvcf"/"$run"filtered_snps_finalGA.vcf > "$rdvcf"/"$file_vcf_finalAPOBEC"
 }
+move_vcf3() {
+for i in raw final filtered; do
+  mv $dir_path/raw_data/vcf_files/*"$i"* $dir_path/raw_data/vcf_files/"$i"/
+done
+}
 snpEff() {
-    java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf"/"$file_vcf_final""$snptype".vcf -stats "$dir_path"/raw_data/snpEff/"$snp_stats""$snptype" -csvStats "$dir_path"/raw_data/snpEff/"$snp_csv""$snptype".csv > "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf
-    ##converts final annotationed vcf to table for easier processing
-    java "$javaset"  -jar "$AIDDtool"/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf -F CHROM -F POS -F ID -F REF -F ALT -F QUAL -F AC -F ANN -o "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".table
+java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf"/"$file_vcf_final""$snptype".vcf -stats "$dir_path"/raw_data/snpEff/"$snp_stats""$snptype" -csvStats "$dir_path"/raw_data/snpEff/"$snp_csv""$snptype".csv > "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf     ##converts final annotationed vcf to table for easier processing
+java "$javaset"  -jar "$AIDDtool"/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf -F CHROM -F POS -F ID -F REF -F ALT -F QUAL -F AC -F ANN -o "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".table
 }
 run_tools() {
-    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
-    then
-      if [ -f "$file_in" ]; # IF INPUT THERE
-      then
-        echo1=FOUND
-        echo2=$file_in
-        echo3=STARTING
-        echo4=$tool
-        mes_out
-        $tool # TOOL
-      else
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
-        mes_out # ERROR INPUT NOT THERE
-      fi
-      if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
-      then
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
-      else 
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
-        mes_out # ERROR INPUT NOT THERE
-      fi
+if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+then
+  if [ -f "$file_in" ]; # IF INPUT THERE
+  then
+    echo1=$(echo "FOUND $file_in STARTING $tool");
+    mes_out
+    $tool # TOOL
   else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
+    echo1=$(echo "CANNOT FIND "$file_in" FOR "$sample"");
   fi
+  if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
+  then
+    echo1=$(echo "FOUND $file_out FINISHED $tool");
+    mes_out # ERROR OUTPUT IS THERE
+  else 
+    echo1=$(echo "CANNOT FIND $file_out FOR THIS "$sample"");
+    mes_out # ERROR INPUT NOT THERE
+  fi
+else
+  echo1=$(echo "FOUND $file_out FINISHED $tool")
+  mes_out # ERROR OUTPUT IS THERE
+fi
 }
 run_tools2o() {
-    if [[ ! -f "$file_out" && ! -f "$file_out2" ]]; # IF OUTPUT FILE IS NOT THERE
-    then
-      if [ -f "$file_in" ]; # IF INPUT THERE
-      then
-        echo1=FOUND
-        echo2="$file_in"
-        echo3=STARTING
-        echo4="$tool"
-        mes_out
-        $tool # TOOL
-      else
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
-        mes_out # ERROR INPUT NOT THERE
-      fi
-      if [[ -f "$file_out" && -f "$file_out2" ]]; # IF OUTPUT IS THERE
-      then
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
-      else 
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
-        mes_out # ERROR INPUT NOT THERE
-      fi
+if [[ ! -f "$file_out" && ! -f "$file_out2" ]]; # IF OUTPUT FILE IS NOT THERE
+then
+  if [ -f "$file_in" ]; # IF INPUT THERE
+  then
+    echo1=$(echo "FOUND "$file_in" STARTING "$tool"");
+    mes_out
+    $tool # TOOL
   else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
+    echo1=$(echo "CANNOT FIND $file_in FOR THIS "$sample"");
+    mes_out # ERROR INPUT NOT THERE
   fi
+  if [[ -f "$file_out" && -f "$file_out2" ]]; # IF OUTPUT IS THERE
+  then
+    echo1=$(echo "FOUND $file_out FINISHED $tool");
+    mes_out # ERROR OUTPUT IS THERE
+  else 
+    echo1=$(echo "CANNOT FIND "$file_out" OR "$file_out2" FOR_THIS "$sample"");
+    mes_out # ERROR INPUT NOT THERE
+  fi
+else
+  echo1=$("FOUND "$file_out" FINISHED "$tool"");
+  mes_out # ERROR OUTPUT IS THERE
+fi
 }
 run_tools2i2o() {
 if [[ ! -f "$file_out" && ! -f "$file_out2" ]]; # IF OUTPUT FILE IS NOT THERE
-      then
-      if [[ -f "$file_in" && -f "$file_in2" ]]; # IF INPUT THERE
-      then
-        echo1=FOUND
-        echo2=$file_in
-        echo3=STARTING
-        echo4=$tool
-        mes_out
-        $tool # TOOL
-      else
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
-        mes_out # ERROR INPUT NOT THERE
-      fi
-      if [[ -f "$file_out" && -f "$file_out2" ]]; # IF OUTPUT IS THERE
-      then
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
-      else 
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
-        mes_out # ERROR INPUT NOT THERE
-      fi
+then
+  if [[ -f "$file_in" && -f "$file_in2" ]]; # IF INPUT THERE
+  then
+    echo1=$("FOUND "$file_in" AND "$file_in2" STARTING "$tool"");
+    mes_out
+    $tool # TOOL
   else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
+    echo1=$("CANNOT FIND "$file_in" OR "$file_in2" FOR THIS "$sample"");
+    mes_out # ERROR INPUT NOT THERE
   fi
+  if [[ -f "$file_out" && -f "$file_out2" ]]; # IF OUTPUT IS THERE
+  then
+    echo1=$(echo "FOUND "$file_out" AND "$file_out2" FINISHED "$tool"");
+    mes_out # ERROR OUTPUT IS THERE
+  else 
+    echo1=$(echo "CANNOT FIND "$file_out" OR "$file_out2" FOR THIS "$sample"");
+    mes_out # ERROR INPUT NOT THERE
+  fi
+else
+  echo1=$(echo "FOUND "$file_out" OR "$file_out2" FINISHED "$tool"");
+  mes_out # ERROR OUTPUT IS THERE
+fi
 }
 run_tools2i() {
-    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
-      then
-      if [[ -f "$file_in" && -f "$file_in2" ]]; # IF INPUT THERE
-      then
-        echo1=FOUND
-        echo2=$file_in
-        echo3=STARTING
-        echo4=$tool
-        mes_out
-        $tool # TOOL
-      else
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
-        mes_out # ERROR INPUT NOT THERE
-      fi
-      if [ -f "$file_out" ]; # IF OUTPUT IS THERE
-      then
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
-      else 
-        echo1=CANT_FIND
-        echo2=$file_in
-        echo3=FOR_THIS
-        echo4="$sample"
-        mes_out # ERROR INPUT NOT THERE
-      fi
+if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+then
+  if [[ -f "$file_in" && -f "$file_in2" ]]; # IF INPUT THERE
+  then
+    echo1=$(echo "FOUND "$file_in" AND "$file_in2" STARTING "$tool"");
+    mes_out
+    $tool # TOOL
   else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
+    echo1=$(echo "CANNOT FIND "$file_in" OR "$file_in2" FOR THIS "$sample"");
+    mes_out # ERROR INPUT NOT THERE
   fi
+  if [ -f "$file_out" ]; # IF OUTPUT IS THERE
+  then
+    echo1=$(echo "FOUND "$file_out" FINISHED "$tool"");
+    mes_out # ERROR OUTPUT IS THERE
+  else 
+    echo1=$(echo "CANNOT FIND "$file_in" OR "$file_in2" FOR THIS "$sample"");
+    mes_out # ERROR INPUT NOT THERE
+  fi
+else
+  echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
+  mes_out # ERROR OUTPUT IS THERE
+fi
+}
+next_samp() {
+sam_num=${sample:7:8}
+new_sam=$(("$sam_num" + 1));
+next_sample=$(echo "sample"$new_sam"");
+echo1=$(echo "FOUND "$sample" NOW STARTING "$next_sample"");
+mes_out
+}
+steps() {
+echo1=$(echo "DONE WITH "$step1" NOW STARTING "$step2"");
+file_in="$step2"
+tool="$step1"
+mes_out
 }
 ####################################################################################################################
 ####################################################################################################################
@@ -474,46 +470,48 @@ do
   rdvcf="$dir_path"/raw_data/vcf_files # directory for vcf files
   rdbam="$dir_path"/raw_data/bam_files # directory for bam files
   rdsnp="$dir_path"/raw_data/snpEff #directory for snp files
+  rdbam="$dir_path"/raw_data/bam_files # directory for bam files
   javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
   fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
   sra="$(config_get sra)"; # downloading sra files or have your own
+  bamfile="$(config_get bamfile)"; #do you want to start at the beginning or with variant calling 
   file_sra="$run";
+  file_bam="$run".bam;
 ####################################################################################################################
 #  DOWNLOADS
 ####################################################################################################################
-  if [ "$sra" == 1 ]; # IF DOWNLOAD SRA
+  if [[ "$sra" == 1 && "$bamfile" == 1 ]]; # IF DOWNLOAD SRA
   then
     if [ ! -f "$wd"/"$file_sra" ]; # IF OUTPUT FILE IS NOT THERE
     then
+      echo1=$(echo "STARTING "$tool" FOR "$sample"");
+      file_in=$(echo "downloading");
+      mes_out
       download
     fi
     if [ -f "$wd"/"$file_sra" ]; # IF OUTPUT IS THERE
     then
-      echo1=FOUND
-      echo2=$file_sra
-      echo3=FINISHED
-      echo4=DOWNLOADING_$sample
+      echo1=$(echo "FOUND $file_sra FINISHED DOWNLOADING $sample")
+      file_in=$(echo "downloading");
       mes_out # ERROR OUTPUT IS THERE
-    else 
+    else
+      echo1=$(echo "STARTING "$tool" FOR "$sample"");
+      file_in=$(echo "downloading_second_time");
       download
       if [ ! -f "$wd"/"$file_sra" ]; # IF OUT IS NOT THERE
       then
+        echo1=$(echo "STARTING "$tool" FOR "$sample"");
+        file_in=$(echo "downloading_third_time");
         download
       fi  
     fi
   else
-    echo1=FOUND
-    echo2=$file_sra
-    echo3=NOW_STARTING
-    echo4=NEXT_SAMPLE
-    mes_out
+    next_samp
   fi
 done
-echo1=DONE_WITH
-echo2=INTERNET
-echo3=NOW_STARTING
-echo4=ALIGN_AND_ASSEMBLE
-mes_out
+step1=$(echo "INTERNET")
+step2=$(echo "ALIGN_AND_ASSEMBLE")
+steps
 } < $INPUT
 IFS=$OLDIFS
 ####################################################################################################################
@@ -585,12 +583,6 @@ do
     file_in="$wd"/$file_sra   
     file_out="$wd"/$file_fastq
     run_tools
-  else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
   fi
 ####################################################################################################################
 # MOVEFASTQPAIRED
@@ -613,12 +605,6 @@ do
     file_in=$fastq_dir_path/$file_fastq   
     file_out="$wd"/$file_fastq
     run_tools
-  else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
   fi
 ####################################################################################################################
 # PAIRED QUALITY CONTROL
@@ -647,11 +633,6 @@ do
     run_tools
     source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
   else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
   fi
 ####################################################################################################################
 # PAIRED TRIMMING
@@ -682,12 +663,6 @@ do
     end=97
     run_tools
     source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
-  else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
   fi
 ####################################################################################################################
 # ALIGNMENT HISAT2 PAIRED
@@ -731,12 +706,6 @@ do
     file_in="$wd"/$file_fastq    
     file_out="$wd"/$file_sam
     run_tools
-  else
-        echo1=FOUND
-        echo2=$file_out
-        echo3=FINISHED
-        echo4=$tool
-        mes_out # ERROR OUTPUT IS THERE
   fi
 ####################################################################################################################
 #  samtobam
@@ -762,17 +731,11 @@ do
 ####################################################################################################################
 #  FINISH
 ####################################################################################################################
-echo2="$sample"
-echo4=next"$sample"
-echo1=DONE_WITH
-echo3=STARTING
-mes_out
+next_samp
 done
-echo1=DONE_WITH
-echo2=ALGIN_AND_ASSEMBLE
-echo3=STARTING
-echo4=VARIANTCALLINGSTEP1
-mes_out
+step1=$(echo "ALIGN_AND_ASSEMBLE")
+step2=$(echo "VARIANT_CALLING_1_PREP_BAM_FILES")
+steps
 } < $INPUT
 IFS=$OLDIFS
 ####################################################################################################################
@@ -827,7 +790,15 @@ then
 ####################################################################################################################
     tool=prep_align_sum
     file_in="$wd"/$file_bam_3   
-    file_out="$wd"/$file_pdf
+    file_out="$run"_alignment_metrics.txt
+    run_tools
+    tool=prep_align_sum2
+    file_in="$wd"/$file_bam_3
+    file_out=$dirqc/insert_metrics/"$run"_insert_metrics.txt
+    run_tools
+    tool=prep_align_sum3
+    file_in="$wd"/$file_bam_3
+    file_out="$wd"/"$run"depth_out.txt
     rm -f "$wd"/"$file_bam_2"
     run_tools
 ####################################################################################################################
@@ -841,11 +812,9 @@ then
 #  DISPLAY MESSAGES
 ####################################################################################################################
   done
-  echo2=VARIANT_CALLING_PART_1
-  echo4=VARIANT_CALLING_PART_2
-  echo1=DONE_WITH
-  echo3=STARTING
-  mes_out
+  step1=$(echo "VARIANT_CALLING_1_PREP_BAM_FILE")
+  step2=$(echo "VARIANT_CALLING_2_FIRST_VARIANT_CALLING")
+  steps
   } < $INPUT
   IFS=$OLDIFS
 ####################################################################################################################
@@ -871,7 +840,7 @@ then
   do
     dir_path="$(config_get dir_path)"; # main directory
     wd="$dir_path"/working_directory; # working directory
-	home_dir="$(config_get home_dir)"; # home directory
+    home_dir="$(config_get home_dir)"; # home directory
     ref_dir_path="$(config_get ref_dir_path)"; # reference directory
     dirqc="$dir_path"/quality_control; # qc directory
     AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
@@ -882,37 +851,79 @@ then
     fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
     ref_dir_path="$(config_get ref_dir_path)"; # directory for where to put the reference files
     file_bam_dup="$run"_dedup_reads.bam;
+    file_bam_dupix="$run"_dedup_read.bai;
     file_bam_recal="$run"recal_reads.bam;
     file_vcf_raw="$run"raw_variants.vcf;
+    file_vcf_rawtab="$rdvcf"/"$run"raw_variants.table;
 ####################################################################################################################
 #  haplotype1
 ####################################################################################################################
     tool=haplotype1
     file_in="$wd"/$file_bam_dup    
-    file_out="$wd"/$file_vcf_raw
+    file_out="$wd"/"$file_bam_dupix"
     rm -f "$wd"/"$file_bam_3"
+    run_tools
+    tool=haplotype1B
+    file_in="$wd"/$file_bam_dup    
+    file_out="$wd"/$file_vcf_raw
+    run_tools
+    tool=haplotype1C
+    file_in="$wd"/$file_vcf_raw   
+    file_out="$file_vcf_rawtab"
     run_tools
 ####################################################################################################################
 #  filter1
 ####################################################################################################################
     tool=filter1
     file_in="$wd"/$file_vcf_raw    
+    file_out="$wd"/"$run"raw_snps.vcf
+    run_tools
+    tool=filter1B
+    file_in="$wd"/"$run"raw_snps.vcf    
+    file_out="$rdvcf"/"$run"raw_snps.table
+    run_tools
+    tool=filter1C
+    file_in="$wd"/$file_vcf_raw
+    file_out="$wd"/"$run"raw_indels.vcf
+    run_tools
+    tool=filter1D
+    file_in="$wd"/"$run"raw_snps.vcf
+    file_out="$wd"/"$run"filtered_snps.vcf
+    run_tools
+    tool=filter1E
+    file_in="$wd"/"$run"filtered_snps.vcf
+    file_out="$rdvcf"/"$run"filtered_snps.table
+    run_tool
+    tool=filter1F
+    file_in="$wd"/"$run"raw_indels.vcf
+    file_out="$wd"/"$run"filtered_indels.vcf
+    run_tools
+    tools=filter1G
+    file_in="$wd"/$file_bam_dup
+    file_out="$wd"/"$run"recal_data.table
+    run_tools
+    tools=filter1H
+    file_in="$wd"/$file_bam_dup
+    file_out="$wd"/"$run"post_recal_data.table
+    run_tools
+    tools=filter1I
+    file_in="$wd"/"$run"recal_data.table
+    file_in2="$wd"/"$run"post_recal_data.table
+    file_out="$wd"/"$run"recalibration_plots.pdf
+    run_tools2i
+    tools=filter1J
+    file_in="$wd"/$file_bam_dup
     file_out="$wd"/$file_bam_recal
     run_tools
+    move_vcf
 ####################################################################################################################
 # DISPLAY MESSAGES
 ####################################################################################################################
-    echo2="$sample"
-    echo4=next"$sample"
-    echo1=DONE_WITH
-    echo3=STARTING
-    mes_out
+    next_samp
   done
-    echo2=VARIANT_CALLING_PART_2
-    echo4=VARIANT_CALLING_PART_3
-    echo1=DONE_WITH
-    echo3=STARTING
-    mes_out
+  step1=$(echo "VARIANT_CALLING_2_FIRST_VARIANT_CALLING")
+  step2=$(echo "VARIANT_CALLING_3_SECOND_VARIANT_CALLING")
+  steps
   } < $INPUT
   IFS=$OLDIFS
 ####################################################################################################################
@@ -952,30 +963,49 @@ then
 ####################################################################################################################
     tool=haplotype2
     file_in="$wd"/$file_bam_recal    
-    file_out="$wd"/$file_vcf_raw_recal
+    file_out="$wd"/"$file_vcf_raw_recal"
     rm -f "$wd"/"$file_bam_dup"
+    run_tools
+    tool=haplotype2B
+    file_in="$wd"/"$file_vcf_raw_recal"
+    file_out="$rdvcf"/"$run"raw_variants_recal.table
     run_tools
 ####################################################################################################################
 #  filter2
 ####################################################################################################################
     tool=filter2
     file_in="$wd"/$file_vcf_raw_recal    
-    file_out="$wd"/$file_vcf_finalAll
+    file_out="$wd"/$file_vcf_recal
     run_tools
+    tool=filter2B
+    file_in="$wd"/$file_vcf_recal
+    file_out="$rdvcf"/"$run"raw_snps_recal.table
+    run_tools
+    tool=filter2C
+    file_in="$wd"/"$file_vcf_raw_recal"
+    file_out="$wd"/"$run"raw_indels_recal.vcf
+    run_tools
+    tool=filter2D
+    file_in="$wd"/"$file_vcf_recal"
+    file_out="$wd"/"$file_vcf_finalAll"
+    run_tools
+    tool=filter2E
+    file_in="$wd"/"$file_vcf_finalAll"
+    file_out="$rdvcf"/"$run"filtered_snps_finalAll.table
+    run_tools
+    tool=filter2F
+    file_in="$wd"/"$run"raw_indels_recal.vcf
+    file_out="$wd"/"$run"filtered_indels_recal.vcf
+    run_tools
+    move_vcf2
 ####################################################################################################################
 # DISPLAY MESSAGES
 ####################################################################################################################
-    echo2="$sample"
-    echo4=next"$sample"
-    echo1=DONE_WITH
-    echo3=STARTING
-    mes_out
+    next_samp
   done
-    echo2=VARIANT_CALLING_PART_3
-    echo4=VARIANT_CALLING_PART_4
-    echo1=DONE_WITH
-    echo3=STARTING
-    mes_out
+  step1=$(echo "VARIANT_CALLING_3_SECOND_VARIANT_CALLING")
+  step2=$(echo "VARIANT_CALLING_4_IMPACT_PREDICTION")
+  steps
   } < $INPUT
   IFS=$OLDIFS
 ####################################################################################################################
@@ -1019,6 +1049,7 @@ then
     file_in="$wd"/$file_vcf_finalAll  
     file_out="$rdvcf"/$file_vcf_finalADAR
     run_tools
+    move_vcf3
 ####################################################################################################################
 #  IMPACT PREDICTION
 ####################################################################################################################
@@ -1032,40 +1063,27 @@ then
 ####################################################################################################################
 # DISPLAY MESSAGES
 ####################################################################################################################
-    echo2="$sample"
-    echo4=next"$sample"
-    echo1=DONE_WITH
-    echo3=STARTING
-    mes_out
+    next_samp
   done
-    echo2=VARIANT_CALLING_PART_4
-    echo4=CLEANING_UP_FILES
-    echo1=DONE_WITH
-    echo3=STARTING
-    mes_out
+  step1=$(echo "VARIANT_CALLING_4_IMPACT_PREDICTION")
+  step2=$(echo "RUNNING_EXTOOLSET")
+  steps
   } < $INPUT
   IFS=$OLDIFS
 ####################################################################################################################
 # RUN EXTOOLSET
 ####################################################################################################################
-bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh 1 "$home_dir" "$dir_path"
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh 1 "$home_dir" "$dir_path"
 ####################################################################################################################
 # CLEANING UP AND COMPRESSING FILES AFTER VARIANT CALLING
 ####################################################################################################################
-  echo1=DONE_WITH  
-  echo2=AIDD_ANALYSIS_FULLY_COMPLETE
-  echo3=STARTING
-  echo4=NOW_CLEANING_UP_AND_COMPRESSING_RESULTS
-  mes_out
-  for i in raw final filtered; do
-  mv $dir_path/raw_data/vcf_files/*"$i"* $dir_path/raw_data/vcf_files/"$i"/
-  done
-  #compress_AIDD
-  echo1=DONE_WITH
-  echo2=ENTIRE_AIDD_EXCITOME_ANALYSIS_AND_FILE_CLEANUP
-  echo3=STARTING
-  echo4=A_NEW_EXPERIMENT_WILL_REQUIRE_AN_EMPTY_DIRECTORY
-  mes_out
+  step1=$(echo "RUNNING_EXTOOLSET")
+  step2=$(echo "CLEANING_UP_FILES")
+  steps
+  compress_AIDD
+  step1=$(echo "CLEANING_UP_FILES")
+  step2=$(echo "NOW_DONE_WITH_AIDD_PLEASE_CHECK_AND_CLEAN_OUT_sf_media_BEFORE_YOU_CAN_RUN_AIDD_AGAIN")
+  steps
 fi
 ####################################################################################################################
 ####################################################################################################################
@@ -1076,17 +1094,12 @@ fi
 ####################################################################################################################
 if [ "$variant" == 2 ];
 then
-  echo1=DONE_WITH
-  echo2=AIDD_ANALYSIS_WITHOUT_VARIANTS_COMPLETE
-  echo3=STARTING
-  echo4=NOW_CLEANING_UP_AND_COMPRESSING_RESULTS
-  mes_out
-  #compress_AIDD
-  echo1=DONE_WITH
-  echo2=ENTIRE_AIDD_EXCITOME_ANALYSIS_WITHOUT_VARIANTS_AND_FILE_CLEANUP
-  echo3=STARTING
-  echo4=A_NEW_EXPERIMENT_WILL_REQUIRE_AN_EMPTY_DIRECTORY
-  echo3=STARTING
-  mes_out
+  step1=$(echo "AIDD_ANALYSIS_WITHOUT_VARIANTS_COMPLETE")
+  step2=$(echo "NOW_CLEANING_UP_AND_COMPRESSING_RESULTS")
+  steps
+  compress_AIDD
+  step1=$(echo "ENTIRE_AIDD_EXCITOME_ANALYSIS_WITHOUT_VARIANTS_AND_FILE_CLEANUP")
+  step2=$(echo "A_NEW_EXPERIMENT_WILL_REQUIRE_AN_EMPTY_DIRECTORY")
+  steps
 fi
 exit

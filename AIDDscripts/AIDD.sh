@@ -135,7 +135,8 @@ INPUT="$dir_path"/PHENO_DATA.csv
 read
 while IFS=, read -r samp_name run codition sample condition2 condition3
 do
-  mkdir "$dir_path"/raw_data/$ball/$sample/
+  new_dir="$dir_path"/raw_data/$ball/$sample/
+  create_dir
 done
 rm -rf "$dir_path"/raw_data/$ball/sample/
 } < $INPUT
@@ -507,7 +508,7 @@ config_defaults # MAKE CONFIG DEFAULTS TEXT
 file_in="$dir_path"/PHENO_DATA.csv
 cat "$file_in" | sed 's/ //g' | sed '/^$/d' >> "$dir_path"/temp.csv
 temp_file
-cat "$dir_path"/PHENO_DATA.csv | awk 'NR==1' | sed 's/,/ /g' | sed "s/ /\n/g" | sed '1d' | sed '1d' | sed '2d' | awk '{$2=NR}1' | awk '{$3=$2+2}1' | sed 's/ /,/g' >> "$dir_path"/AIDD/listofconditions.csv # creates list of conditions file 
+cat "$dir_path"/PHENO_DATA.csv | awk 'NR==1' | sed 's/,/ /g' | sed "s/ /\n/g" | sed '1d' | sed '1d' | sed '2d' | awk '{$2=NR}1' | awk '{$3=$2+2}1' | sed 's/ /,/g' | sed '/,$/{N;s/\n/ /}' >> "$dir_path"/AIDD/listofconditions.csv # creates list of conditions file 
 cd "$dir_path"/AIDD
 cat "$dir_path"/PHENO_DATA.csv | sed 's/_[0-9]*//g' >> "$dir_path"/PHENO_DATAtemp.csv
 allcon=$(awk -F, 'NR==1{print $1}' "$dir_path"/PHENO_DATAtemp.csv)

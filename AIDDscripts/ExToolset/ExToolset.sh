@@ -215,7 +215,7 @@ sed -i '1i name,freq' "$file_in"
 file_out="$dirqcalign"/all_summary"$colname".tiff
 bartype=$(echo "single")
 tool=Rbar
-#run_tools
+run_tools
 done
 } # separates big summary into each category and creates bar graph
 matrixeditor() {

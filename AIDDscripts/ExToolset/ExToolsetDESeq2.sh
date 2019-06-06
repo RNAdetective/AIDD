@@ -27,6 +27,46 @@ sed -i 's/set_design/'$condition_name'/g' "$ExToolset"/DE.R
 Rscript "$ExToolset"/DE.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
 sed -i 's/'$condition_name'/set_design/g' "$ExToolset"/DE.R
 }
+GvennR() {
+Rscript "$ExToolset"/Gvenn.R "$file_in" "$file_out" "$image_out"
+}
+temp_file() {
+if [ -s "$dir_path"/temp.csv ];
+then
+  rm "$file_in"
+  mv "$dir_path"/temp.csv "$file_in"
+fi
+}
+run_tools() {
+    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+    then
+      if [ -f "$file_in" ]; # IF INPUT THERE
+      then
+        echo1=$(echo "FOUND "$file_in" STARTING "$tool"")
+        #mes_out
+        $tool # TOOL
+      else
+        echo1=$(echo "CANT FIND "$file_in" FOR_THIS "$sample"")
+        mes_out # ERROR INPUT NOT THERE
+      fi
+      if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
+      then
+        echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
+        #mes_out # ERROR OUTPUT IS THERE
+      else 
+        echo1=$(echo "CANT FIND "$file_out" FOR THIS "$sample"")
+        #mes_out # ERROR INPUT NOT THERE
+      fi
+  else
+        echo1=FOUND_"$file_out"_FINISHED_"$tool"
+        mes_out # ERROR OUTPUT IS THERE
+  fi
+}
+mes_out() {
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+}
 cd "$dir_path"/AIDD
 source config.shlib
 home_dir=$(config_get home_dir);
@@ -36,9 +76,10 @@ con_name1=$(config_get con_name1);
 con_name2=$(config_get con_name2);
 con_name3=$(config_get con_name3);
 cell_line="$3"
+split_csv=$(echo "sex.csv")
 if [ "$cell_line" == "1" ];
 then
-  INPUT="$dir_path"/cell.csv
+  INPUT="$dir_path"/"$split_csv"
   OLDIFS=$IFS
   {
   IFS=,
@@ -47,6 +88,7 @@ then
   while read freq name
   do
     source config.shlib;
+    split_csv=$(echo "sex.csv")
     home_dir=$(config_get home_dir);
     dir_path=$(config_get dir_path);
     dirres="$dir_path"/Results
@@ -57,9 +99,9 @@ then
     cat "$dir_path"/PHENO_DATA.csv | sed -n '/^'$name'/p' | sed '1i samp_name,run,condition,sample,cell,reads' >> "$dir_path"/PHENO_DATA"$name".csv
     for level in gene transcript ;
     do
-      name1=$(awk -F, 'NR==3{print $2}' "$dir_path"/cell.csv)
-      name2=$(awk -F, 'NR==4{print $2}' "$dir_path"/cell.csv)
-      name3=$(awk -F, 'NR==2{print $2}' "$dir_path"/cell.csv)
+      name1=$(awk -F, 'NR==3{print $2}' "$dir_path"/"$split_csv")
+      name2=$(awk -F, 'NR==4{print $2}' "$dir_path"/"$split_csv")
+      name3=$(awk -F, 'NR==2{print $2}' "$dir_path"/"$split_csv")
       if [ "$name"  == "$name1" ];
       then
         column_num=$(cat "$dir_path"/PHENO_DATA"$name".csv | wc -l) # 1+the first group

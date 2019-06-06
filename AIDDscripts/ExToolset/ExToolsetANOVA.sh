@@ -51,10 +51,10 @@ mes_out # ERROR INPUT NOT THERE
   if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
   then
 echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
-#mes_out # ERROR OUTPUT IS THERE
+mes_out # ERROR OUTPUT IS THERE
   else 
 echo1=$(echo "CANT FIND "$file_in" FOR THIS "$sample"")
-mes_out # ERROR INPUT NOT THERE
+#mes_out # ERROR INPUT NOT THERE
   fi
   else
 echo1=FOUND_"$file_out"_FINISHED_"$tool"
@@ -89,8 +89,8 @@ bartype=linewerr
 source config.shlib;
 home_dir=$(config_get home_dir);
 dir_path=$(config_get dir_path);
-
-dirres=/media/sf_AIDD/MDD/Results/;
+sex_name=$(echo "Suicide"); #what name did you name the all_count_matrix and it will have matching folder.
+dirres=/media/sf_AIDD/MDD/Results/"$sex_name";
 new_dir="$dirres"
 create_dir
 dirresall="$dirres"/all
@@ -98,8 +98,8 @@ new_dir="$dirresall"
 create_dir
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
-allcm="$dirres"/all_count_matrix.csv
-allcmedit="$dirresall"/all_count_matrixedit.csv
+allcm="$dirres"/all_count_matrix"$sex_name".csv
+allcmedit="$dirresall"/all_count_matrixedit"$sex_name".csv
 allindex="$dirresall"/allindex.csv
 file_in="$allcm"
 file_out="$allcmedit"
@@ -119,19 +119,20 @@ do
   source config.shlib;
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
-  dirres=$(config_get dirres)
+sex_name=$(echo "Suicide");
+  dirres=/media/sf_AIDD/MDD/Results/"$sex_name";
   con_name1=$(config_get con_name1);
   con_name2=$(config_get con_name2);
   con_name3=$(config_get con_name3);
   con_name4=$(echo "sampname");
   echo1=$(echo "STARTING ANOVA FOR "$freq"")
   mes_out
-  for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4";
+  for cond_name in "$con_name4";
   do
     dirrescon="$dirres"/all/"$cond_name";
     new_dir="$dirrescon";
     create_dir
-    file_in="$dirres"/all/all_count_matrixedit.csv;
+    file_in="$dirres"/all/all_count_matrixedit"$sex_name".csv;
     file_out="$dirrescon"/"$freq"summary.tiff;
     bartype=ANOVA
     pheno="$dir_path"/PHENO_DATA.csv
@@ -165,7 +166,7 @@ con_name1=$(config_get con_name1);
 con_name2=$(config_get con_name2);
 con_name3=$(config_get con_name3);
 con_name4=$(echo "sampname");
-  for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4";
+for cond_name in "$con_name4" ;
 do
   echo1=$(echo "STARTING SUMMARY COLLECTION FOR "$cond_name"")
   mes_out
@@ -188,10 +189,10 @@ do
   source config.shlib;
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
-
-  dirres=$(config_get dirres)
+sex_name=$(echo "Suicide");
+  dirres=/media/sf_AIDD/MDD/Results/"$sex_name";
   ExToolset="$dir_path"/AIDD/ExToolset/scripts
-  file_in="$dirres"/all_count_matrix.csv;
+  file_in="$dirres"/all_count_matrix"$sex_name".csv;
   dirrescorr="$dirres"/all/correlations
   new_dir="$dirrescorr"
   create_dir
@@ -234,8 +235,8 @@ do
   source config.shlib;
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
-
-  dirres=$(config_get dirres)
+sex_name=$(echo "Suicide");
+  dirres=/media/sf_AIDD/MDD/Results/"$sex_name";
   dirrescorr="$dirres"/all/correlations
   ExToolset="$dir_path"/AIDD/ExToolset/scripts
   file_in="$dirrescorr"/"$name"corr.txt
