@@ -8,5 +8,3 @@ cp -r /home/user/AIDDscripts/* /home/user/AIDD/AIDD/ #moves all the updated scri
 AIDDs=/home/user/AIDD/AIDD
 gsettings set org.gnome.desktop.background picture-uri "file://"$AIDDs"/AIDDlogo.jpg"
 rm -r /home/user/AIDDscripts
-
-
