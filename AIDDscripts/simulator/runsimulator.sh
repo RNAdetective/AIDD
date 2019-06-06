@@ -1,4 +1,18 @@
 export PATH=$PATH:~/AIDD/AIDD_tools/flux-simulator-1.2.1/bin
+time_check(){
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $tool
+___________________________________________________________________________" >> "$dir_path"/"$name"time_check.txt
+}
+check_tools() {
+for tools in flux-simulator ;
+do
+  if ! [ -x "$(command -v "$tools")" ]; then
+    echo "Need to install "$tools" to continue"
+    exit
+  fi
+done
+}
 create_dir() {
 if [ ! -d "$new_dir" ];
 then
@@ -57,18 +71,18 @@ move_files() {
 mv "$par_dir"/"$name"* "$wkd"/
 }
 Simcounts() {
-cat "$wkd"/"$name".pro | awk '{ print $2, $8 }' | column -t | sed 's/\t/,/g' | sed '1d' | sed '1i transcript_id,'$name'sim' >> "$wkd"/"$name"sim.csv
+cat "$wkd"/"$name".pro | sed 's/\t/,/g' | awk -F',' '{ print $2, $8 }' | sed '1d' | sed '1i transcript_id,sim' | sort -r | sed 's/ /,/g' >> "$wkd"/"$name"sim.csv
 cp "$wkd"/"$name"sim.csv "$dir_path"/correlations/"$name"sim.csv
-cp 
 }
 PHENO() {
-mkdir "$dir_path"/PHENO_DATA/
+new_dir="$dir_path"/PHENO_DATA/
+create_dir
 echo ""$name","$name",none,"$sample"" >> "$dir_path"/PHENO_DATA/PHENO_DATA"$name".csv
 }
 createPHENO() {
 if [ -s "$dir_path"/PHENO_DATA.csv ];
 then
-rm "$dir_path"/PHENO_DATA.csv
+  rm "$dir_path"/PHENO_DATA.csv
 fi
 cat "$dir_path"/PHENO_DATA/*.csv | sed '1i samp_name,Run,condition,sample' >> "$dir_path"/PHENO_DATA.csv
 }
@@ -91,7 +105,8 @@ hisat2 -q -x "$ref_path"/genome -p3 --dta-cufflinks -1 "$wkd"/"$name"_1.fastq -2
 samtobam() { 
 java -Djava.io.tmpdir="$dir_path"/tmp -jar "$tools"/picard.jar SortSam INPUT="$wkd"/"$name".sam OUTPUT="$wkd"/"$name".bam SORT_ORDER=coordinate
 }
-assem_string() { 
+assem_string() {
+export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin 
 mkdir "$prep_dir" 
 mkdir "$prep_dir"/"$sample"
 stringtie "$wkd"/"$name".bam -p3 -G "$sim_ref"/GRCh37.gtf -A "$wkd"/"$name".tab -l -B -b "$wkd"/"$name" -e -o "$prep_dir"/"$sample"/"$name".gtf 
@@ -105,7 +120,7 @@ cp "$wkd"/summary/"$name"_summary.txt "$dir_path"/summary/
 count_AIDD() {
 cd "$wkd"/
 python "$tools"/prepDE.py -g "$wkd"/"$name"_gene_count_matrix.csv -t "$wkd"/"$name"_transcript_count_matrix.csv # CREATE MATRIX FILES
-cat "$wkd"/"$name"_transcript_count_matrix.csv | sed '1d' | sed '1i transcript_id,'$name'AIDD' >> "$wkd"/"$name"AIDD.csv
+cat "$wkd"/"$name"_transcript_count_matrix.csv | sed '1d' | sed '1i transcript_id,AIDD' | sort -r >> "$wkd"/"$name"AIDD.csv
 cp "$wkd"/"$name"AIDD.csv "$dir_path"/correlations/"$name"AIDD.csv
 cd
 }
@@ -149,9 +164,16 @@ cd
 }
 gtfcheck() {
 temp_dir
-path_to_file_check="$dir_path"/ballgown/$sample/"$file_name_gtf" 
+path_fc="$dir_path"/ballgown/$sample/"$file_name_gtf" 
 file_check # makes temp file with yes or no
 makecheckfile
+}
+temp_file() {
+if [ -s "$dir_path"/temp.csv ];
+then
+  rm "$file_in"
+  mv "$dir_path"/temp.csv "$file_in"
+fi
 }
 m_corr() {
 join -1 1 -2 1 "$corr"/"$name"AIDD.csv "$corr"/"$name"sim.csv  -o1.1,1.2,2.2 -e0 >> "$corr"/"$name"all.csv
@@ -159,6 +181,51 @@ join -1 1 -2 1 "$corr"/"$name"AIDD.csv "$corr"/"$name"sim.csv  -o1.1,1.2,2.2 -e0
 compress() {
 tar -cvzf "$dir_path"/"$name".tar.gz "$wkd"
 }
+summary_split() {
+cat "$dir_path"/summary/"$name"_summary.txt | sed '/^#/d' | sed 's/PAIR/'$run'/g' | sed '/^FIR/d' | sed '/^SEC/d' | sed 's/\t/,/g' | sed '1d' >> "$dir_path"/"$name"_summary.csv
+} #creates alignment matrix from txt file
+combine_file() {
+cat "$file_in" | sed '1!{/^CAT/d;}' | cut -d',' -f"$col_num" | sed '/^$/d' | awk -F',' '!x[$1]++' >> "$file_out"
+} # cuts each column out of matrix and makes its own file
+Rbar() {
+Rscript "$ExToolset"/barchart.R "$file_in" "$file_out" "$bartype" "$pheno" "$freq" "$sum_file" "$sampname" "$file_out2" "$sum_file2"
+} # runs bargraph R script
+sum_combine() {
+cat "$dir_path"/summary/*.csv | sed '/^$/d' | awk -F',' '!x[$1]++' >> "$dir_path"/summary/all_summary.csv
+sed -i '1!{/^CAT/d;}' "$dir_path"/summary/all_summary.csv
+file_in="$dir_path"/summary/all_summary.csv
+file_out="$dir_path"/summary/all_summaryfilter.csv
+col_num=$(echo "1,6,7,13,18,20,21,22,23")
+tool=combine_file
+run_tools
+file_in="$dir_path"/summary/all_summary.csv
+file_out="$dir_path"/summary/all_summarynorm.csv
+col_num=$(echo "1,2")
+tool=combine_file
+run_tools
+file_in="$dir_path"/summary/all_summarynorm.csv
+file_out="$dir_path"/summary/all_summarynorm.tiff
+bartype=$(echo "single")
+tool=Rbar
+run_tools
+} # makes big summary file matrix with all columns and creates bar graph
+sum_divid() {
+for colnum in 2 3 4 5 6 7 8 9 ; do
+colname=$(awk -F, 'NR==1{print $'$colnum'}' "$dir_path"/summary/all_summaryfilter.csv);
+file_in="$dir_path"/summary/all_summaryfilter.csv
+file_out="$dir_path"/summary/all_summary"$colname".csv
+col_num=$(echo "1,"$colnum"")
+tool=combine_file
+run_tools
+file_in="$dir_path"/summary/all_summary"$colname".csv
+sed -i '1d' "$file_in"
+sed -i '1i name,freq' "$file_in"
+file_out="$dir_path"/summary/all_summary"$colname".tiff
+bartype=$(echo "single")
+tool=Rbar
+#run_tools
+done
+} # separates big summary into each category and creates bar graph
 run_tools() {
 if [ ! -s "$file_out" ];
 then
@@ -175,9 +242,12 @@ fi
 ###########################################################################################
 # RUN FLUX SIMULATOR
 ###########################################################################################
-dir_path="$2"
-home_dir="$1"
+dir_path=/media/sf_AIDD/sim
+home_dir=/home/user
 new_dir="$dir_path"
+tool=start_time
+time_check
+check_tools
 create_dir
 sim_scripts="$dir_path"/simulator
 new_dir="$sim_scripts"
@@ -199,9 +269,9 @@ OLDIFS=$IFS
 [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
 while IFS=, read -r num len sample
 do
-  dir_path="$2"
+  dir_path=/media/sf_AIDD/sim
   ref_path="$home_dir"/AIDD/references
-  home_dir="$1"
+  home_dir=/home/user
   name="$num"M"$len"length
   wkd="$dir_path"/sim_out/"$name"
   tools="$home_dir"/AIDD/AIDD_tools
@@ -220,90 +290,159 @@ do
   then
     if [ ! -s "$wkd"/"$name".fastq ];
     then
+      tool=references_start
+      time_check
       get_gtf
       get_chromfa
+      tool=references_end
+      time_check
+      tool=simulation_start
+      time_check
       sim_tool
       move_files
       PHENO
+      tool=simulation_end
+      time_check
     else
       echo ""$name" already done"
     fi
   else
     echo ""$name".par files not found"
   fi
-    if [[ -s "$wkd"/"$name".pro && -s "$wkd"/"$name".fastq ]]
+  if [[ -s "$wkd"/"$name".pro && -s "$wkd"/"$name".fastq ]]
+  then
+    tool=Simcounts
+    file_in="$wkd"/"$name".pro
+    file_out="$wkd"/"$name"sim.csv
+    time_check
+    run_tools
+    tool=splitfq 
+    file_in="$wkd"/"$name".fastq
+    file_out="$wkd"/"$name"_1.fastq
+    time_check
+    run_tools
+    use_java=11
+    setjavaversion
+    tool=fastqcpaired
+    file_in="$wkd"/"$name"_1.fastq
+    file_out="$wkd"/"$name"_1_fastqc.html
+    time_check
+    run_tools
+    use_java=8
+    setjavaversion
+    export PATH=$PATH:"$home_dir"/AIDD/AIDD_tools/bin
+    tool=HISAT2_paired
+    file_in="$wkd"/"$name"_1.fastq
+    file_out="$wkd"/"$name".sam
+    time_check
+    run_tools
+    tool=samtobam
+    file_in="$wkd"/"$name".sam
+    file_out="$wkd"/"$name".bam
+    time_check
+    run_tools
+    tool=assem_string
+    file_in="$wkd"/"$name".bam
+    file_out="$wkd"/"$name".tab
+    time_check
+    run_tools
+    tool=align_metric
+    file_in="$wkd"/"$name".bam
+    file_out="$wkd"/summary/"$name"_summary.txt
+    time_check
+    run_tools
+    tool=count_AIDD
+    file_in="$wkd"/"$name".tab
+    file_out="$wkd"/"$name"AIDD.csv
+    time_check
+    run_tools
+    tool=compress
+    file_in="$wkd"/"$name"AIDD.csv
+    file_out="$dir_path"/"$name".tar.gz
+    time_check
+    run_tools
+    tool=AIDD_done
+    time_check
+    tool=start_corr
+    time_check
+    if [[ -s "$corr"/"$name"AIDD.csv && -s "$corr"/"$name"sim.csv ]];
     then
-      tool=Simcounts
-      file_in="$wkd"/"$name".pro
-      file_out="$wkd"/"$name"sim.csv
-      run_tools
-      tool=splitfq 
-      file_in="$wkd"/"$name".fastq
-      file_out="$wkd"/"$name"_1.fastq
-      run_tools
-      use_java=8
-      setjavaversion
-      tool=fastqcpaired
-      file_in="$wkd"/"$name"_1.fastq
-      file_out="$wkd"/"$name"_1_fastqc.html
-      run_tools
-      use_java=11
-      setjavaversion
-      export PATH=$PATH:"$home_dir"/AIDD/AIDD_tools/bin
-      tool=HISAT2_paired
-      file_in="$wkd"/"$name"_1.fastq
-      file_out="$wkd"/"$name".sam
-      run_tools
-      tool=samtobam
-      file_in="$wkd"/"$name".sam
-      file_out="$wkd"/"$name".bam
-      run_tools
-      tool=assem_string
-      file_in="$wkd"/"$name".bam
-      file_out="$wkd"/"$name".tab
-      run_tools
-      tool=align_metric
-      file_in="$wkd"/"$name".bam
-      file_out="$wkd"/summary/"$name"_summary.txt
-      run_tools
-      tool=count_AIDD
-      file_in="$wkd"/"$name".tab
-      file_out="$wkd"/"$name"AIDD.csv
-      run_tools
-      tool=compress
-      file_in="$wkd"/"$name"AIDD.csv
-      file_out="$dir_path"/"$name".tar.gz
-      run_tools
-      if [[ -s "$corr"/"$name"AIDD.csv && "$corr"/"$name"sim.csv ]];
+      dir_path=/media/sf_AIDD/sim
+      ref_path="$home_dir"/AIDD/references
+      home_dir=/home/user
+      name="$num"M"$len"length
+      echo ""$name""
+      wkd="$dir_path"/sim_out/"$name"
+      tools="$home_dir"/AIDD/AIDD_tools
+      sim_scripts="$dir_path"/simulator
+      par_dir="$dir_path"/par_files
+      scripts_dir="$home_dir"/AIDD/AIDD/scripts
+      prep_dir="$wkd"/ballgown
+      sim_ref="$dir_path"/genome_references
+      corr="$dir_path"/correlations
+      file_in1="$corr"/"$name"sim.csv
+      sed -i 's/  /,/g' "$file_in1"
+      file_in2="$corr"/"$name"AIDD.csv
+      file_out1="$corr"/"$name"corr.tiff
+      file_out2="$corr"/"$name"corr.txt
+      file_outAll="$corr"/"$name"All.csv
+      if [ ! -s "$file_outAll" ];
       then
-        m_corr
-        variables
-      else 
-        echo "can't find "$name" transcript count files"
+        Rscript "$sim_scripts"/simcorr.R "$name" "$file_in1" "$file_in2" "$file_out1" "$file_out2" "$file_outAll"
       fi
-        gtfcheck
-        Rscript "$sim_scripts"/simcorr.R
-    else
-      echo "Can't find pro file for "$name""
+      if [ -s "$file_outAll" ];
+      then
+        echo ""$name" DONE"
+      fi
+      dirrescorr="$dir_path"/correlations
+      file_in="$dirrescorr"/"$name"corr.txt
+      file_out="$dirrescorr"/all_corr_data.cvs
+      corr_file="$dirrescorr"/"$name"corr.txt
+      pcorr=$(cat "$corr_file" | awk '/   cor/{nr[NR+1]}; NR in nr')
+      new_file="$dir_path"/correlations/temp.csv
+      lowCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $2}') 
+      highCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $3}')
+      p_value=$(cat "$corr_file" | awk '/p-value /{nr[NR]}; NR in nr' | sed 's/ //g' | sed 's/p-value=/p-value</g' | sed 's/</,/g' | awk -F ',' 'NR=1{print $4}')
+      echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirrescorr"/all_corr_data.csv
+    else 
+      echo "can't find "$name" transcript count files"
     fi
+    #gtfcheck
+  else
+    echo "Can't find pro file for "$name""
+  fi
+tool=alignment_stats
+time_check
+file_in="$dir_path"/summary/"$name"_summary.txt
+file_out="$dir_path"/summary/"$name"_summary.csv
+tool=summary_split
+run_tools
+tool=corr_end
+time_check
 done
 } < $INPUT
 IFS=$OLDIFS
+sum_combine
+sum_divid
+tool=end_time
+time_check
 ###########################################################################################
 # RUN ANALYSIS
 ###########################################################################################
-createPHENO
-if [ ! -s ""$dir_path"/file_check/CheckTheseFiles.csv" ]; # IF ALL INPUT FILES ARE THERE CHECKFILE EMPTY
-then
-  matrix
-else
-  echo "there are missing gtf files please check file_check directory for more information"
-fi
-if [[ -s "$dir_path"/DE/gene_count_matrix.csv && -s "$dir_path"/DE/transcript_count_matrix.csv ]];
-then
-Rscript Deseq2DE.R
-Rscript EdgeRDE.R
-fi 
-source config.shlib; # load the config library functions
-#merge correlation files all.csv
-
+#createPHENO
+#if [ ! -s ""$dir_path"/file_check/CheckTheseFiles.csv" ]; # IF ALL INPUT FILES ARE THERE CHECKFILE EMPTY
+#then
+#  matrix
+#else
+#  echo "there are missing gtf files please check file_check directory for more information"
+#fi
+#if [[ -s "$dir_path"/DE/gene_count_matrix.csv && -s "$dir_path"/DE/transcript_count_matrix.csv ]];
+#then
+#Rscript Deseq2DE.R
+#Rscript EdgeRDE.R
+#fi 
+#source config.shlib; # load the config library functions
+####################################################################################################################
+# RUNS EXTOOLSET FOR CORRELATION SUMMARY
+####################################################################################################################
+#cat "$dirres"/all/all_corr_data.csv | sort -k5 |  >> "$dirrescorr"/all_corr_datasig.csv
