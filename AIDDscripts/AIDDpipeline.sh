@@ -892,25 +892,25 @@ then
     tool=filter1E
     file_in="$wd"/"$run"filtered_snps.vcf
     file_out="$rdvcf"/"$run"filtered_snps.table
-    run_tool
+    run_tools
     tool=filter1F
     file_in="$wd"/"$run"raw_indels.vcf
     file_out="$wd"/"$run"filtered_indels.vcf
     run_tools
-    tools=filter1G
+    tool=filter1G
     file_in="$wd"/$file_bam_dup
     file_out="$wd"/"$run"recal_data.table
     run_tools
-    tools=filter1H
+    tool=filter1H
     file_in="$wd"/$file_bam_dup
     file_out="$wd"/"$run"post_recal_data.table
     run_tools
-    tools=filter1I
+    tool=filter1I
     file_in="$wd"/"$run"recal_data.table
     file_in2="$wd"/"$run"post_recal_data.table
     file_out="$wd"/"$run"recalibration_plots.pdf
     run_tools2i
-    tools=filter1J
+    tool=filter1J
     file_in="$wd"/$file_bam_dup
     file_out="$wd"/$file_bam_recal
     run_tools
