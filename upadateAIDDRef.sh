@@ -14,7 +14,8 @@ perl -e 'use File::Temp qw/tempdir/; use IO::File; $d=tempdir; $fh; map{if(m/^\>
 java -jar "$home_dir"/AIDD/AIDD_tools/picard.jar CreateSequenceDictionary REFERENCE="$ref_dir_path"/ref2.fa OUTPUT="$ref_dir_path"/ref2.dict
 samtools faidx "$ref_dir_path"/ref2.fa
 }
-cd /home/user/AIDD/references
+ref_dir_path=/home/user/AIDD/references
+cd "$ref_dir_path"
 for files in ref1.fa ref2.fa ref2.dict ref2.fa.fai dbsnp.vcf dbsnp.vcf.idx ;
 do
   rm "$files"
