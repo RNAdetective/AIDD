@@ -1,4 +1,5 @@
 mv /home/user/AIDD/AIDD_tools/snpEff/snpEff.jar /home/user/AIDD/AIDD_tools/snpEff.jar
+mv /home/user/AIDD/AIDD_tools/snpEff/snpEff.jar /home/user/AIDD/AIDD_tools/snpEff.config
 rm -r /home/user/AIDD/AIDD
 wget https://github.com/RNAdetective/AIDD/raw/master/AIDDscripts.tar.gz #this will get pipeline scripts
 tar -vxzf AIDDscripts.tar.gz #uncompress them
