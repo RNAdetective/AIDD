@@ -471,8 +471,12 @@ fi
 # CREATE FILE CHECK FILES TO CHECK FOR RAW DATA FILES                                                                                *TESTED
 ###############################################################################################################################################################
 cd "$dir_path"/AIDD
+new_dir="$dir_path"/Results
+create_dir
 echo1=$(echo "CHECKING DATA")
 mes_out
+sed -i 's/g/\r//g' "$dir_path"/PHENO_DATA.csv
+sed -i 's/g/\r//g' "$dir_path"/PHENO_DATAalign.csv
 INPUT="$dir_path"/PHENO_DATA.csv
 OLDIFS=$IFS
 {
