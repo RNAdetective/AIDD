@@ -8,6 +8,7 @@
  
  # About AIDD
  
+ 
 * AIDD incorporates open source tools into a static virtualbox to ensure reproducability in RNA-seq experiments.  
 * There is a bash script that completely automates the pipeline making it ease to use. 
 * The manual also instructs the more advanced user how to change the script to add more individual options.  
