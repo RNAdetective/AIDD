@@ -369,7 +369,7 @@ The next four steps 2-5 are optional if you don't have any genes of interest or 
 Step 3: copy and paste the following command into the command prompt
 
 ```
-bash /home/user/AIDD/AIDD/AIDD.sh 1 /home/user /media/AIDD
+bash /home/user/AIDD/AIDD/AIDD.sh 1 /home/user /media/sf_AIDD
 ```
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/runAIDD.png">
