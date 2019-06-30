@@ -23,10 +23,17 @@ downreg100="$dirresDELDEvd"/downregGListtop100.csv
 downregGlist="$dirresDELDEvd"/downregGList.csv
 heatmap="$dirresDELDE"/top60heatmap.tiff
 volcano="$dirresDELDE"/VolcanoPlot.tiff
+ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
 sed -i 's/set_design/'$condition_name'/g' "$ExToolset"/DE.R
 Rscript "$ExToolset"/DE.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
 sed -i 's/'$condition_name'/set_design/g' "$ExToolset"/DE.R
 }
+create_dir() {
+if [ ! -d "$new_dir" ];
+then
+  mkdir "$new_dir"
+fi
+} # this creates directories $new_dir
 GvennR() {
 Rscript "$ExToolset"/Gvenn.R "$file_in" "$file_out" "$image_out"
 }
@@ -67,7 +74,6 @@ DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
 echo "'$DATE_WITH_TIME' $echo1
 ___________________________________________________________________________"
 }
-cd "$dir_path"/AIDD
 source config.shlib
 home_dir=$(config_get home_dir);
 dir_path=$(config_get dir_path); 
@@ -132,7 +138,7 @@ then
       for condition_name in "$con_name1" "$con_name2" "$con_name3" ;
       do
         file_in="$dirres"/"$level"_count_matrixedited"$name".csv
-        cat "$file_in" | awk -F',' '!v[$1]++' >> "$dir_path"/temp.csv
+        cat "$file_in" | awk -F',' '!a[$1]++' | sort -u -t',' -k1,1 >> "$dir_path"/temp.csv
         temp_file
         echo1=$(echo "STARTING DESEQ2 FOR level="$level", and condition="$condition_name"")
         mes_out
@@ -233,8 +239,12 @@ else
     for condition_name in "$con_name1" "$con_name2" "$con_name3" ;
     do
       file_in="$dirres"/"$level"_count_matrixedited.csv
-      cat "$file_in" | awk -F',' '!v[$1]++' >> "$dir_path"/temp.csv
-      temp_file
+      cat "$file_in" | sort -t',' -u -k1,1 | uniq >> tempor.csv
+      if [ -f tempor.csv ];
+      then
+        rm "$file_in"
+        mv tempor.csv "$file_in"
+      fi
       echo1=$(echo "STARTING "$file_in"")
       mes_out
       file_in="$dirres"/"$level"_count_matrixedited.csv

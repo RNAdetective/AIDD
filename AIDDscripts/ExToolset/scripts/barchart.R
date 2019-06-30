@@ -85,16 +85,16 @@ if ( bartype == "ANOVA" ) {
   cdata <- ddply(data, c("condition_name"), summarise, N = length(freq_name), mean=round(mean(freq_name),5), sd=round(sd(freq_name), 5))
   cdata$substitution <- rep("freq_name",nrow(cdata)) # make new column 
   write.csv(cdata, sum_file, row.names=FALSE, quote=FALSE)
-  #tiff(file_out, units="in", width=10, height=10, res=600) #names the chart file
-  #q <- ggplot(cdata, aes(x=condition_name, y=mean, fill=condition_name)) + geom_bar(stat="identity", color="black", position=position_dodge()) + theme_minimal() + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-  #p <- q + theme(axis.text.x = element_text(angle = 90, hjust = 1))
-  #r <- p + geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2, position=position_dodge(.9)) 
-  #z <- r + labs(title="freq_name expression for condition_name", x="freq_name", y = "Expression(TPM)")
-  #print(z)
-  #garbage <- dev.off()
-  #tiff(file_out2, units="in", width=10, height=10, res=600)
-#ggboxplot(data, x= "condition_name", y = "freq_name", color = "condition_name")
-#  garbage <- dev.off()
+  tiff(file_out, units="in", width=10, height=10, res=600) #names the chart file
+  q <- ggplot(cdata, aes(x=condition_name, y=mean, fill=condition_name)) + geom_bar(stat="identity", color="black", position=position_dodge()) + theme_minimal() + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  p <- q + theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  r <- p + geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2, position=position_dodge(.9)) 
+  z <- r + labs(title="freq_name expression for condition_name", x="freq_name", y = "Expression(TPM)")
+  print(z)
+  garbage <- dev.off()
+  tiff(file_out2, units="in", width=10, height=10, res=600)
+ggboxplot(data, x= "condition_name", y = "freq_name", color = "condition_name")
+  garbage <- dev.off()
 res.aov <- anova(lm(freq_name~condition_name, data=data))
 out <- capture.output(summary(res.aov))
 write.csv(out, sum_file2, row.names=FALSE, quote=FALSE)
@@ -115,3 +115,28 @@ write.csv(out, file_out2, row.names=FALSE, quote=FALSE)
 #total <- sum(data_in$freq)
 #data <- data_in
 #data$pct <- data$name/total #adds percent column
+if (bartype == "VENN") {
+suppressPackageStartupMessages(library("gdata"))
+suppressPackageStartupMessages(library("VennDiagram"))
+suppressPackageStartupMessages(library("gplots"))
+image_out <- paste0(args[4])
+gLists <- read.csv(file_in)
+gLists$X <- NULL
+head(gLists)
+tail(gLists)
+gLS <- lapply(as.list(gLists), function(x) x[x != ""])
+lapply(gLS, tail)
+names(gLS) <- c(set_column_name)
+VENN.LIST <- gLS
+tiff(image_out, units="in", width=10, height=10, res=600)
+venn.plot <- venn.diagram(VENN.LIST, NULL, category.names=c(set_column_name), fill=c(set_colors), alpha=c(set_alpha), cex = 2, cat.fontface=4)
+grid.draw(venn.plot)
+dev.off()
+a <- venn(VENN.LIST, show.plot=TRUE)
+str(a)
+inters <- attr(a,"intersections")
+lapply(inters, head)
+sink(file_out)
+inters
+sink()
+}

@@ -234,7 +234,7 @@ filter_impact() {
 #if [ "$any_no" == "0" ];
 #then
 addcondition=$(echo ""$con_name1"_"$condition"_"$con_name2"_"$condition2"_"$con_name3"_"$condition3"_"$con_name4"_"$condition4"")
-  cat "$raw_input4" | sed '1,2d' | sed 's/	/,/g' | sed 's/    /,/g' | sed 's/  /,/g' | sed 's/ /,/g' | cut -d',' -f"$col_num" | sed '1i\ '$impact''$variable''$snptype'' | sed '/,0$/d' | sort -t, -u | sed 's/ /,/g' >> "$VC_dir"/"$level"/"$impact"/"$run""$snptype""$addcondition".csv
+  cat "$raw_input4" | sed '1,2d' | sed 's/	/,/g' | sed 's/    /,/g' | sed 's/  /,/g' | sed 's/ /,/g' | cut -d',' -f"$col_num" | sed '1i\ '$impact''$snptype''$addcondition',editing_sites' | sed '/,0$/d' | sort -t, -u | sed 's/ /,/g' >> "$VC_dir"/"$level"/"$impact"/"$run""$snptype""$addcondition".csv
 count=$(cat "$VC_dir"/"$level"/"$impact"/"$run""$snptype""$addcondition".csv | wc -l)
   new_dir="$VC_dir"/final
   create_dir
@@ -248,12 +248,12 @@ count=$(cat "$VC_dir"/"$level"/"$impact"/"$run""$snptype""$addcondition".csv | w
 #fi
 } # this will create impact files for each sample
 splitallmatrix() {
-var=$(head -n 1 "$olddirres"/all/all_count_matrixedit.csv)
-grep -n -w -F  "$name" "$olddirres"/all/all_count_matrixedit.csv | sed '1i '$var'' | sed 's/[0-9]://g' >> "$dirres"/all/all_count_matrixedit.csv
+var=$(head -n 1 "$olddirres"/all_count_matrix.csv)
+grep -n -w -F  "$name" "$olddirres"/all_count_matrix.csv | sed '1i '$var'' | sed 's/[0-9]://g' >> "$dirres"/all/all_count_matrixedit.csv
 }
 PDsplit() {
 header=$(head -n 1 "$dir_path"/PHENO_DATA.csv)
-grep -n -w -F "$name" "$dir_path"/PHENO_DATA.csv | sed '1i '$header'' | sed 's/[0-9]://g' | sed 's/_[0-9]//g' >> "$dirres"/all/PHENO_DATA.csv
+grep -n -w -F "$name" "$dir_path"/PHENO_DATA.csv | sed '1i '$header'' | sed 's/[0-9]://g' | sed 's/_[0-9]//g' >> "$dirres"/PHENO_DATA.csv
 }
 DE_R() {
 rlog="$dirresDEcal"/rlogandvariance.tiff
@@ -304,34 +304,37 @@ then
 fi
 } # deletes any temp directories created in error from stringtie
 run_tools() {
-    if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
-    then
-      if [ -f "$file_in" ]; # IF INPUT THERE
-      then
-        echo1=$(echo "FOUND "$file_in" STARTING "$tool"")
-        #mes_out
-        $tool # TOOL
-      else
-        echo1=$(echo "CANT FIND "$file_in" FOR_THIS "$sample"")
-        mes_out # ERROR INPUT NOT THERE
-      fi
-      if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
-      then
-        echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
-        #mes_out # ERROR OUTPUT IS THERE
-      else 
-        echo1=$(echo "CANT FIND "$file_out" FOR THIS "$sample"")
-        #mes_out # ERROR INPUT NOT THERE
-      fi
+if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+then
+  if [ -f "$file_in" ]; # IF INPUT THERE
+  then
+    echo1=$(echo "FOUND $file_in STARTING $tool");
+    mes_out
+    $tool # TOOL
   else
-        echo1=FOUND_"$file_out"_FINISHED_"$tool"
-        mes_out # ERROR OUTPUT IS THERE
+    echo1=$(echo "CANNOT FIND "$file_in" FOR "$sample"");
   fi
+  if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
+  then
+    echo1=$(echo "FOUND $file_out FINISHED $tool");
+    mes_out # ERROR OUTPUT IS THERE
+  else 
+    echo1=$(echo "CANNOT FIND $file_out FOR THIS "$sample"");
+    mes_out # ERROR INPUT NOT THERE
+  fi
+else
+  echo1=$(echo "FOUND $file_out FINISHED $tool")
+  mes_out # ERROR OUTPUT IS THERE
+fi
 }
 mes_out() {
+dirqc="$dir_path"/quality_control
 DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
 echo "'$DATE_WITH_TIME' $echo1
 ___________________________________________________________________________"
+new_dir="$dirqc"/time_check
+create_dir
+echo "'$DATE_WITH_TIME',"$run","$file_in","$tool"" >> "$dirqc"/time_check/"$run"time_check.csv
 }
 DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
 TIME_HOUR=$(date +%H)
@@ -416,8 +419,13 @@ done
 make_config # makes config files
 make_cdef # makes config default files
 to_move="$home_dir"/Desktop/PHENO_DATA.csv
+sed -i 's/\r//g' "$to_move"
 file_move="$dir_path"/PHENO_DATA.csv
-get_file
+sed -i 's/\r//g' "$file_move"
+if [ ! -f "$file_move" ];
+then
+  get_file
+fi
 file_in="$dir_path"/PHENO_DATA.csv
 cat "$file_in" | sed 's/ //g' | sed '/^$/d' >> "$dir_path"/temp.csv
 temp_file
@@ -475,8 +483,8 @@ new_dir="$dir_path"/Results
 create_dir
 echo1=$(echo "CHECKING DATA")
 mes_out
-sed -i 's/g/\r//g' "$dir_path"/PHENO_DATA.csv
-sed -i 's/g/\r//g' "$dir_path"/PHENO_DATAalign.csv
+sed -i 's/\r//g' "$dir_path"/PHENO_DATA.csv
+#sed -i 's/\r//g' "$dir_path"/PHENO_DATAalign.csv
 INPUT="$dir_path"/PHENO_DATA.csv
 OLDIFS=$IFS
 {
@@ -509,7 +517,7 @@ do
   type2="$raw_input2"
   snptype=summary
   create_filecheck
-  for snptype in AG GA CT TC ADARediting APOBECediting All ;
+  for snptype in ADARediting APOBECediting All ;
   do
     filecheckVC="$dirqc"/filecheckVC
     raw_input3="$dirraw"/snpEff/snpEff"$run""$snptype".csv
@@ -531,7 +539,7 @@ for in_file in "$raw_check1" "$raw_check2" ;
 do
   checkfile
 done
-for snptype in AG GA CT TC ADARediting APOBECediting All ;
+for snptype in ADARediting APOBECediting All ;
 do
   raw_check3="$dirqc"/filecheckVC/filecheck"$snptype"1.csv #snpeff.csv
   for in_file in "$raw_check3" ;
@@ -539,7 +547,7 @@ do
     checkfile
   done
 done
-for snptype in AG GA CT TC ADARediting APOBECediting All ;
+for snptype in ADARediting APOBECediting All ;
 do
   raw_check4="$dirqc"/filecheckVC/filecheck"$snptype"2.csv #snpeff.txt
   for in_file in "$raw_check4" ;
@@ -616,6 +624,13 @@ do
       echo1=$(echo "CREATING "$file_out"")
       mes_out
       matrixeditor
+      header=$(head -n 1 "$file_out")
+      cat "$file_out" | awk -F',' 'NR > 1{s=0; for (i=3;i<=NF;i++) s+=$i; if (s!=0)print}' | sed '1i '$header'' >> temporary.csv
+      if [ -f temporary.csv ];
+      then
+        rm "$file_out"
+        mv temporary.csv "$file_out"
+      fi
     else
       echo1=$(echo "ALREADY FOUND "$matrix_fileedit" OR "$matrix_fileedit2"")
       mes_out
@@ -646,11 +661,13 @@ do
 done 
 } < $INPUT
 IFS=$OLDIFS
+## combine all the files in desktop folder
+## add them to the bottom of "$home_dir"/insert_"$level"_of_interest/"$level"ofinterest.csv
 for level in gene transcript ;
 do
   if [[ -s "$matrix_fileedit" && -s "$matrix_fileedit2" ]];
   then
-    if [ ! -s "$matrix_file3" ];
+    if [[ ! -s "$matrix_file3" && ! -s "$matrix_file3b" ]];
     then
       cur_wkd="$dirres"
       summaryfile=none
@@ -700,6 +717,42 @@ else
   echo1=$(echo "CANT FIND "$matrix_file"") 
   mes_out
 fi # NOW HAVE EXCTIOME MATRIX
+if [ -s "$matrix_file" ];
+then
+  for level in gene transcript ;
+  do
+    user_GOI="$home_dir"/Desktop/insert_"$level"_of_interest
+    for files in "$user_GOI"/* ;
+    do
+      dir_name=$(echo "$files" | sed 's/\//./g' | cut -f 6 -d '.')
+      file_name=$(echo "$dir_name" | cut -f 1 -d '.')
+      echo "$file_name"
+      echo ""$file_name"" >> "$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_"$level"list.csv
+      matrix_file4a="$dirres"/"$file_name"_count_matrix.csv
+      if [ ! -s "$matrix_file4a" ];
+      then
+        cur_wkd="$dirres"
+        summaryfile=none
+        Rtool=transpose
+        Rtype=single2f
+        file_out="$dirres"/"$file_name"_count_matrix.csv
+        mergefile="$ExToolsetix"/gene_list/DESeq2/"$file_name".csv
+        phenofile="$dirres"/gene_count_matrixedited.csv
+        level_name=$(echo "gene_name")
+        echo1=$(echo "CREATING "$file_out"")
+        mes_out
+        mergeR
+        sed -i '2d' "$file_out"
+      else
+        echo1=$(echo "ALREADY FOUND "$matrix_file4a"")
+        mes_out
+      fi
+    done
+  done
+else
+  echo1=$(echo "CANT FIND "$matrix_file"") 
+  mes_out
+fi # NOW HAVE USE SUPPLIED GENE OR TRANSCRIPT OF INTEREST FILES
 if [[ -s "$matrix_file3a" && -s "$matrix_file3b" ]];
 then
   if [ ! -s "$matrix_file5" ];
@@ -774,7 +827,7 @@ then
     dirVCsubs=$(config_get dirVCsubs);
     echo1="STARTING G_VEX FOR "$run" VARIANTS"
     mes_out
-    for snptype in AG GA CT TC ADARediting APOBECediting All ;
+    for snptype in ADARediting APOBECediting All ;
     do
       #any_no= # count how many lines contain no "$filecheckVC"/filecheck"$snptype"1.csv
       #if [ "$any_no" == "0" ];
@@ -827,7 +880,7 @@ then
   sed -i 's/'$run'/'$run'.x/g' "$summaryfile"
   if [ -s "$summaryfile" ];
   then
-    for snptype in AG GA CT TC ADARediting APOBECediting All ;
+    for snptype in ADARediting APOBECediting All ;
     do
       for level in nucleotide amino_acid ;
       do
@@ -1116,556 +1169,63 @@ else
   echo1=$(echo "ALREADY FOUND "$matrix_filefinal"")
   mes_out
 fi
-####################################################################################################################
-# RUNS EXTOOLSET FOR GTEX SUMMARY AND BARGRAPHS ADD ERROR BARS TO BARGRAPHS
-####################################################################################################################
-source config.shlib;
-home_dir=$(config_get home_dir);
-dir_path=$(config_get dir_path);
-dirres=$(config_get dirres);
-dirresall="$dirres"/all
-new_dir="$dirresall"
-create_dir
-ExToolset="$dir_path"/AIDD/ExToolset/scripts
-ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
-allcm="$dirres"/all_count_matrix.csv
-allcmedit="$dirresall"/all_count_matrixedit.csv
-allindex="$dirresall"/allindex.csv
-file_in="$allcm"
-file_out="$allcmedit"
-tool=editmatrix
-run_tools
-file_in="$allcmedit"
-file_out="$allindex"
-tool=createindex
-run_tools
-INPUT="$allindex"
-OLDIFS=$IFS
-{
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-read
-while IFS=, read -r freq
-do
-  source config.shlib;
-  home_dir=$(config_get home_dir);
-  dir_path=$(config_get dir_path);
-  dirres=$(config_get dirres);
-  con_name1=$(config_get con_name1);
-  con_name2=$(config_get con_name2);
-  con_name3=$(config_get con_name3);
-  con_name4=$(echo "sampname");
-  echo1=$(echo "STARTING ANOVA FOR "$freq"")
-  mes_out
-  for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4";
-  do
-    dirrescon="$dirres"/all/"$cond_name";
-    new_dir="$dirrescon";
-    create_dir
-    file_in="$dirres"/all/all_count_matrixedit.csv;
-    file_out="$dirrescon"/"$freq"summary.tiff;
-    bartype=ANOVA
-    pheno="$dir_path"/PHENO_DATA.csv
-    count_of_interest="$freq"
-    sum_file="$dirrescon"/"$freq"summary.csv
-    condition_name="$cond_name"
-    sum_file2="$dirrescon"/"$freq"ANOVA.txt
-    tool=Rbar
-    sum_file="$dirres"/all/"$cond_name"/"$freq"summary.csv
-    sed -i 's/freq_name/'$freq'/g' "$ExToolset"/barchart.R
-    sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
-    run_tools
-    sed -i 's/'$freq'/freq_name/g' "$ExToolset"/barchart.R 
-    sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
-    if [ -s "$dirrescon"/"$freq"ANOVA.txt ];
-    then
-      line=$(echo "11")
-      pvalue=$(sed -n "$line p" "$dirrescon"/"$freq"ANOVA.txt)
-      justp=${pvalue#*:}
-      if [ ! -s "$dirres"/all/"$cond_name"allANOVA.csv ];
-      then
-        echo "variable,ANOVApvalue" >> "$dirres"/all/"$cond_name"allANOVA.csv
-      fi
-      echo ""$freq","$justp"" >> "$dirres"/all/"$cond_name"allANOVA.csv
-    fi
-  done
-done 
-} < $INPUT
-IFS=$OLDIFS
-con_name1=$(config_get con_name1);
-con_name2=$(config_get con_name2);
-con_name3=$(config_get con_name3);
-con_name4=$(echo "sampname");
-for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4" ;
-do
-  echo1=$(echo "STARTING SUMMARY COLLECTION FOR "$cond_name"")
-  mes_out
-  cat "$dirres"/all/"$cond_name"/*summary.csv | sed '2,${/^sampname/d;}' >> "$dirres"/all/"$cond_name"allsummaries.csv
-  file_in="$dirres"/all/"$cond_name"allsummaries.csv
-  file_out="$dirres"/all/"$cond_name"allsummaries.tiff
-  bartype=substitutions
-  tool=Rbar
-  sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
-  run_tools
-  sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
-done
-INPUT="$ExToolsetix"/index/scatterplots.csv
-OLDIFS=$IFS
-{
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-read
-while IFS=, read -r scatter_x scatter_y
-do
-  source config.shlib;
-  home_dir=$(config_get home_dir);
-  dir_path=$(config_get dir_path);
-  dirres=$(config_get dirres);
-  ExToolset="$dir_path"/AIDD/ExToolset/scripts
-  file_in="$dirres"/all_count_matrix.csv;
-  dirrescorr="$dirres"/all/correlations
-  new_dir="$dirrescorr"
-  create_dir
-  con_name1=$(config_get con_name1);
-  con_name2=$(config_get con_name2);
-  con_name3=$(config_get con_name3);
-  con_name4=$(echo "sampname");
-  echo1=$(echo "STARTING CORRELATION FOR "$scatter_x" AND "$scatter_y"")
-  mes_out
-  file_out="$dirrescorr"/"$scatter_x""$scatter_y"scatterplot.tiff
-  file_out2="$dirrescorr"/"$scatter_x""$scatter_y"scatterplot.txt
-  bartype=scatter
-  tool=Rbar
-  sed -i 's/scatter_x/'$scatter_x'/g' "$ExToolset"/barchart.R
-  sed -i 's/scatter_y/'$scatter_y'/g' "$ExToolset"/barchart.R
-  sed -i 's/cond_1/'$con_name1'/g' "$ExToolset"/barchart.R
-  sed -i 's/cond_2/'$con_name2'/g' "$ExToolset"/barchart.R
-  sed -i 's/cond_4/'$con_name4'/g' "$ExToolset"/barchart.R
-  run_tools
-  sed -i 's/'$scatter_x'/scatter_x/g' "$ExToolset"/barchart.R
-  sed -i 's/'$scatter_y'/scatter_y/g' "$ExToolset"/barchart.R
-  sed -i 's/'$con_name1'/cond_1/g' "$ExToolset"/barchart.R
-  sed -i 's/'$con_name2'/cond_2/g' "$ExToolset"/barchart.R
-  sed -i 's/'$con_name4'/cond_4/g' "$ExToolset"/barchart.R
-done 
-} < $INPUT
-IFS=$OLDIFS
-####################################################################################################################
-# RUNS EXTOOLSET FOR CORRELATION SUMMARY
-####################################################################################################################
-  echo1=$(echo "STARTING CORRELATION SUMMARIES")
-  mes_out
-INPUT="$ExToolsetix"/index/scatterplots.csv
-OLDIFS=$IFS
-{
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-read
-while IFS=, read -r scatter_x scatter_y
-do
-  source config.shlib;
-  home_dir=$(config_get home_dir);
-  dir_path=$(config_get dir_path);
-  dirres=$(config_get dirres);
-  dirrescorr="$dirres"/all/correlations
-  ExToolset="$dir_path"/AIDD/ExToolset/scripts
-  file_in="$dirrescorr"/"$name"corr.txt
-  file_out="$dirrescorr"/all_corr_data.cvs
-  name=$(echo ""$scatter_x""$scatter_y"")
-  corr_file="$dirrescorr"/"$name"scatterplot.txt
-  pcorr=$(cat "$corr_file" | awk '/   cor/{nr[NR+1]}; NR in nr')
-  new_file="$dir_path"/correlations/temp.csv
-  lowCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $2}') 
-  highCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $3}')
-  p_value=$(cat "$corr_file" | awk '/p-value /{nr[NR]}; NR in nr' | sed 's/ //g' | sed 's/p-value=/p-value</g' | sed 's/</,/g' | awk -F ',' 'NR=1{print $4}')
-  echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirres"/all/all_corr_data.csv
-done 
-} < $INPUT
-IFS=$OLDIFS
-cat "$dirres"/all/all_corr_data.csv | sort -k5 |  >> "$dirres"/all/all_corr_datasig.csv
-####################################################################################################################
-# IMPACT GENE LIST PREP
-####################################################################################################################
-dir_path=/home/user/AIDDtest
-dirresVC="$dir_path"/Results/variant_calling
-con_name1=$(config_get con_name1); #suicide
-con_name2=$(config_get con_name2); #sex
-con_name3=$(config_get con_name3); #MDD
 for level in gene transcript ;
 do
-  for impact in moderate_impact high_impact ;
+  for impact in high_impact moderate_impact ;
   do
-    for cond_2 in male female ;
+    for snptype in ADARediting APOBECediting AG GA TC CT All ;
     do
-      new_dir="$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"
+      new_dir="$dirres"/variant_calling/impact/"$level"/"$impact"/"$snptype"
       create_dir
-      cp "$dirresVC"/impact/"$level"/"$impact"/*"$con_name2"_"$cond_2"* "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"
-      for cond_1 in yes no ;
-      do
-        new_dir="$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"
-        create_dir
-        cp "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/*"$con_name1"_"$cond_1"* "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"/
-        for snptype in All AG GA TC CT APOBEC ADAR ;
-        do
-          new_dir="$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"/"$snptype"
-          create_dir
-          cp "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"/*"$snptype"*.csv "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"/"$snptype"/
-        done
-      done
-      for cond_3 in yes no ;
-      do
-        new_dir="$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"
-        create_dir
-        cp "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/*"$con_name3"_"$cond_3"* "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"/
-        for snptype in All AG GA TC CT APOBEC ADAR ;
-        do
-          new_dir="$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"/"$snptype"
-          create_dir
-          cp "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"/*"$snptype"*.csv "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"/"$snptype"/
-        done
-      done
+      exten=$(echo ".csv")
+      mv "$dirres"/variant_calling/impact/"$level"/"$impact"/*"$snptype"*"$exten" "$new_dir"
     done
   done
 done
-for level in gene transcript ;
-do
-  for impact in moderate_impact high_impact ;
-  do
-    for snptype in All AG GA TC CT APOBEC ADAR ;
-    do
-      for cond_2 in male female ;
-      do
-        for cond_3 in yes no ;
-        do
-          new_dir="$dirresVC"/impact/final
-          create_dir
-          new_dir="$dirresVC"/impact/final/genelists
-          create_dir
-          new_dir="$dirresVC"/impact/final/genelists/"$snptype"
-          create_dir
-          cat "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name3""$cond_3"/"$snptype"/* | cut -d',' -f1 | sort -t',' -u | sed '1d' | sed '1i '$level''$impact''$con_name2'_'$cond_2''$con_name3'_'$cond_3''$snptype'' >> "$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_name3"_"$cond_3""$snptype".csv
-          counts=$(cat "$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_name3"_"$cond_3""$snptype".csv | sed '1d' | wc -l)
-          if [ ! -s "$dirresVC"/impact/allgenelistssummary"$con_name3".csv ];
-          then
-            echo "level,impact,"$con_name2","$con_name3",snptype,counts" >> "$dirresVC"/impact/allgenelistssummary"$con_name3".csv
-          fi
-          echo "$level","$impact","$cond_2","$cond_3","$snptype","$counts" >> "$dirresVC"/impact/allgenelistssummary"$con_name3".csv
-        done
-        for cond_1 in yes no ;
-        do
-          new_dir="$dirresVC"/impact/final
-          create_dir
-          new_dir="$dirresVC"/impact/final/genelists
-          create_dir
-          new_dir="$dirresVC"/impact/final/genelists/"$snptype"
-          create_dir
-          cat "$dirresVC"/impact/"$level"/"$impact"/"$con_name2""$cond_2"/"$con_name1""$cond_1"/"$snptype"/* | cut -d',' -f1 | sort -t',' -u | sed '1d' | sed '1i '$level''$impact''$con_name2'_'$cond_2''$con_name1'_'$cond_1''$snptype'' >> "$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_name1"_"$cond_1""$snptype".csv
-          counts=$(cat "$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_name1"_"$cond_1""$snptype".csv | sed '1d' | wc -l)
-          if [ ! -s "$dirresVC"/impact/allgenelistssummary"$con_name1".csv ];
-          then
-            echo "level,impact,"$con_name2","$con_name1",snptype,counts" >> "$dirresVC"/impact/allgenelistssummary"$con_name1".csv
-          fi
-          echo "$level","$impact","$cond_2","$cond_1","$snptype","$counts" >> "$dirresVC"/impact/allgenelistssummary"$con_name1".csv
-        done
-      done
-    done
-  done
-done
-for level in gene transcript ;
-do
-  for impact in moderate_impact high_impact ;
-  do
-    for snptype in All AG GA TC CT APOBEC ADAR ;
-    do
-      for cond_2 in male female ;
-      do
-        for con_nam in "$con_name3" "$con_name1" ;
-        do
-          file1="$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_nam"_yes"$snptype".csv
-          file2="$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_nam"_no"$snptype".csv
-          paste -d, "$file2" <(cut -d, -f1 "$file1") >> "$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_nam""$snptype".csv
-        done
-      done
-    done
-  done
-done
-for level in gene transcript ;
-do
-  for impact in moderate_impact high_impact ;
-  do
-    for snptype in All AG ADAR ;
-    do
-      for cond_2 in male female ;
-      do
-        for con_nam in "$con_name3" "$con_name1" ;
-        do
-          file_in="$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_nam""$snptype".csv
-          file_out="$dirresVC"/impact/final/genelists/"$snptype"/VENND"$level""$impact""$con_name2"_"$cond_2""$con_nam""$snptype".csv
-          bartype=Venn
-          file_out2="$dirresVC"/impact/final/genelists/"$snptype"/"$level""$impact""$con_name2"_"$cond_2""$con_nam""$snptype".tiff
-          tool=Rbar
-          column_nam1=$(echo ""$level""$impact""$con_name2"_"$cond_2""$con_nam"_yes"$snptype"")
-          column_nam2=$(echo ""$level""$impact""$con_name2"_"$cond_2""$con_nam"_no"$snptype"")
-          set_column_name=$(echo ""$column_nam1","$column_nam2"")
-          sed 's/set_column_name/'$set_column_name'/g' "$ExToolset"/barcharts.R
-          run_tools
-          sed 's/'$set_column_name'/set_column_name/g' "$ExToolset"/barcharts.R
-        done
-      done
-    done
-  done
-done
-####################################################################################################################
-# RUNS EXTOOLSET FOR DE ANALYSIS USING DESeq2
-####################################################################################################################
-
-for level in gene transcript ;
-do
-  for condition_name in "$con_name1" "$con_name2" "$con_name3" ;
-  do
-    file_in="$dirres"/"$level"_count_matrixedited.csv
-    cat "$file_in" | awk -F',' '!v[$1]++' >> "$dir_path"/temp.csv
-    temp_file
-    echo1=$(echo "STARTING "$file_in"")
-    mes_out
-    file_in="$dirres"/"$level"_count_matrixedited.csv
-    pheno="$dir_path"/PHENO_DATA.csv
-    set_design="$condition_name"
-    level_name=level_name
-    dirresDE="$dirres"/DESeq2
-    new_dir="$dirresDE"
-    create_dir
-    dirresDElevel="$dirresDE"/"$level"
-    new_dir="$dirresDElevel"
-    create_dir
-    dirresDElevelcon="$dirresDElevel"/"$condition_name"
-    new_dir="$dirresDElevelcon"
-    create_dir
-    dirresDEcal="$dirresDElevelcon"/calibration
-    new_dir="$dirresDEcal"
-    create_dir
-    dirresDEPCA="$dirresDElevelcon"/PCA
-    new_dir="$dirresDEPCA"
-    create_dir
-    dirresDELDE="$dirresDElevelcon"/DE
-    new_dir="$dirresDELDE"
-    create_dir
-    dirresDELDEvd="$dirresDElevelcon"/DE/vennD
-    new_dir="$dirresDELDEvd"
-    create_dir
-    file_out="$dirresDELDE"/resultsall.csv
-    tool=DE_R
-    run_tools
-    for updown in upregGlist upreg100 downreg100 downregGlist ;
-    do
-      file_in="$dirresDELDEvd"/"$updown".csv
-      file_out="$dirresDELDEvd"/"$updown".txt
-      image_out="$dirresDELDEvd"/"$updown".tiff
-      bartool=Venn
-      tool=Rbar
-          column_nam1=$(echo ""$level""$impact""$con_name2"_"$cond_2""$con_name3"_yes"$snptype"")
-          column_nam2=$(echo ""$level""$impact""$con_name2"_"$cond_2""$con_name3"_no"$snptype"")
-          set_column_name=$(echo ""$column_nam1","$column_nam2"")
-         # sed 's/set_column_name/'$set_column_name'/g' "$ExToolset"/barcharts.R
-          #run_tools
-         # sed 's/'$set_column_name'/set_column_name/g' "$ExToolset"/barcharts.R
-    done
-  done
-done
-####################################################################################################################
-# RUNS EXTOOLSET FOR DE ANALYSIS WHEN ONE CONDITION IS SPLIT INTO ITS OWN FILE
-####################################################################################################################
-cd "$dir_path"/AIDD
-source config.shlib
-con_name1=$(config_get con_name1);
-con_name2=$(config_get con_name2);
-con_name3=$(config_get con_name3);
-splitname="$3"
-if [ ! "$splitname" == "" ];
+## TO COMBINE ALL FILES IN EACH SNPTYPE SO HAVE EACH SAMPLE IS A COLUMN OF GENES FOR GENE ENRICHMENT INPUT
+#for level in gene transcript ;
+#do
+#  for impact in high_impact moderate_impact ;
+#  do
+#    for snptype in ADARediting APOBECediting AG GA TC CT All ;
+#    do
+#      for file in "$dirres"/variant_calling/impact/"$level"/"$impact"/"$snptype"/
+#      cat "$file" | awk -F',' {print $1} >> "$dirres"/variant_calling/impact/"$level""$impact""$snptype"GeneLists.csv
+#    done
+#  done
+#done
+##RUN TOPGO TO CREATE LIST OF GOTERMS WITH HOW MANY GENES ARE IN PATHWAY HOW MNAY OF THESE HAVE EDITING SITES
+#bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetGEA.sh GOID,Term,annotated,sig,expected,rankinfisher,classicfisher,classicelim
+#maybe do annotated,sigincontrol,sigincondition1,expected
+bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh
+user_input=$(echo ""$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_"$level"list.csv")
+if [ -f "$user_input" ];
 then
-  name1=$(awk -F, 'NR==3{print $2}' "$dir_path"/"$splitname".csv)
-  name2=$(awk -F, 'NR==4{print $2}' "$dir_path"/"$splitname".csv)
-  name3=$(awk -F, 'NR==2{print $2}' "$dir_path"/"$splitname".csv)
-####################################################################################################################
-# RUNS EXTOOLSET FOR GTEX SUMMARY AND BARGRAPHS ADD ERROR BARS TO BARGRAPHS
-####################################################################################################################
-  source config.shlib;
-  home_dir=$(config_get home_dir);
-  dir_path=$(config_get dir_path);
-  for name in "$name1" "$name2" "$name3" ;
+  INPUT="$user_input"
+  OLDIFS=$IFS
+  {
+  [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+  read
+  while IFS=, read -r GOI
   do
-    dirres="$dir_path"/Results/"$name"
-    new_dir="$dirres"
-    create_dir
-    sed -i '/^dirres=/d' "$dir_path"/AIDD/config.cfg
-    echo "dirres="$dirres"" >> "$dir_path"/AIDD/config.cfg
-    dirresall="$dirres"/all
-    new_dir="$dirresall"
-    create_dir
-    olddirres="$dir_path"/Results
-    file_in="$olddirres"/all/all_count_matrixedit.csv
-    file_out="$dirres"/all/all_count_matrixedit.csv
-    tool=splitallmatrix
-    run_tools
-    file_in=
-    file_out=
-    tool=PDsplit
-    run_tools
-    ExToolset="$dir_path"/AIDD/ExToolset/scripts
-    ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
-    allcm="$dirres"/all_count_matrix.csv
-    allcmedit="$dirresall"/all_count_matrixedit.csv
-    allindex="$dirresall"/allindex.csv
-    file_in="$allcm"
-    file_out="$allcmedit"
-    tool=editmatrix
-    run_tools
-    file_in="$allcmedit"
-    file_out="$allindex"
-    tool=createindex
-    run_tools
-    INPUT="$allindex"
-    OLDIFS=$IFS
-    {
-    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-    read
-    while IFS=, read -r freq
-    do
-      source config.shlib;
-      home_dir=$(config_get home_dir);
-      dir_path=$(config_get dir_path);
-      dirres=$(config_get dirres);
-      con_name1=$(config_get con_name1);
-      con_name2=$(config_get con_name2);
-      con_name3=$(config_get con_name3);
-      con_name4=$(echo "sampname");
-      echo1=$(echo "STARTING ANOVA FOR "$freq"")
-      mes_out
-      for cond_name in "$con_name1" "$con_name3" "$con_name4";
-      do
-        dirrescon="$dirres"/all/"$cond_name";
-        new_dir="$dirrescon";
-        create_dir
-        file_in="$dirres"/all/all_count_matrixedit.csv;
-        file_out="$dirrescon"/"$freq"summary.tiff;
-        bartype=ANOVA
-        pheno="$dirres"/PHENO_DATA.csv
-        count_of_interest="$freq"
-        sum_file="$dirrescon"/"$freq"summary.csv
-        condition_name="$cond_name"
-        sum_file2="$dirrescon"/"$freq"ANOVA.txt
-        tool=Rbar
-        sum_file="$dirres"/all/"$cond_name"/"$freq"summary.csv
-        sed -i 's/freq_name/'$freq'/g' "$ExToolset"/barchart.R
-        sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
-        run_tools
-        sed -i 's/'$freq'/freq_name/g' "$ExToolset"/barchart.R
-        sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
-        if [ -s "$dirrescon"/"$freq"ANOVA.txt ];
-        then
-          line=$(echo "11")
-          pvalue=$(sed -n "$line p" "$dirrescon"/"$freq"ANOVA.txt)
-          justp=${pvalue#*:}
-          if [ ! -s "$dirres"/all/"$cond_name"allANOVA.csv ];
-          then
-            echo "variable,ANOVApvalue" >> "$dirres"/all/"$cond_name"allANOVA.csv
-          fi
-          echo ""$freq","$justp"" >> "$dirres"/all/"$cond_name"allANOVA.csv
-        fi
-      done
-    done 
-    } < $INPUT
-    IFS=$OLDIFS
-    con_name1=$(config_get con_name1);
-    con_name2=$(config_get con_name2);
-    con_name3=$(config_get con_name3);
-    con_name4=$(echo "sampname");
-    for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4" ;
-    do
-      echo1=$(echo "STARTING SUMMARY COLLECTION FOR "$cond_name"")
-      mes_out
-      cat "$dirres"/all/"$cond_name"/*summary.csv | sed '2,${/^sampname/d;}' >> "$dirres"/all/"$cond_name"allsummaries.csv
-      file_in="$dirres"/all/"$cond_name"allsummaries.csv
-      file_out="$dirres"/all/"$cond_name"allsummaries.tiff
-      bartype=substitutions
-      tool=Rbar
-      sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
-      run_tools
-      sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
-    done
-    INPUT="$ExToolsetix"/index/scatterplots.csv
-    OLDIFS=$IFS
-    {
-    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-    read
-    while IFS=, read -r scatter_x scatter_y
-    do
-      source config.shlib;
-      home_dir=$(config_get home_dir);
-      dir_path=$(config_get dir_path);
-      dirres=$(config_get dirres);
-      ExToolset="$dir_path"/AIDD/ExToolset/scripts
-      file_in="$dirres"/all_count_matrix.csv;
-      dirrescorr="$dirres"/all/correlations
-      new_dir="$dirrescorr"
-      create_dir
-      con_name1=$(config_get con_name1);
-      con_name2=$(config_get con_name2);
-      con_name3=$(config_get con_name3);
-      con_name4=$(echo "sampname");
-      echo1=$(echo "STARTING CORRELATION FOR "$scatter_x" AND "$scatter_y"")
-      mes_out
-      file_out="$dirrescorr"/"$scatter_x""$scatter_y"scatterplot.tiff
-      file_out2="$dirrescorr"/"$scatter_x""$scatter_y"scatterplot.txt
-      bartype=scatter
-      tool=Rbar
-      sed -i 's/scatter_x/'$scatter_x'/g' "$ExToolset"/barchart.R
-      sed -i 's/scatter_y/'$scatter_y'/g' "$ExToolset"/barchart.R
-      sed -i 's/cond_1/'$con_name1'/g' "$ExToolset"/barchart.R
-      sed -i 's/cond_2/'$con_name2'/g' "$ExToolset"/barchart.R
-      sed -i 's/cond_4/'$con_name4'/g' "$ExToolset"/barchart.R
-      run_tools
-      sed -i 's/'$scatter_x'/scatter_x/g' "$ExToolset"/barchart.R
-      sed -i 's/'$scatter_y'/scatter_y/g' "$ExToolset"/barchart.R
-      sed -i 's/'$con_name1'/cond_1/g' "$ExToolset"/barchart.R
-      sed -i 's/'$con_name2'/cond_2/g' "$ExToolset"/barchart.R
-      sed -i 's/'$con_name4'/cond_4/g' "$ExToolset"/barchart.R
-    done 
-    } < $INPUT
-    IFS=$OLDIFS
-####################################################################################################################
-# RUNS EXTOOLSET FOR CORRELATION SUMMARY
-####################################################################################################################
-    echo1=$(echo "STARTING CORRELATION SUMMARIES")
-    mes_out
-    INPUT="$ExToolsetix"/index/scatterplots.csv
-    OLDIFS=$IFS
-    {
-    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-    read
-    while IFS=, read -r scatter_x scatter_y
-    do
-      source config.shlib;
-      home_dir=$(config_get home_dir);
-      dir_path=$(config_get dir_path);
-      dirres=$(config_get dirres);
-      dirrescorr="$dirres"/all/correlations
-      ExToolset="$dir_path"/AIDD/ExToolset/scripts
-      file_in="$dirrescorr"/"$name"corr.txt
-      file_out="$dirrescorr"/all_corr_data.cvs
-      name=$(echo ""$scatter_x""$scatter_y"")
-      corr_file="$dirrescorr"/"$name"scatterplot.txt
-      pcorr=$(cat "$corr_file" | awk '/   cor/{nr[NR+1]}; NR in nr')
-      new_file="$dir_path"/correlations/temp.csv
-      lowCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $2}') 
-      highCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $3}')
-      p_value=$(cat "$corr_file" | awk '/p-value /{nr[NR]}; NR in nr' | sed 's/ //g' | sed 's/p-value=/p-value</g' | sed 's/</,/g' | awk -F ',' 'NR=1{print $4}')
-      echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirres"/all/all_corr_data.csv
-    done 
-    } < $INPUT
-    IFS=$OLDIFS
-    cat "$dirres"/all/all_corr_data.csv | sort -k5 |  >> "$dirres"/all/all_corr_datasig.csv
+    sed -i 's/all_count_matrix/'$GOI'/g' "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh
+    sed -i 's/"$dirres"\/all/"$dirres"\/'$GOI'/g' "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh
+    bash "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh
+    sed -i 's/'$GOI'/all_count_matrix/g' "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh
+    sed -i 's/"$dirres"\/'$GOI'/"$dirres"\/all/g' "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh
   done
+  } < $INPUT
+  IFS=$OLDIFS # creates count matrix
+
+fi
+bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetcorr.sh
+bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh
+if [ ! "$4" == "" ];
+then
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetsplit.sh
 fi
 ####################################################################################################################
-# RUNS EXTOOLSET FOR GTEX SUMMARY AND BARGRAPHS ADD ERROR BARS TO BARGRAPHS
+# CLEAN UP AND EXIT
 ####################################################################################################################
 cd "$dir_path"/AIDD
 source config.shlib
@@ -1678,15 +1238,3 @@ END_TIME_HOUR=$(date +%H)
 END_TIME_MIN=$(date +%M)
 END_TIME_SEC=$(date +%S)
 echo "EXTOOLSET STARTED "$DATE_WITH_TIME" AND ENDED "$END_DATE_WITH_TIME""
-HOURstart=$(expr "$END_TIME_HOUR" * "60" * "60")
-HOURend=$(expr "$TIME_HOUR" * "60" * "60")
-MIN=$(expr "$END_TIME_MIN" - "$TIME_MIN")
-MINstart=$(expr "$END_TIME_MIN" * "60")
-MINend=$(expr "$TIME_HOUR" * "60")
-HOURMINstart=$(expr "$HOURstart" + "$MINstart")
-HOURMINend=$(expr "$HOURend" + "$MINend")
-SECstart=$(expr "$HOURMINstart" + "$TIME_SEC")
-SECend=$(expr "$HOURMINend" + "$END_TIME_SEC")
-TotalTime=$(expr "$SECend" / "60")
-echo1=$(echo "EXTOOLSET TOOK "$TotalTime" MINUTES TO FINISH ANALYSIS")
-mes_out

@@ -25,10 +25,10 @@ if ( Rtool == "GTEX" ) {
   newdata <- rename[order( rename[,1] ),] # sort them
   data <- newdata[!duplicated( newdata[,1] ), ]
   write.csv(newdata, output_file, quote=FALSE, row.names=FALSE)
-  #rename <- read.csv(output_file, row.names=1)
-  #Data <- read.csv(pheno_file, row.names=1) # READS PHENO_DATA
-  #colnames(rename) <- rownames(Data) # ADDS SAMPLE NAMES DEFINED BY USER TO MATRIX
-  #write.csv(rename, output_file, quote=FALSE) # WRITES THE NEWLY NAMED MATRIX FILE
+  rename <- read.csv(output_file, row.names=1)
+  Data <- read.csv(pheno_file, row.names=1) # READS PHENO_DATA
+  colnames(rename) <- rownames(Data) # ADDS SAMPLE NAMES DEFINED BY USER TO MATRIX
+  write.csv(rename, output_file, quote=FALSE) # WRITES THE NEWLY NAMED MATRIX FILE
 } else if ( Rtool == "G_VEX" ) {
 library("data.table")
 input_file=paste0(args[2])

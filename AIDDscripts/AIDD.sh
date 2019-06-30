@@ -100,7 +100,7 @@ run_tools() {
       if [ -f "$file_in" ]; # IF INPUT THERE
       then
         echo1=$(echo "FOUND "$file_in" STARTING "$tool"")
-        #mes_out
+        mes_out
         $tool # TOOL
       else
         echo1=$(echo "CANT FIND "$file_in" FOR_THIS "$sample"")
@@ -109,10 +109,10 @@ run_tools() {
       if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
       then
         echo1=$(echo "FOUND "$file_out" FINISHED "$tool"")
-        #mes_out # ERROR OUTPUT IS THERE
+        mes_out # ERROR OUTPUT IS THERE
       else 
         echo1=$(echo "CANT FIND "$file_out" FOR THIS "$sample"")
-        #mes_out # ERROR INPUT NOT THERE
+        mes_out # ERROR INPUT NOT THERE
       fi
   else
         echo1=FOUND_"$file_out"_FINISHED_"$tool"

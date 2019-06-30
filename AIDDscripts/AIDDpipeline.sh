@@ -390,7 +390,7 @@ if [[ ! -f "$file_out" && ! -f "$file_out2" ]]; # IF OUTPUT FILE IS NOT THERE
 then
   if [[ -f "$file_in" && -f "$file_in2" ]]; # IF INPUT THERE
   then
-    echo1=$("FOUND "$file_in" AND "$file_in2" STARTING "$tool"");
+    echo1=$("FOUND "$file_in" STARTING "$tool"");
     mes_out
     $tool # TOOL
   else

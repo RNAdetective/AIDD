@@ -84,28 +84,26 @@ bartype=linewerr
 #run_tools
 }
 ####################################################################################################################
-# RUNS EXTOOLSET FOR GTEX SUMMARY AND BARGRAPHS ADD ERROR BARS TO BARGRAPHS
+# RUNS EXTOOLSET FOR GTEX SUMMARY AND BARGRAPHS ADD ERROR BARS TO BARGRAPHS *TESTED
 ####################################################################################################################
 source config.shlib;
 home_dir=$(config_get home_dir);
 dir_path=$(config_get dir_path);
-sex_name=$(echo "Suicide"); #what name did you name the all_count_matrix and it will have matching folder.
-dirres=/media/sf_AIDD/MDD/Results/"$sex_name";
-new_dir="$dirres"
-create_dir
+dirres=$(config_get dirres);
 dirresall="$dirres"/all
 new_dir="$dirresall"
 create_dir
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
-allcm="$dirres"/all_count_matrix"$sex_name".csv
-allcmedit="$dirresall"/all_count_matrixedit"$sex_name".csv
+allcm="$dirres"/all_count_matrix.csv
+allcmedit="$dirresall"/all_count_matrixedit.csv
 allindex="$dirresall"/allindex.csv
 file_in="$allcm"
 file_out="$allcmedit"
 tool=editmatrix
 run_tools
 file_in="$allcmedit"
+sed -i '/Inf/d' "$allcmedit"
 file_out="$allindex"
 tool=createindex
 run_tools
@@ -119,20 +117,23 @@ do
   source config.shlib;
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
-sex_name=$(echo "Suicide");
-  dirres=/media/sf_AIDD/MDD/Results/"$sex_name";
+  dirres=$(config_get dirres);
   con_name1=$(config_get con_name1);
+  con_name1=$(echo ""$con_name1"" | sed 's/_//g')
   con_name2=$(config_get con_name2);
+  con_name2=$(echo ""$con_name2"" | sed 's/_//g')
   con_name3=$(config_get con_name3);
+  con_name3=$(echo ""$con_name3"" | sed 's/_//g')
   con_name4=$(echo "sampname");
+  con_name4=$(echo ""$con_name4"" | sed 's/_//g')
   echo1=$(echo "STARTING ANOVA FOR "$freq"")
   mes_out
-  for cond_name in "$con_name4";
+  for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4";
   do
     dirrescon="$dirres"/all/"$cond_name";
     new_dir="$dirrescon";
     create_dir
-    file_in="$dirres"/all/all_count_matrixedit"$sex_name".csv;
+    file_in="$dirres"/all/all_count_matrixedit.csv;
     file_out="$dirrescon"/"$freq"summary.tiff;
     bartype=ANOVA
     pheno="$dir_path"/PHENO_DATA.csv
@@ -163,14 +164,18 @@ done
 } < $INPUT
 IFS=$OLDIFS
 con_name1=$(config_get con_name1);
+con_name1=$(echo ""$con_name1"" | sed 's/_//g')
 con_name2=$(config_get con_name2);
+con_name2=$(echo ""$con_name2"" | sed 's/_//g')
 con_name3=$(config_get con_name3);
+con_name3=$(echo ""$con_name3"" | sed 's/_//g')
 con_name4=$(echo "sampname");
-for cond_name in "$con_name4" ;
+con_name4=$(echo ""$con_name4"" | sed 's/_//g')
+for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4" ;
 do
   echo1=$(echo "STARTING SUMMARY COLLECTION FOR "$cond_name"")
   mes_out
-  cat "$dirres"/all/"$cond_name"/*summary.csv | sed '2,${/^sampname/d;}' >> "$dirres"/all/"$cond_name"allsummaries.csv
+  cat "$dirres"/all/"$cond_name"/*summary.csv | sed '2,${/^'$con_name'/d;}' >> "$dirres"/all/"$cond_name"allsummaries.csv
   file_in="$dirres"/all/"$cond_name"allsummaries.csv
   file_out="$dirres"/all/"$cond_name"allsummaries.tiff
   bartype=substitutions
@@ -179,77 +184,3 @@ do
   run_tools
   sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
 done
-INPUT="$ExToolsetix"/index/scatterplots.csv
-OLDIFS=$IFS
-{
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-read
-while IFS=, read -r scatter_x scatter_y
-do
-  source config.shlib;
-  home_dir=$(config_get home_dir);
-  dir_path=$(config_get dir_path);
-sex_name=$(echo "Suicide");
-  dirres=/media/sf_AIDD/MDD/Results/"$sex_name";
-  ExToolset="$dir_path"/AIDD/ExToolset/scripts
-  file_in="$dirres"/all_count_matrix"$sex_name".csv;
-  dirrescorr="$dirres"/all/correlations
-  new_dir="$dirrescorr"
-  create_dir
-  con_name1=$(config_get con_name1);
-  con_name2=$(config_get con_name2);
-  con_name3=$(config_get con_name3);
-  con_name4=$(echo "sampname");
-  echo1=$(echo "STARTING CORRELATION FOR "$scatter_x" AND "$scatter_y"")
-  mes_out
-  file_out="$dirrescorr"/"$scatter_x""$scatter_y"scatterplot.tiff
-  file_out2="$dirrescorr"/"$scatter_x""$scatter_y"scatterplot.txt
-  bartype=scatter
-  tool=Rbar
-  sed -i 's/scatter_x/'$scatter_x'/g' "$ExToolset"/barchart.R
-  sed -i 's/scatter_y/'$scatter_y'/g' "$ExToolset"/barchart.R
-  sed -i 's/cond_1/'$con_name1'/g' "$ExToolset"/barchart.R
-  sed -i 's/cond_2/'$con_name2'/g' "$ExToolset"/barchart.R
-  sed -i 's/cond_4/'$con_name4'/g' "$ExToolset"/barchart.R
-  run_tools
-  sed -i 's/'$scatter_x'/scatter_x/g' "$ExToolset"/barchart.R
-  sed -i 's/'$scatter_y'/scatter_y/g' "$ExToolset"/barchart.R
-  sed -i 's/'$con_name1'/cond_1/g' "$ExToolset"/barchart.R
-  sed -i 's/'$con_name2'/cond_2/g' "$ExToolset"/barchart.R
-  sed -i 's/'$con_name4'/cond_4/g' "$ExToolset"/barchart.R
-done 
-} < $INPUT
-IFS=$OLDIFS
-####################################################################################################################
-# RUNS EXTOOLSET FOR CORRELATION SUMMARY
-####################################################################################################################
-  echo1=$(echo "STARTING CORRELATION SUMMARIES")
-  mes_out
-INPUT="$ExToolsetix"/index/scatterplots.csv
-OLDIFS=$IFS
-{
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-read
-while IFS=, read -r scatter_x scatter_y
-do
-  source config.shlib;
-  home_dir=$(config_get home_dir);
-  dir_path=$(config_get dir_path);
-sex_name=$(echo "Suicide");
-  dirres=/media/sf_AIDD/MDD/Results/"$sex_name";
-  dirrescorr="$dirres"/all/correlations
-  ExToolset="$dir_path"/AIDD/ExToolset/scripts
-  file_in="$dirrescorr"/"$name"corr.txt
-  file_out="$dirrescorr"/all_corr_data.cvs
-  name=$(echo ""$scatter_x""$scatter_y"")
-  corr_file="$dirrescorr"/"$name"scatterplot.txt
-  pcorr=$(cat "$corr_file" | awk '/   cor/{nr[NR+1]}; NR in nr')
-  new_file="$dir_path"/correlations/temp.csv
-  lowCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $2}') 
-  highCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $3}')
-  p_value=$(cat "$corr_file" | awk '/p-value /{nr[NR]}; NR in nr' | sed 's/ //g' | sed 's/p-value=/p-value</g' | sed 's/</,/g' | awk -F ',' 'NR=1{print $4}')
-  echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirres"/all/all_corr_data.csv
-done 
-} < $INPUT
-IFS=$OLDIFS
-cat "$dirres"/all/all_corr_data.csv | sort -k5 |  >> "$dirres"/all/all_corr_datasig.csv

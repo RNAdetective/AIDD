@@ -19,7 +19,7 @@ if ( Rtype == "multi" ){
       # if the merged dataset does exist, append to it
       if (exists("dataset")){
         temp_dataset <- read.csv(file)
-        dataset <- merge(dataset, temp_dataset, by=level)
+        dataset <- merge(dataset, temp_dataset, by=level, all=T)
         rm(temp_dataset)
       }
      write.csv(dataset, tempfile, row.names=FALSE, quote = FALSE)
@@ -32,7 +32,7 @@ if ( Rtype == "multi" ){
     colnames(datatable)[1] <- "CATEGORY"
     readdepth <- read.csv(readdepth)
     colnames(readdepth)[1] <- "CATEGORY"
-    normalized <- merge(datatable, readdepth, by="CATEGORY")
+    normalized <- merge(datatable, readdepth, by="CATEGORY", all=T)
     write.csv(normalized, file_out, row.names=FALSE, quote = FALSE)
     } else if ( Rtool == "I_VEX" ) {
     datatable <- read.csv(tempfile, row.names=1)
