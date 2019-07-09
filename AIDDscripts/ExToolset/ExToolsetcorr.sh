@@ -89,7 +89,6 @@ do
   dirres=$(config_get dirres);
   ExToolset="$dir_path"/AIDD/ExToolset/scripts
   file_in="$dirres"/all_count_matrix.csv;
-  sed -i '/Inf/d' "$file_in"
   dirrescorr="$dirres"/all/correlations
   new_dir="$dirrescorr"
   create_dir

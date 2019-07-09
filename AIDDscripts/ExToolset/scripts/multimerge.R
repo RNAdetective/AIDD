@@ -6,9 +6,9 @@ file_out <- paste0(args[3])
 Rtool <- paste0(args[4])
 Rtype <- paste0(args[5])
 readdepth <- paste0(args[6])
-tempfile <- paste0("/home/user/tempR.csv")
-tempfile2 <- paste0("/home/user/tempR2.csv")
-tempfile3 <- paste0("/home/user/tempR3.csv")
+tempfile <- paste0(args[10])
+tempfile2 <- paste0(args[11])
+tempfile3 <- paste0(args[12])
 if ( Rtype == "multi" ){
   file_list <- list.files()
     for (file in file_list){     
@@ -71,6 +71,7 @@ colnames(data_in)[1] <- level_name
 colnames(pheno_in)[1] <- level_name
 }
 final <- merge(data_in, pheno_in, by=level_name)
+final[!duplicated(final$level_name), ]
 write.csv(final, file_out, quote=FALSE, row.names=FALSE)
 if ( Rtool == "transpose" ) {
 data <- read.csv(file_out, row.names=1)
