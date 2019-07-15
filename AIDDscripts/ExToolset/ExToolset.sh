@@ -655,7 +655,7 @@ do
       mes_out
       matrixeditor
       header=$(head -n 1 "$file_out")
-      cat "$file_out" | awk -F',' 'NR > 1{s=0; for (i=3;i<=NF;i++) s+=$i; if (s!=0)print}' | sed '1i '$level'_name'$header'' >> "$dir_path"/temp.csv
+      cat "$file_out" | awk -F',' 'NR > 1{s=0; for (i=3;i<=NF;i++) s+=$i; if (s!=0)print}' | sort -u -k1 | sed '1i '$level'_name'$header'' >> "$dir_path"/temp.csv
       file_in="$file_out"
       temp_file
     else
@@ -765,7 +765,7 @@ then
         Rtype=single2f
         file_out="$dirres"/"$file_name"_count_matrix.csv
         mergefile="$user_GOI"/"$file_name".csv
-        phenofile="$dirres"/gene_count_matrixedited.csv
+        phenofile="$dirres"/"$level"_count_matrixedited.csv
         level_name=$(echo "gene_name")
         echo1=$(echo "CREATING "$file_out"")
         mes_out
@@ -1231,8 +1231,9 @@ done
 #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetGEA.sh GOID,Term,annotated,sig,expected,rankinfisher,classicfisher,classicelim
 #maybe do annotated,sigincontrol,sigincondition1,expected
 bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 2
-bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExctiome.sh 1
-bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh
+#bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 1
+count_matrix=all_count_matrix
+bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix"
 user_input=$(echo ""$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_"$level"list.csv")
 if [ -f "$user_input" ];
 then
@@ -1242,21 +1243,36 @@ then
   [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
   while IFS=, read -r GOI
   do
-    sed -i 's/all_count_matrix/'$GOI'/g' "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh
-    sed -i 's/"$dirres"\/all/"$dirres"\/'$GOI'/g' "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh
-    bash "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh
-    sed -i 's/'$GOI'/all_count_matrix/g' "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh
-    sed -i 's/"$dirres"\/'$GOI'/"$dirres"\/all/g' "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh
+    source config.shlib;
+    home_dir=$(config_get home_dir);
+    dir_path=$(config_get dir_path);
+    dirres=$(config_get dirres);
+    count_matrix="$GOI"_count_matrix
+    new_dir="$dirres"/"$count_matrix"
+    create_dir
+    tool=DEBUG
+    echo1="
+**
+**
+**
+**
+**
+**
+**
+WHY IS THIS NOT WORKING IS IT FILE NAME PROBLEMS "$count_matrix""
+    mes_out
+    bash "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix"
   done
   } < $INPUT
   IFS=$OLDIFS # creates count matrix
-
 fi
+cd "$dir_path"/AIDD
 bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetcorr.sh
-bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh
+cd "$dir_path"/AIDD
+bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$4"
 if [ ! "$4" == "" ];
 then
-  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetsplit.sh
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetsplit.sh "$4"
 fi
 ####################################################################################################################
 # CLEAN UP AND EXIT

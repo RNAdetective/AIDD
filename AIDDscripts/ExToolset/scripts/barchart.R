@@ -104,10 +104,10 @@ if ( bartype == "scatter" ) {
 file_out2 <- paste0(args[8])
 #tiff(file_out, units="in", width=10, height=10, res=600)
 data <- read.csv(file_in)
-#p <- ggplot(data, aes(x= scatter_x, y= scatter_xp110)) + geom_point(aes(color=cond_4, shape=cond_1, size=cond_3)) + geom_smooth(method=lm) + scale_shape_manual(values=c(16,17)) + scale_size_manual(values=c(2,4))
+#p <- ggplot(data, aes(x= scatter_x, y= scatter_y)) + geom_point(aes(color=cond_4, shape=cond_1, size=cond_3)) + geom_smooth(method=lm) + scale_shape_manual(values=c(16,17)) + scale_size_manual(values=c(2,4))
 #print(p)
 #garbage <- dev.off()
-out <- capture.output(cor.test( ~ scatter_x + scatter_xp110, data=data, method = "pearson", continuity = FALSE, conf.level = 0.95))
+out <- capture.output(cor.test( ~ scatter_x + scatter_y, data=data, method = "pearson", continuity = FALSE, conf.level = 0.95))
 write.csv(out, file_out2, row.names=FALSE, quote=FALSE)
 }
 #total <- data_in$freq[nrow(data_in)] #find the correct total to calculate percents

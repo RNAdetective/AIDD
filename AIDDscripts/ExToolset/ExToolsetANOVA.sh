@@ -87,19 +87,22 @@ bartype=linewerr
 # RUNS EXTOOLSET FOR GTEX SUMMARY AND BARGRAPHS ADD ERROR BARS TO BARGRAPHS *TESTED
 ####################################################################################################################
 source config.shlib;
+count_matrix="$1"
 home_dir=$(config_get home_dir);
 dir_path=$(config_get dir_path);
 echo "$dir_path"
 dirres=$(config_get dirres);
-dirresall="$dirres"/all_count_matrix
+dirresall="$dirres"/"$count_matrix"
 new_dir="$dirresall"
 create_dir
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
-allcm="$dirres"/all_count_matrix.csv
-allindex="$dirresall"/allindex.csv
+allcm="$dirres"/"$count_matrix".csv
+allindex="$dirresall"/"$count_matrix"_index.csv
 file_in="$allcm"
 sed -i '/Inf/d' "$allcm"
+cat "$allcm" | sed 's/samp_name/sampname/g' | sed 's/_[0-9]//g' >> "$dirres"/"$count_matrix"2.csv
+file_in="$allcm"
 file_out="$allindex"
 tool=createindex
 run_tools
@@ -111,6 +114,7 @@ read
 while IFS=, read -r freq
 do
   source config.shlib;
+  count_matrix="$1"
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
   dirres=$(config_get dirres);
@@ -126,10 +130,10 @@ do
   mes_out
   for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4";
   do
-    dirrescon="$dirres"/all_count_matrix/"$cond_name";
+    dirrescon="$dirres"/"$count_matrix"/"$cond_name";
     new_dir="$dirrescon";
     create_dir
-    file_in="$dirres"/all_count_matrix.csv;
+    file_in="$dirres"/"$count_matrix"2.csv;
     file_out="$dirrescon"/"$freq"summary.tiff;
     bartype=ANOVA
     pheno="$dir_path"/PHENO_DATA.csv
@@ -138,7 +142,7 @@ do
     condition_name="$cond_name"
     sum_file2="$dirrescon"/"$freq"ANOVA.txt
     tool=Rbar
-    sum_file="$dirres"/all_count_matrix/"$cond_name"/"$freq"summary.csv
+    sum_file="$dirres"/"$count_matrix"/"$cond_name"/"$freq"summary.csv
     sed -i 's/freq_name/'$freq'/g' "$ExToolset"/barchart.R
     sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
     run_tools
@@ -149,14 +153,15 @@ do
       line=$(echo "11")
       pvalue=$(sed -n "$line p" "$dirrescon"/"$freq"ANOVA.txt)
       justp=${pvalue#*:}
-      if [ ! -s "$dirres"/all_count_matrix/"$cond_name"allANOVA.csv ];
+      if [ ! -s "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv ];
       then
-        echo "variable,ANOVApvalue" >> "$dirres"/all_count_matrix/"$cond_name"allANOVA.csv
+        echo "variable,ANOVApvalue" >> "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv
       fi
-      echo ""$freq","$justp"" >> "$dirres"/all_count_matrix/"$cond_name"allANOVA.csv
+      echo ""$freq","$justp"" >> "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv
     fi
   done
 done 
+rm "$dirres"/"$count_matrix"2.csv
 } < $INPUT
 IFS=$OLDIFS
 con_name1=$(config_get con_name1);
@@ -171,9 +176,9 @@ for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4" ;
 do
   echo1=$(echo "STARTING SUMMARY COLLECTION FOR "$cond_name"")
   mes_out
-  cat "$dirres"/all_count_matrix/"$cond_name"/*summary.csv | sed '2,${/^'$con_name'/d;}' >> "$dirres"/all_count_matrix/"$cond_name"allsummaries.csv
-  file_in="$dirres"/all_count_matrix/"$cond_name"allsummaries.csv
-  file_out="$dirres"/all_count_matrix/"$cond_name"allsummaries.tiff
+  cat "$dirres"/"$count_matrix"/"$cond_name"/*summary.csv | sed '2,${/^'$cond_name'/d;}' >> "$dirres"/"$count_matrix"/"$cond_name"allsummaries.csv
+  file_in="$dirres"/"$count_matrix"/"$cond_name"allsummaries.csv
+  file_out="$dirres"/"$count_matrix"/"$cond_name"allsummaries.tiff
   bartype=substitutions
   tool=Rbar
   sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R

@@ -24,9 +24,11 @@ downregGlist="$dirresDELDEvd"/downregGList.csv
 heatmap="$dirresDELDE"/top60heatmap.tiff
 volcano="$dirresDELDE"/VolcanoPlot.tiff
 ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
+sed -i 's/condition_type/'$condition_name'/g' "$ExToolset"/DE.R
 sed -i 's/set_design/'$condition_name'/g' "$ExToolset"/DE.R
 Rscript "$ExToolset"/DE.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
 sed -i 's/'$condition_name'/set_design/g' "$ExToolset"/DE.R
+sed -i 's/'$condition_name'/condition_type/g' "$ExToolset"/DE.R
 }
 create_dir() {
 if [ ! -d "$new_dir" ];
@@ -81,7 +83,7 @@ dirres="$dir_path"/Results;
 con_name1=$(config_get con_name1);
 con_name2=$(config_get con_name2);
 con_name3=$(config_get con_name3);
-cell_line="$3"
+cell_line="$1"
 split_csv=$(echo "sex.csv")
 if [ "$cell_line" == "1" ];
 then
@@ -239,18 +241,18 @@ else
     for condition_name in "$con_name1" "$con_name2" "$con_name3" ;
     do
       file_in="$dirres"/"$level"_count_matrixedited.csv
-      cat "$file_in" | sort -t',' -u -k1,1 | uniq >> tempor.csv
-      if [ -f tempor.csv ];
-      then
-        rm "$file_in"
-        mv tempor.csv "$file_in"
-      fi
+     # cat "$file_in" | sort -t',' -u -k1,1 | uniq >> tempor.csv
+     # if [ -f tempor.csv ];
+     # then
+     #   rm "$file_in"
+     #   mv tempor.csv "$file_in"
+     # fi
       echo1=$(echo "STARTING "$file_in"")
       mes_out
       file_in="$dirres"/"$level"_count_matrixedited.csv
       pheno="$dir_path"/PHENO_DATA.csv
       set_design="$condition_name"
-      level_name=level_name
+      level_name="$level"_name
       dirresDE="$dirres"/DESeq2
       new_dir="$dirresDE"
       create_dir

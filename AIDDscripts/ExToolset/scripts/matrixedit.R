@@ -51,4 +51,10 @@ colnames(data_summary)[2] <- "totalcounts"
 final <- merge(data, data_summary, by="name") # add column at the end
 normalized <- sweep(final, 2, final$totalcounts, `/`)
 write.csv(normalized, output_file)
+} else if ( Rtool == "dup" ) {
+input_file=paste0(args[2])
+output_file=paste0(args[1])
+my_data <- read.csv(input_file)
+data <- my_data[!duplicated(my_data$level_name), ]
+write.csv(data, output_file, row.names=FALSE, quotes=FALSE)
 }

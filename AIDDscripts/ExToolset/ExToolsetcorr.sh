@@ -89,7 +89,7 @@ do
   dirres=$(config_get dirres);
   ExToolset="$dir_path"/AIDD/ExToolset/scripts
   file_in="$dirres"/all_count_matrix.csv;
-  dirrescorr="$dirres"/all/correlations
+  dirrescorr="$dirres"/all_count_matrix/correlations
   new_dir="$dirrescorr"
   create_dir
   con_name1=$(config_get con_name1);
@@ -129,7 +129,7 @@ do
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
   dirres=$(config_get dirres);
-  dirrescorr="$dirres"/all/correlations
+  dirrescorr="$dirres"/all_count_matrix/correlations
   ExToolset="$dir_path"/AIDD/ExToolset/scripts
   file_in="$dirrescorr"/"$name"corr.txt
   file_out="$dirrescorr"/all_corr_data.cvs
@@ -140,8 +140,8 @@ do
   lowCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $2}') 
   highCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $4}')
   p_value=$(cat "$corr_file" | awk '/p-value /{nr[NR]}; NR in nr' | sed 's/ //g' | sed 's/p-value=/p-value</g' | sed 's/</,/g' | awk -F ',' 'NR=1{print $4}')
-  echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirres"/all/all_corr_data.csv
+  echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirres"/all_count_matrix/all_corr_data.csv
 done 
 } < $INPUT
 IFS=$OLDIFS
-cat "$dirres"/all/all_corr_data.csv | sort -k5 |  >> "$dirres"/all/all_corr_datasig.csv
+cat "$dirres"/all_count_matrix/all_corr_data.csv | sort -k5 |  >> "$dirres"/all_count_matrix/all_corr_datasig.csv

@@ -43,7 +43,7 @@ colData <- read.csv(pheno, row.names=1)
 #countData <- countData[, rownames(colData)]
 #print("after renaming columns with PHENO_DATA file do they still match")
 #all(rownames(colData) == colnames(countData))
-dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ set_design_type)
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ set_design)
 dds <- dds[ rowSums(counts(dds)) > 1, ]
 tiff(rlogandvariance, units="in", width=10, height=10, res=600)
 lambda <- 10^seq(from = -1, to = 2, length = 1000)
@@ -66,31 +66,31 @@ print(p)
 invisible(dev.off()) #save tiff
 sampleDists <- dist(t(assay(rld)))
 sampleDistMatrix <- as.matrix( sampleDists )
-rownames(sampleDistMatrix) <- paste( rld$set_design_type)
+rownames(sampleDistMatrix) <- paste( rld$set_design)
 colnames(sampleDistMatrix) <- NULL
 colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 poisd <- PoissonDistance(t(counts(dds)))
 samplePoisDistMatrix <- as.matrix( poisd$dd )
-rownames(samplePoisDistMatrix) <- paste(rld$set_design_type)
+rownames(samplePoisDistMatrix) <- paste(rld$set_design)
 colnames(samplePoisDistMatrix) <- NULL
 tiff(PoisHeatmap, units="in", width=10, height=10, res=600)
 pheatmap(samplePoisDistMatrix, clustering_distance_rows = poisd$dd, clustering_distance_cols = poisd$dd, col = colors)
 invisible(dev.off()) #save tiff
 tiff(PCAplot, units="in", width=10, height=10, res=600)
-plotPCA(rld, intgroup = c("set_design_type"))
+plotPCA(rld, intgroup = c("set_design"))
 invisible(dev.off()) #save tiff
-pcaData <- plotPCA(rld, intgroup = c("set_design_type"), returnData = TRUE)
+pcaData <- plotPCA(rld, intgroup = c("set_design"), returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 tiff(PCAplot2, units="in", width=10, height=10, res=600)
-ggplot(pcaData, aes(x = PC1, y = PC2, color = set_design_type, group = set_design_type, label=rownames(pcaData))) + geom_point(size = 0) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed() +geom_text(aes(label=rownames(pcaData))) + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+ggplot(pcaData, aes(x = PC1, y = PC2, color = set_design, group = set_design, label=rownames(pcaData))) + geom_point(size = 0) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed() +geom_text(aes(label=rownames(pcaData))) + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 invisible(dev.off()) #save tiff
 mds <- as.data.frame(colData(rld))  %>% cbind(cmdscale(sampleDistMatrix))
 tiff(MDSplot, units="in", width=10, height=10, res=600)
-ggplot(mds, aes(x = `1`, y = `2`, color = set_design_type)) + geom_point(size = 3) + coord_fixed()
+ggplot(mds, aes(x = `1`, y = `2`, color = set_design)) + geom_point(size = 3) + coord_fixed()
 invisible(dev.off()) #save tiff
 mdsPois <- as.data.frame(colData(dds)) %>% cbind(cmdscale(samplePoisDistMatrix))
 tiff(MDSpois, units="in", width=10, height=10, res=600)
-ggplot(mdsPois, aes(x = `1`, y = `2`, color = set_design_type)) + geom_point(size = 3) + coord_fixed()
+ggplot(mdsPois, aes(x = `1`, y = `2`, color = set_design)) + geom_point(size = 3) + coord_fixed()
 invisible(dev.off()) #save tiff
 print("RUNNING DESEQ2 COMMAND MAY TAKE AWHILE")
 dds <- DESeq(dds)
@@ -108,21 +108,21 @@ newdata <- table3[order(-log2FoldChange),]
 detach(table3)
 write.csv(newdata, upreg, row.names=FALSE)
 datatop <- newdata[1:100,]
-myvars <- c("level_name")
+myvars <- c(level_name)
 finaltable <- datatop[myvars]
 write.csv(finaltable, upreg100, row.names=FALSE)
 table4 <- table2[myvars]
 write.csv(table4, upregGlist, row.names=FALSE)
 table2 <- table1[ which(table1$pvalue < 0.05 & table1$log2FoldChange < -1), ]
-colnames(table2)[colnames(table2)=="X"] <- "level_name"
-myvars <- c("level_name", "log2FoldChange")
+colnames(table2)[colnames(table2)=="X"] <- level_name
+myvars <- c(level_name, "log2FoldChange")
 table3 <- table2[myvars]
 attach(table3)
 newdata <- table3[order(log2FoldChange),]
 detach(table3)
 write.csv(newdata, downreg, row.names=FALSE)
 datatop <- newdata[1:100,]
-myvars <- c("level_name")
+myvars <- c(level_name)
 finaltable <- datatop[myvars]
 write.csv(finaltable, downreg100, row.names=FALSE)
 table4 <- table2[myvars]
@@ -130,7 +130,7 @@ write.csv(table4, downregGlist, row.names=FALSE)
 topVarlevels <- head(order(rowVars(assay(rld)), decreasing = TRUE), 60)
 mat  <- assay(rld)[ topVarlevels, ]
 mat  <- mat - rowMeans(mat)
-anno <- as.data.frame(colData(rld)[, c("set_design_type")])
+anno <- as.data.frame(colData(rld)[, c("set_design")])
 rownames(anno) <- colData[,3]
 colnames(anno) <- level_name
 tiff(heatmap, units="in", width=10, height=10, res=600)
