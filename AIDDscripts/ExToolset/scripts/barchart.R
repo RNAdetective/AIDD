@@ -46,9 +46,9 @@ data_in <- read.csv(file_in);
   colnames(data_in)[1] <- "samp_name"
   datamerge <- merge(pheno_in, data_in, by="samp_name")
   }
-  if ( cond_1_name == "run" ) {
-  colnames(data_in)[1] <- "run"
-  datamerge <- merge(pheno_in, data_in, by="run")
+  if ( cond_1_name == "freq_name" ) {
+  colnames(data_in)[1] <- "freq_name"
+  datamerge <- merge(pheno_in, data_in, by="freq_name")
   }
 cdata <- ddply(datamerge, c("cond_1_name"), summarise, N = length(freq_name), mean=round(mean(freq_name),2), sd=round(sd(freq_name), 2))
 cdata$substitution <- rep("freq_name",nrow(cdata)) # make new column 
@@ -121,7 +121,7 @@ suppressPackageStartupMessages(library("VennDiagram"))
 suppressPackageStartupMessages(library("gplots"))
 image_out <- paste0(args[4])
 gLists <- read.csv(file_in)
-gLists$X <- NULL
+gLists$freq_name <- NULL
 head(gLists)
 tail(gLists)
 gLS <- lapply(as.list(gLists), function(x) x[x != ""])

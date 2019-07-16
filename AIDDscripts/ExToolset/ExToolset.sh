@@ -231,7 +231,7 @@ matrixeditor() {
 Rscript "$ExToolset"/matrixedit.R "$file_out" "$file_in" "$index_file" "$pheno_file" "$Rtool" "$level_id" "$level_name" "$filter_type" "$level" "$tempf1" "$tempf2" "$tempf3"
 } # creates matrix counts with names instead of ids and checks to make sure they are there
 mergeR() {
-Rscript "$ExToolset"/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" #creates level of interest files
+Rscript "$ExToolset"/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" "$GOI_file" #creates level of interest files
 } # Runs multimerge R
 creatematrix() {
 cd "$dir_path"/raw_data/
@@ -766,7 +766,9 @@ then
         file_out="$dirres"/"$file_name"_count_matrix.csv
         mergefile="$user_GOI"/"$file_name".csv
         phenofile="$dirres"/"$level"_count_matrixedited.csv
-        level_name=$(echo "gene_name")
+        level_name=$(echo ""$level"_name")
+        summaryfile="$dir_path"/PHENO_DATA.csv
+        GOI_file=GOItrue
         echo1=$(echo "CREATING "$file_out"")
         mes_out
         mergeR
@@ -790,6 +792,8 @@ then
     Rtool=finalmerge
     Rtype=single2f
     level_name=$(echo "gene_name")
+    summaryfile="$dir_path"/PHENO_DATA.csv
+    GOI_file=GOItrue
     file_out="$dirres"/genetrans_count_matrix.csv
     mergefile="$dirres"/geneofinterest_count_matrix.csv
     phenofile="$dirres"/transcriptofinterest_count_matrix.csv

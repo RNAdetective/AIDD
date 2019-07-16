@@ -78,4 +78,13 @@ data <- read.csv(file_out, row.names=1)
 data2 <- t(data)
 write.csv(data2, file_out, quote=FALSE)
 }
+GOI_file <- paste0(args[10])
+if ( GOI_file == "GOItrue" ) {
+new_data <- read.csv(file_out)
+pheno <- read.csv(readdepth)
+colnames(new_data)[1] <- "CATEGORY"
+colnames(pheno)[1] <- "CATEGORY"
+new_datamerge <- merge(pheno, new_data, by="CATEGORY")
+write.csv(new_datamerge, file_out, row.names=FALSE, quote=FALSE)
+}
 }
