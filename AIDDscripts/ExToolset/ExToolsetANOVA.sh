@@ -130,34 +130,88 @@ do
   mes_out
   for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4";
   do
-    dirrescon="$dirres"/"$count_matrix"/"$cond_name";
-    new_dir="$dirrescon";
-    create_dir
-    file_in="$dirres"/"$count_matrix"2.csv;
-    file_out="$dirrescon"/"$freq"summary.tiff;
-    bartype=ANOVA
-    pheno="$dir_path"/PHENO_DATA.csv
-    count_of_interest="$freq"
-    sum_file="$dirrescon"/"$freq"summary.csv
-    condition_name="$cond_name"
-    sum_file2="$dirrescon"/"$freq"ANOVA.txt
-    tool=Rbar
-    sum_file="$dirres"/"$count_matrix"/"$cond_name"/"$freq"summary.csv
-    sed -i 's/freq_name/'$freq'/g' "$ExToolset"/barchart.R
-    sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
-    run_tools
-    sed -i 's/'$freq'/freq_name/g' "$ExToolset"/barchart.R 
-    sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
-    if [ -s "$dirrescon"/"$freq"ANOVA.txt ];
-    then
-      line=$(echo "11")
-      pvalue=$(sed -n "$line p" "$dirrescon"/"$freq"ANOVA.txt)
-      justp=${pvalue#*:}
-      if [ ! -s "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv ];
+    cond_col=$(cat "$dir_path"/PHENO_DATA.csv | 
+awk -F',' '{for(i=1;i<=NF;i++){A[NR,i]=$i};if(NF>n){n=NF}}
+END{for(i=1;i<=n;i++){
+for(j=1;j<=NR;j++){
+s=s?s","A[j,i]:A[j,i]}
+print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
+    cond_namecol=${cond_col%:*}
+    condcount=$(cat "$dir_path"/PHENO_DATA.csv | awk -F ',' '{print $'$cond_namecol'}' | sort | uniq -c | sort -n | sed '1d' | wc -l)
+    if [ "$condcount" > "2" ];
+    then # if the number of conditions is greater then 2 run ANOVA
+      dirrescon="$dirres"/"$count_matrix"/"$cond_name";
+      new_dir="$dirrescon";
+      create_dir
+      file_in="$dirres"/"$count_matrix"2.csv;
+      sed -i 's/'$cond_name'.x/'$cond_name'/g' "$file_in"
+      file_out="$dirrescon"/"$freq"summary.tiff;
+      file_out2="$dirrescon"/"$freq"summary2.tiff;
+      bartype=ANOVA
+      pheno="$dir_path"/PHENO_DATA.csv
+      count_of_interest="$freq"
+      sum_file="$dirrescon"/"$freq"summary.csv
+      condition_name="$cond_name"
+      sum_file2="$dirrescon"/"$freq"ANOVA.txt
+      tool=Rbar
+      sum_file="$dirres"/"$count_matrix"/"$cond_name"/"$freq"summary.csv
+      sed -i 's/freq_name/'$freq'/g' "$ExToolset"/barchart.R
+      sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
+      run_tools
+      sed -i 's/'$freq'/freq_name/g' "$ExToolset"/barchart.R 
+      sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
+      if [ -s "$dirrescon"/"$freq"ANOVA.txt ];
       then
-        echo "variable,ANOVApvalue" >> "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv
+        line=$(echo "11")
+        pvalue=$(sed -n "$line p" "$dirrescon"/"$freq"ANOVA.txt)
+        justp=${pvalue#*:}
+        if [ ! -s "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv ];
+        then
+          echo "variable,ANOVApvalue" >> "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv
+        fi
+        echo ""$freq","$justp"" >> "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv
       fi
-      echo ""$freq","$justp"" >> "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv
+    fi
+    if [ "$condcount" == "2" ];
+    then # if the number of conditions is only 2 run t-test
+      new_dir="$dirres"/"$count_matrix"/Ttest
+      create_dir
+      dirrescon="$dirres"/"$count_matrix"/Ttest/"$cond_name";
+      new_dir="$dirrescon";
+      create_dir
+      file_in="$dirres"/"$count_matrix"2.csv;
+      sed -i 's/'$cond_name'.x/'$cond_name'/g' "$file_in"
+      file_out="$dirrescon"/"$freq"summary.tiff;
+      file_out2="$dirrescon"/"$freq"summary2.tiff;
+      bartype=ANOVA
+      pheno="$dir_path"/PHENO_DATA.csv
+      count_of_interest="$freq"
+      sum_file="$dirrescon"/"$freq"summary.csv
+      condition_name="$cond_name"
+      sum_file2="$dirrescon"/"$freq"Ttest.txt
+      tool=Rbar
+      sum_file="$dirrescon"/"$freq"summary.csv
+      sed -i 's/freq_name/'$freq'/g' "$ExToolset"/barchart.R
+      sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
+      run_tools
+      sed -i 's/'$freq'/freq_name/g' "$ExToolset"/barchart.R 
+      sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
+      if [ -s "$dirrescon"/"$freq"Ttest.txt ];
+      then
+        line=$(echo "11")
+        pvalue=$(sed -n "$line p" "$dirrescon"/"$freq"Ttest.txt)
+        justp=${pvalue#*:}
+        if [ ! -s "$dirres"/"$count_matrix"/"$cond_name"allTtest.csv ];
+        then
+          echo "variable,Ttestpvalue" >> "$dirres"/"$count_matrix"/"$cond_name"allTtest.csv
+        fi
+        echo ""$freq","$justp"" >> "$dirres"/"$count_matrix"/"$cond_name"allTtest.csv
+      fi
+    fi
+    if [[ "$condcount" == "1" || "$condcount" == "" ]];
+    then # if the number of conditions is only 1 or there is no column for that condition 
+      echo1=$(echo ""$cond_name" ONLY HAS ONE VARIABLE OR DOES NOT EXIST EXTOOLSET CAN NOT RUN STATISTICS CHECK YOUR PHENO_DATA FILE")
+      mes_out
     fi
   done
 done 
@@ -174,14 +228,30 @@ con_name4=$(echo "sampname");
 con_name4=$(echo ""$con_name4"" | sed 's/_//g')
 for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4" ;
 do
-  echo1=$(echo "STARTING SUMMARY COLLECTION FOR "$cond_name"")
-  mes_out
-  cat "$dirres"/"$count_matrix"/"$cond_name"/*summary.csv | sed '2,${/^'$cond_name'/d;}' >> "$dirres"/"$count_matrix"/"$cond_name"allsummaries.csv
-  file_in="$dirres"/"$count_matrix"/"$cond_name"allsummaries.csv
-  file_out="$dirres"/"$count_matrix"/"$cond_name"allsummaries.tiff
-  bartype=substitutions
-  tool=Rbar
-  sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
-  run_tools
-  sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
+   cond_col=$(cat "$dir_path"/PHENO_DATA.csv | 
+awk -F',' '{for(i=1;i<=NF;i++){A[NR,i]=$i};if(NF>n){n=NF}}
+END{for(i=1;i<=n;i++){
+for(j=1;j<=NR;j++){
+s=s?s","A[j,i]:A[j,i]}
+print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
+cond_namecol=${cond_col%:*}
+  condcount=$(cat "$dir_path"/PHENO_DATA.csv | awk -F ',' '{print $'$cond_namecol'}' | sort | uniq -c | sort -n | sed '1d' | wc -l)
+  if [ "$condcount" > "1" ];
+  then
+    echo1=$(echo "STARTING SUMMARY COLLECTION FOR "$cond_name"")
+    mes_out
+    cat "$dirres"/"$count_matrix"/"$cond_name"/*summary.csv | sed '2,${/^'$cond_name'/d;}' >> "$dirres"/"$count_matrix"/"$cond_name"allsummaries.csv
+    file_in="$dirres"/"$count_matrix"/"$cond_name"allsummaries.csv
+    file_out="$dirres"/"$count_matrix"/"$cond_name"allsummaries.tiff
+    bartype=substitutions
+    tool=Rbar
+    sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
+    run_tools
+    sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
+  fi
+  if [[ "$condcount" == "1" || "$condcount" == "" ]];
+  then
+    echo1=$(echo ""$cond_name" ONLY HAS ONE VARIABLE OR DOES NOT EXIST EXTOOLSET CAN NOT RUN STATISTICS CHECK YOUR PHENO_DATA FILE")
+    mes_out
+  fi
 done

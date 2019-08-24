@@ -70,7 +70,7 @@ USCOUNTER=$(expr $USCOUNTER + 1)
 echo "sample$USCOUNTER"
 }
 mergeR() {
-Rscript /home/user/AIDD/AIDD/ExToolset/scripts/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" #creates level of interest files
+Rscript /home/user/AIDD/AIDD/ExToolset/scripts/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" "$temp_file" #creates level of interest files
 } # Runs multimerge R
 #grep '^#' "$file_in" > "$file_out" && grep -v '^#' "$file_in" | LC_ALL=C sort -t $'\t' -k1,1 -k2,2n >> "$file_out
 ######################################################################################
@@ -192,6 +192,18 @@ then
       count_matrix="$dir_path"/Results/all_count_matrix.csv
       excit_pres=$(cat "$file_in" | awk '{if ($1 ~ /'"$chrome"'/) print $2}' | awk '{if ($1 ~ /'"$coord"'/) print $0}')
       excitome_gene_s=$(echo "$excitome_gene" | cut -d'_' -f1)
+      if [ "$excitome_gene" == "ADAR.1" ];
+      then
+        express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene'/) print NR}')
+      fi
+      if [ "$excitome_gene" == "ADAR.B1" ];
+      then
+        express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene'/) print NR}')
+      fi
+      if [ "$excitome_gene" == "ADAR.B2" ];
+      then
+        express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene'/) print NR}')
+      fi
       express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_s'/) print NR}')
       if [ "$express_col" == "" ];
       then
@@ -218,7 +230,9 @@ then
   Rtype=$(echo "multi")
   summaryfile=none
   names=$(echo "condition")
+  temp_file="$dirres"/temp2.csv
   file_out="$dirres"/guttman_count_matrix.csv
+  sed -i sed 's/_[0-9]*//g' "$file_out"
   echo1=$(echo "CREATING "$file_out"")
   mes_out
   mergeR

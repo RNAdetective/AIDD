@@ -84,13 +84,17 @@ read
 while IFS=, read -r scatter_x scatter_y
 do
   source config.shlib;
+  count_matrix="$1"
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
   dirres=$(config_get dirres);
   ExToolset="$dir_path"/AIDD/ExToolset/scripts
-  file_in="$dirres"/all_count_matrix.csv;
-  dirrescorr="$dirres"/all_count_matrix/correlations
+  file_in="$dirres"/"$count_matrix".csv;
+  dirrescorr="$dirres"/correlations
   new_dir="$dirrescorr"
+  create_dir
+  dirrescorr2="$dirrescorr"/"$count_matrix"
+  new_dir="$dirrescorr2"
   create_dir
   con_name1=$(config_get con_name1);
   con_name2=$(config_get con_name2);
@@ -98,8 +102,8 @@ do
   con_name4=$(echo "sampname");
   echo1=$(echo "STARTING CORRELATION FOR "$scatter_x" AND "$scatter_y"")
   mes_out
-  file_out="$dirrescorr"/"$scatter_x""$scatter_y"scatterplot.tiff
-  file_out2="$dirrescorr"/"$scatter_x""$scatter_y"scatterplot.txt
+  file_out="$dirrescorr2"/"$scatter_x""$scatter_y"scatterplot.tiff
+  file_out2="$dirrescorr2"/"$scatter_x""$scatter_y"scatterplot.txt
   bartype=scatter
   tool=Rbar
   sed -i 's/scatter_x/'$scatter_x'/g' "$ExToolset"/barchart.R
@@ -126,22 +130,24 @@ read
 while IFS=, read -r scatter_x scatter_y
 do
   source config.shlib;
+  count_matrix="$1"
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
   dirres=$(config_get dirres);
-  dirrescorr="$dirres"/all_count_matrix/correlations
+  dirrescorr="$dirres"/correlations
+  dirrescorr2="$dirres"/correlations/"$count_matrix"
   ExToolset="$dir_path"/AIDD/ExToolset/scripts
   file_in="$dirrescorr"/"$name"corr.txt
   file_out="$dirrescorr"/all_corr_data.cvs
   name=$(echo ""$scatter_x""$scatter_y"")
   corr_file="$dirrescorr"/"$name"scatterplot.txt
   pcorr=$(cat "$corr_file" | awk '/   cor/{nr[NR+1]}; NR in nr')
-  new_file="$dir_path"/correlations/temp.csv
+  new_file="$dir_rescorr2"/temp.csv
   lowCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $2}') 
   highCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $4}')
   p_value=$(cat "$corr_file" | awk '/p-value /{nr[NR]}; NR in nr' | sed 's/ //g' | sed 's/p-value=/p-value</g' | sed 's/</,/g' | awk -F ',' 'NR=1{print $4}')
-  echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirres"/all_count_matrix/all_corr_data.csv
+  echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirrescorr2"/all_corr_data.csv
 done 
 } < $INPUT
 IFS=$OLDIFS
-cat "$dirres"/all_count_matrix/all_corr_data.csv | sort -k5 |  >> "$dirres"/all_count_matrix/all_corr_datasig.csv
+cat "$dirrescorr2"/all_corr_data.csv | sort -k5 -n -t, | awk -F',' '$5 < 0.05 { print $0 }'  >> "$dirrescorr2"/all_corr_datasig.csv
