@@ -9,17 +9,24 @@ readdepth <- paste0(args[6])
 tempfile <- paste0(args[10])
 tempfile2 <- paste0(args[11])
 tempfile3 <- paste0(args[12])
+Rtooltrans <- paste0(args[13])
+rename <- paste0(args[14])
 if ( Rtype == "multi" ){
   file_list <- list.files()
     for (file in file_list){     
       # if the merged dataset doesn't exist, create it
       if (!exists("dataset")){
         dataset <- read.csv(file)
+        dataset[!duplicated(dataset$level), ]
+        dataset[!grepl("ENSG00000066468", dataset$level),]
       } 
       # if the merged dataset does exist, append to it
       if (exists("dataset")){
         temp_dataset <- read.csv(file)
+        temp_dataset[!grepl("ENSG00000066468", temp_dataset$level),]
         dataset <- merge(dataset, temp_dataset, by=level, all=T)
+        dataset[!duplicated(dataset$level), ]
+        dataset[!grepl("ENSG00000066468", dataset$level),]
         rm(temp_dataset)
       }
      write.csv(dataset, tempfile, row.names=FALSE, quote = FALSE)
@@ -44,12 +51,12 @@ pheno <- paste0(args[8])
 data1 <- read.csv(filein)
 data2 <- read.csv(readdepth)
 datafinal <- merge(data1, data2, by="CATEGORY")
-write.csv(datafinal, tempfile3, row.names=FALSE, quote=FALSE)
-subs <- read.csv(tempfile3)
-phenodata <- read.csv(pheno)
-colnames(phenodata)[2] <- "CATEGORY"
-phenofinal <- merge(phenodata, subs, by="CATEGORY")
-write.csv(phenofinal, file_out, row.names=FALSE, quote=FALSE)
+write.csv(datafinal, file_out, row.names=FALSE, quote=FALSE)
+#subs <- read.csv(tempfile3)
+#phenodata <- read.csv(pheno)
+#colnames(phenodata)[2] <- "CATEGORY"
+#phenofinal <- merge(phenodata, subs, by="CATEGORY")
+#write.csv(phenofinal, file_out, row.names=FALSE, quote=FALSE)
 } else if ( Rtype == "onesingle" ) {
 data <- paste0(args[6])
 pheno <- paste0(args[8])
@@ -59,7 +66,11 @@ pheno_in <- read.csv(pheno)
 colnames(pheno_in)[2] <- "CATEGORY"
 final <- merge(pheno_in, data_in, by="CATEGORY")
 write.csv(final, file_out, quote=FALSE, row.names=FALSE)
-} else if ( Rtype == "single2f" ) {
+} else if ( Rtype == "transpose" ) {
+data <- read.csv(file_out, row.names=1)
+data2 <- t(data)
+write.csv(data2, tempfile, quote=FALSE)
+}else if ( Rtype == "single2f" ) {
 data <- paste0(args[7]) #gene
 pheno <- paste0(args[8]) #transcript
 level_name <- (paste0(args[9])) 
@@ -70,13 +81,18 @@ if ( Rtool == "finalmerge" ) {
 colnames(data_in)[1] <- level_name
 colnames(pheno_in)[1] <- level_name
 }
-final <- merge(data_in, pheno_in, by=level_name)
+final <- merge(pheno_in, data_in, by=level_name)
 final[!duplicated(final$level_name), ]
 write.csv(final, file_out, quote=FALSE, row.names=FALSE)
 if ( Rtool == "transpose" ) {
 data <- read.csv(file_out, row.names=1)
 data2 <- t(data)
 write.csv(data2, file_out, quote=FALSE)
+}
+if ( Rtooltrans == "transpose" ) {
+data <- read.csv(file_out, row.names=1)
+data2 <- t(data)
+write.csv(data2, tempfile, quote=FALSE)
 }
 GOI_file <- paste0(args[10])
 if ( GOI_file == "GOItrue" ) {
