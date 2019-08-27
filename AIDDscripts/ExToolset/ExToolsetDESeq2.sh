@@ -19,7 +19,7 @@ downreg100="$dirresDELDEvd"/downregGListtop100.csv
 downregGlist="$dirresDELDEvd"/downregGList.csv
 heatmap="$dirresDELDE"/top60heatmap.tiff
 volcano="$dirresDELDE"/VolcanoPlot.tiff
-ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
+ExToolset="$dir_path"/AIDD/ExToolset/scripts
 sed -i 's/set_design/'$condition_name'/g' "$ExToolset"/DE.R
 Rscript "$ExToolset"/DE.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
 sed -i 's/'$condition_name'/set_design/g' "$ExToolset"/DE.R

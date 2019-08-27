@@ -137,17 +137,17 @@ do
   dirrescorr="$dirres"/correlations
   dirrescorr2="$dirres"/correlations/"$count_matrix"
   ExToolset="$dir_path"/AIDD/ExToolset/scripts
-  file_in="$dirrescorr"/"$name"corr.txt
+  file_in="$dirrescorr2"/"$name"corr.txt
   file_out="$dirrescorr"/all_corr_data.cvs
   name=$(echo ""$scatter_x""$scatter_y"")
-  corr_file="$dirrescorr"/"$name"scatterplot.txt
+  corr_file="$dirrescorr2"/"$name"scatterplot.txt
   pcorr=$(cat "$corr_file" | awk '/   cor/{nr[NR+1]}; NR in nr')
   new_file="$dir_rescorr2"/temp.csv
   lowCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $2}') 
   highCI=$(cat "$corr_file" | awk '/95 percent confidence interval/{nr[NR+1]}; NR in nr' | sed 's/ /,/g' | awk -F',' 'NR=1{print $4}')
   p_value=$(cat "$corr_file" | awk '/p-value /{nr[NR]}; NR in nr' | sed 's/ //g' | sed 's/p-value=/p-value</g' | sed 's/</,/g' | awk -F ',' 'NR=1{print $4}')
-  echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirrescorr2"/all_corr_data.csv
+  echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirrescorr"/all_corr_data.csv
 done 
 } < $INPUT
 IFS=$OLDIFS
-cat "$dirrescorr2"/all_corr_data.csv | sort -k5 -n -t, | awk -F',' '$5 < 0.05 { print $0 }'  >> "$dirrescorr2"/all_corr_datasig.csv
+cat "$dirrescorr"/all_corr_data.csv | sort -k5 -n -t, | awk -F',' '$5 < 0.05 { print $0 }'  >> "$dirrescorr"/all_corr_datasig.csv

@@ -1283,7 +1283,6 @@ then
     sed -i 's/gene_name/sampname/g' "$file_out"
     sed -i 's/Var.1/sampname/g' "$file_out"
     sed -i 's/_[0-9]*//g' "$file_out"
-    sed -i 's/ADAR.1/1ADAR/g' "$file_out"
   else
     echo1=$(echo "CANT FIND "$matrix_file11"")
     mes_out
@@ -1422,7 +1421,19 @@ do
         END{for(i=1;i<=n;i++){
         for(j=1;j<=NR;j++){
         s=s?s","A[j,i]:A[j,i]}
-        print s;s=""}}' >> "$dirres"/"$level"_"$impact"_"$snptype"edits_count_matrixeditedall.csv
+        print s;s=""}}' | sed 's/'$level'_name/sampname/g' >> "$dirres"/"$level"_"$impact"_"$snptype"edits_count_matrixeditedall.csv
+        summaryfile=none
+        Rtool=finalmerge
+        Rtype=single2f
+        file_out="$dir_path"/temp.csv
+        mergefile="$dirres"/"$level"_"$impact"_"$snptype"edits_count_matrixeditedall.csv
+        phenofile="$dir_path"/PHENO_DATA.csv
+        level_name=$(echo "sampname")
+        echo1=$(echo "CREATING "$mergefile"")
+        mes_out
+        mergeR
+        file_in="$dirres"/"$level"_"$impact"_"$snptype"edits_count_matrixeditedall.csv
+        temp_file
     done
   done
 done
@@ -1446,71 +1457,57 @@ done
 # Statistical Analysis section                                                                                                         *WORKING ON IT
 ###############################################################################################################################################################
 cd "$dir_path"/AIDD
-bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 2 #creates guttman_count_matrix.csv and runs guttman tests (need to add this part)
+#bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 2 #creates guttman_count_matrix.csv and runs guttman tests (need to add this part)
 #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 1
 count_matrix=all_count_matrix
-if [ -s "$count_matrix" ];
-then
-  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on each gene in the excitome, each nt and AA substitution, and impact of subs.
-  for level in transcript ;
-  do
-    for impact in high_impact moderate_impact ;
-    do
-      for snptype in ADARediting APOBECediting All ;
-      do
-        count_matrix="$level"_"$impact"_"$snptype"edits_count_matrixeditedall
-        bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on number of edits found in each gene or transcript
-      done
-    done
-  done
-else
-  echo1=$(""$count_matrix" NOT FOUND")
-  mes_out
-fi
-user_input=$(echo ""$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_"$level"list.csv")
-if [ -f "$user_input" ];
-then
-  INPUT="$user_input"
-  OLDIFS=$IFS
-  {
-  [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-  while IFS=, read -r GOI
-  do
-    source config.shlib;
-    home_dir=$(config_get home_dir);
-    dir_path=$(config_get dir_path);
-    dirres=$(config_get dirres);
-    count_matrix="$GOI"_count_matrix
-    new_dir="$dirres"/"$count_matrix"
-    create_dir
-    tool=DEBUG
-    echo1="NOW RUNNING STATISTICS FOR "$count_matrix""
-    mes_out
-    bash "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA for each gene list provided by the user
-  done
-  } < $INPUT
-  IFS=$OLDIFS # creates count matrix
-fi
-cd "$dir_path"/AIDD
-count_matrix=all_count_matrix
-if [ -s "$count_matrix" ];
-then
-  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetcorr.sh "$count_matrix" #runs correlations
-  cd "$dir_path"/AIDD
-else
-  echo1=$(echo ""$count_matrix" NOT FOUND")
-  mes_out
-fi
+bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on each gene in the excitome, each nt and AA substitution, and impact of subs.
 for level in gene transcript ;
 do
-  count_matrix="$level"_count_matrix
-  if [ -s "$count_matrix" ];
+  for impact in high_impact moderate_impact ;
+  do
+    for snptype in ADARediting APOBECediting All ;
+    do
+      count_matrix="$level"_"$impact"_"$snptype"edits_count_matrixeditedall
+      #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on number of edits found in each gene or transcript
+    done
+  done
+done
+dir_path=/media/sf_AIDD/germ_layer
+for level in gene transcript ;
+do
+  user_input=$(echo ""$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_"$level"list.csv")
+  if [ -f "$user_input" ];
   then
-    bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #run DE with DESEq2 for each gene and transcript count matrix for each condition
-  else
-    echo1=$(echo ""$count_matrix" NOT FOUND")
-    mes_out
+    INPUT="$user_input"
+    OLDIFS=$IFS
+    {
+    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+    while IFS=, read -r GOI
+    do
+      source config.shlib;
+      home_dir=$(config_get home_dir);
+      dir_path=$(config_get dir_path);
+      dirres=$(config_get dirres);
+      count_matrix="$GOI"_count_matrix
+      new_dir="$dirres"/"$count_matrix"
+      create_dir
+      tool=DEBUG
+      echo1="NOW RUNNING STATISTICS FOR "$count_matrix""
+      mes_out
+      bash "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA for each gene list provided by the user
+    done
+    } < $INPUT
+    IFS=$OLDIFS # creates count matrix
   fi
+done
+cd "$dir_path"/AIDD
+count_matrix=all_count_matrix
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetcorr.sh "$count_matrix" #runs correlations
+  cd "$dir_path"/AIDD
+for level in gene transcript ;
+do
+  count_matrix="$level"_count_matrixedited
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #run DE with DESEq2 for each gene and transcript count matrix for each condition
 done
 for level in transcript ;
 do
@@ -1518,26 +1515,14 @@ do
   do
     for snptype in ADARediting APOBECediting All ;
     do
-      if [ -s "$count_matrix" ];
-      then
         count_matrix="$level"_"$impact"_"$snptype"edits_count_matrixedited
         bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #runs DE with DESeq2 for each editing impact count matrix (these counts are how many edits are found in each gene
-      else
-        echo1=$(echo ""$count_matrix" NOT FOUND")
-        mes_out
-      fi
     done
   done
 done
 if [ ! "$4" == "" ];
 then
-  if [ -s "$count_matrix" ];
-  then
     bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetsplit.sh "$count_matrix" "$4" # this will split the matrices by a certain condition and create new pheno-data files and matrices by condition supplied by the user.
-  else
-    echo1=$(echo ""$count_matrix" NOT FOUND")
-    mes_out
-  fi
 fi
 ####################################################################################################################
 # CLEAN UP AND EXIT
