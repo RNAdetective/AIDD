@@ -89,5 +89,6 @@ toolz
 tool=hisat2-2.1.0-Linux_x86_64 #install HISAT2
 toolz
 cp "$tool_dir"/hisat2-2.1.0/* "$tool_dir_bin"
-gsettings set org.gnome.desktop.background picture-uri "file://"$home"/AIDD/AIDDlogo.jpg"
+gsettings set org.gnome.desktop.background picture-uri "file://"$home"/AIDD/AIDD/AIDDlogo.jpg"
 cd
+mv "$home_dir"/AIDD/Desktop/* "$home_dir"/Desktop
