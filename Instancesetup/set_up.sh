@@ -23,10 +23,6 @@ rm "$tool".zip
 sudo apt-get --yes update
 sudo apt-get --yes upgrade
 sudo apt-get install build-essential gcc make perl dkms
-sudo mount /dev/cdrom /media/cdrom
-cd /media/cdrom
-sudo su
-./VBoxLinuxAdditions.run
 ##this updates java for the picard tool
 sudo apt install --yes default-jdk
 sudo apt-add-repository ppa:webupd8team/java
@@ -48,11 +44,6 @@ sudo apt-get --yes install build-essential python2.7-dev python-htseq
 wget https://s3.amazonaws.com/rstudio-dailybuilds/rstudio-xenial-1.1.463-amd64.deb
 sudo gdebi rstudio-xenial-1.1.463-amd64.deb
 rm rstudio-xenial-1.1.463-amd64.deb
-new_dir="$home_dir"/AIDD
-create_dir
-AIDDs="$home_dir"/AIDD/AIDD/
-new_dir="$AIDDs"
-create_dir
 tool_dir="$home_dir"/AIDD/AIDD_tools
 new_dir="$tool_dir"
 create_dir
@@ -60,18 +51,7 @@ tool_dir_bin="$home_dir"/AIDD/AIDD_tools/bin
 new_dir="$tool_dir_bin"
 create_dir
 AIDD_tools="$home_dir"/AIDD/AIDDtoolscompressed
-new_dir="$AIDD_tools"
-create_dir
-cd
-wget https://github.com/RNAdetective/AIDD/raw/master/AIDDscripts.tar.gz #this will get pipeline scripts
-tar -vxzf AIDDscripts.tar.gz
-rm AIDDscripts.tar.gz
-cp -r "$home_dir"/AIDDscripts/* "$AIDDs"
-wget https://github.com/RNAdetective/AIDD/raw/master/Desktop.tar.gz #this will get desktop folder
-tar -vxzf Desktop.tar.gz
-rm Desktop.tar.gz
 cd "$AIDD_tools"
-wget https://github.com/RNAdetective/AIDD/raw/master/AIDDtoolscompressed/AIDDtools.tar.gz.{001..014} # gets static versions of tools used in AIDD pipeline
 cat "$AIDD_tools"/* > AIDDtools.tar.gz
 tar -zxf AIDDtools.tar.gz
 rm AIDDtools.tar.gz*
@@ -109,6 +89,5 @@ toolz
 tool=hisat2-2.1.0-Linux_x86_64 #install HISAT2
 toolz
 cp "$tool_dir"/hisat2-2.1.0/* "$tool_dir_bin"
-gsettings set org.gnome.desktop.background picture-uri "file://"$AIDDs"/AIDDlogo.jpg"
-rm -r "$home_dir"/AIDDscripts
+gsettings set org.gnome.desktop.background picture-uri "file://"$home"/AIDD/AIDDlogo.jpg"
 cd
