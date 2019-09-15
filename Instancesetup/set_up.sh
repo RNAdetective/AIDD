@@ -22,6 +22,11 @@ rm "$tool".zip
 }
 sudo apt-get --yes update
 sudo apt-get --yes upgrade
+sudo apt-get install build-essential gcc make perl dkms
+sudo mount /dev/cdrom /media/cdrom
+cd /media/cdrom
+sudo su
+./VBoxLinuxAdditions.run
 ##this updates java for the picard tool
 sudo apt install --yes default-jdk
 sudo apt-add-repository ppa:webupd8team/java
