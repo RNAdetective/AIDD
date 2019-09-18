@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=AIDD
+Comment=Run AIDD
+Exec=/home/user/AIDD/AIDD/AIDD.sh
+Icon=/home/user/AIDD/AIDD/AIDD.gif
+Terminal=false
+Type=Application
