@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-home_dir="$1"
 create_dir() {
 if [ ! -d "$new_dir" ];
 then
@@ -25,6 +24,8 @@ read answer
 if [ "$answer" == "yes" ];
 then
   echo "SETTING UP AIDD"
+  echo "Type the path where your AIDD directory was downloaded."
+  read home_dir
   sudo apt-get --yes update
   sudo apt-get --yes upgrade
   sudo apt-get install build-essential gcc make perl dkms
@@ -32,7 +33,6 @@ then
   sudo apt install --yes default-jdk
   sudo apt-add-repository ppa:webupd8team/java
   sudo apt-get install oracle-java8-installer 
-
   ##this insalls python
   sudo apt-get --yes install python2.7
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
