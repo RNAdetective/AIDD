@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 ####################################################################################################################
 # this sets up variables for options
 ####################################################################################################################
@@ -439,7 +440,7 @@ then
   to_move="$home_dir"/Desktop/PHENO_DATA.csv
   file_move="$dir_path"/PHENO_DATA.csv
   get_file
-  sed -i 's/\r//g' "$dir_path"/PHENO_DATA.csv
+  #sed -i 's/\r//g' "$dir_path"/PHENO_DATA.csv
 fi
 #if [[ "$pheno" == "2" && "$batchinstance" == "1" ]];
 #then

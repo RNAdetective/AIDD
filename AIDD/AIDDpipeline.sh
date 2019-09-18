@@ -448,6 +448,21 @@ file_in="$step2"
 tool="$step1"
 mes_out
 }
+setjavaversion() {
+                                                                                                 case $version in
+  8)
+     export JAVA_HOME="$JDK8"
+     export PATH=$JAVA_HOME/bin:$PATH     ;
+  ;;
+  11)
+     export JAVA_HOME="$JDK11"
+     export PATH=$JAVA_HOME/bin:$PATH     ;
+  ;;
+  *)
+     error java version can only be 1.8 or 1.11
+  ;;
+esac
+}
 ####################################################################################################################
 ####################################################################################################################
 ####################################################################################################################
@@ -618,9 +633,13 @@ do
     file_in2="$wd"/$file_fastqpaired2
     file_out=$dirqc/fastqc/"$run"_1_fastqc.html
     file_out2=$dirqc/fastqc/"$run"_2_fastqc.html
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 11
+    JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+    version=11
+    setjavaversion
     run_tools2i2o
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
+    version=8
+    JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
+    setjavaversion
   fi
 ####################################################################################################################
 #  SINGLE QUALITY CONTROL
@@ -631,9 +650,13 @@ do
     file_in="$wd"/$file_fastq    
     file_out=$dirqc/fastqc/"$run"_fastqc.html
     rm -f "$wd"/"$file_sra"
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 11
+    JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+    version=11
+    setjavaversion
     run_tools
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
+    JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
+    version=8
+    setjavaversion
   fi
 ####################################################################################################################
 # PAIRED TRIMMING
@@ -645,11 +668,15 @@ do
     file_in2="$wd"/$file_fastqpaired2
     file_out=$dirqc/fastqc/"$run"_trim_1_fastqc.html 
     file_out2=$dirqc/fastqc/"$run"_trim_2_fastqc.html
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 11  
+    JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+    version=11
+    setjavaversion 
     start=12
     end=97  
     run_tools2i2o
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
+    JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/
+    version=8 
+    setjavaversion
   fi
 ####################################################################################################################
 # TRIMMING SINGLE
@@ -659,11 +686,15 @@ do
     tool=trimsingle
     file_in="$wd"/$file_fastq    
     file_out=$dirqc/fastqc/"$run"_trim_fastqc.html
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 11
+    JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+    version=11
+    setjavaversion
     start=12
     end=97
     run_tools
-    source "$home_dir"/AIDD/AIDD/scripts/setjavaversion.sh 8
+    JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
+    version=8
+    setjavaversion
   fi
 ####################################################################################################################
 # ALIGNMENT HISAT2 PAIRED
