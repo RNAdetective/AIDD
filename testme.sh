@@ -1,36 +1,30 @@
-move_vcf() {
-mv "$wd"/$file_vcf_raw "$rdvcf"/
-mv "$wd"/"$run"filtered_snps.vcf "$rdvcf"/
-mv "$wd"/"$run"recal_data.table $dirqc/recalibration_plots/
-mv "$wd"/"$run"raw_snps.vcf "$rdvcf"/
-rm "$wd"/"$run"raw_indels.vcf
-rm "$wd"/"$run"filtered_indels.vcf
-if [ -f "$wd"/"$run"recalibration_plots.pdf ];
-then
-  rm "$wd"/"$run"recal_data.table
-  rm "$wd"/"$run"post_recal_data.table
-fi
+download() {
+runfoldernameup=${run:0:3}
+runfoldername=$(echo "$runfoldernameup" | tr '[:upper:]' '[:lower:]')
+runfolder=${run:0:6}
+lastnum=${run:9:10}
+cd "$wd"/
+wget ftp://ftp.sra.ebi.ac.uk/vol1/"$runfoldername"/"$runfolder"/00"$lastnum"/"$run"
+# wget ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/"$runfoldername"/"$runfolder"/"$run"/"$run".sra # this was for ncbi but ebi works better
+cd "$dir_path"/AIDD
 }
-move_vcf2() {
-mv "$wd"/"$file_vcf_raw_recal" "$rdvcf"/
-mv "$wd"/"$file_vcf_recal" "$rdvcf"/
-mv "$wd"/"$file_vcf_finalAll" "$rdvcf"/
-}
-excitome_vcf() { 
-## filter out everything that is not ADAR mediated editing
-awk -F "\t" '/^#/' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalinfo.vcf #
-awk -F "\t" ' { if (($4 == "A") && ($5 == "G")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalAG.vcf
-awk -F "\t" '{ if (($4 == "T") && ($5 == "C")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalTC.vcf
-cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalAG.vcf "$rdvcf"/"$run"filtered_snps_finalTC.vcf > "$rdvcf"/"$file_vcf_finalADAR"
-awk -F "\t" ' { if (($4 == "C") && ($5 == "T")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalCT.vcf
-awk -F "\t" '{ if (($4 == "G") && ($5 == "A")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalGA.vcf
-cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalCT.vcf "$rdvcf"/"$run"filtered_snps_finalGA.vcf > "$rdvcf"/"$file_vcf_finalAPOBEC"
-}
-snpEff() {
-    java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf"/"$file_vcf_final""$snptype".vcf -stats "$rdsnp"/"$snp_stats""$snptype" -csvStats "$rdsnp"/"$snp_csv""$snptype".csv > "$rdsnp"/"$snpEff_out""$snptype".vcf
-    ##converts final annotationed vcf to table for easier processing
-    #java "$javaset"  -jar "$AIDDtool"/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf -F CHROM -F POS -F ID -F REF -F ALT -F QUAL -F AC -F ANN -o "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".table
-}
+fastqdumppaired() { 
+fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/ 
+mv "$wd"/$file_fastqpaired1pass "$wd"/$file_fastqpaired1 
+mv "$wd"/$file_fastqpaired2pass "$wd"/$file_fastqpaired2
+ }
+fastqdumpsingle() { fastq-dump "$wd"/$file_sra --read-filter pass -O "$wd"/ ; }
+movefastq() { mv $fastq_dir_path/$file_fastq "$wd"/ ; }
+fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
+fastqcsingle() { cd $dirqc/fastqc/ ; fastqc "$wd"/$file_fastq ; cd "$dir_path"/AIDD ; }
+trimpaired() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired1 -o "$wd"/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired2 -o "$wd"/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/$file_fastqpaired1 ; rm -f "$wd"/$file_fastqpaired2 ; mv "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired1 ; mv "$wd"/$file_fastqpaired2trim "$wd"/$file_fastqpaired2 ; }
+trimsingle() { fastx_trimmer -f start -l end -i "$wd"/$file_fastq -o "$wd"/"$run"_trim.fastq ; cd $dirqc/fastqc ; fastqc "$run"_trim.fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f "$wd"/$file_fastq ; mv "$wd"/"$run"_trim.fastq "$wd"/$file_fastq ; }
+HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/"$file_fastqpaired1" -2 "$wd"/"$file_fastqpaired2" -t --summary-file $dirqc/alignment_metrics/"$run".txt -S "$wd"/"$file_sam" ; }
+HISAT2_single() { hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$wd"/"$file_fastq" -t --summary-file "$dir_path"/raw_data/counts/"$run".txt -S "$wd"/"$file_sam" ; }
+STAR_paired() { echo "STAR some text line on how to run" ; }
+STAR_single() { echo "STAR some text line on how to run" ; }
+samtobam() { java -Djava.io.tmpdir="$dir_path"/tmp -jar "$AIDDtool"/picard.jar SortSam INPUT="$wd"/"$file_sam" OUTPUT="$rdbam"/$file_bam SORT_ORDER=coordinate ; }
+assem_string() { stringtie "$rdbam"/"$file_bam" -p3 -G "$ref_dir_path"/ref.gtf -A "$dir_path"/raw_data/counts/"$file_tab" -l -B -b "$dir_path"/raw_data/ballgown_in/"$sample"/"$run" -e -o "$dir_path"/raw_data/ballgown/"$sample"/"$file_name_gtf" ; }
 prep_bam_2() {
 java $javaset -jar $AIDDtool/picard.jar AddOrReplaceReadGroups I="$rdbam"/$file_bam O="$wd"/$file_bam_2 RGID=4 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=20 ##this will set up filtering guidelines in bam files 
 }
@@ -47,16 +41,10 @@ echo2=SAMTOOLS
 echo3=TO_CHECK
 echo4=READ_DEPTH
 mes_out
-samtools depth "$wd"/$file_bam_3 > "$wd"/"$run"depth_out.txt
+#samtools depth "$wd"/$file_bam_3 > "$wd"/"$run"depth_out.txt
 mv "$wd"/"$run"_alignment_metrics.txt $dirqc/alignment_metrics/
 mv "$wd"/"$run"_insert_metrics.txt $dirqc/insert_metrics/
 mv "$wd"/"$run"_insert_size_histogram.pdf $dirqc/insert_metrics/
-}
-combine_file() {
-cat "$file_in" | sed '1!{/^CAT/d;}' | cut -d',' -f"$col_num" >> "$file_out"
-}
-Rbar() {
-Rscript "$sim_scripts"/barchart.R "$file_in" "$file_out" "$bartype"
 }
 summary_split() {
 INPUT="$dir_path"/PHENO_DATA2.csv
@@ -107,6 +95,92 @@ tool=Rbar
 run_tools
 done
 }
+markduplicates(){
+    java $javaset -jar $AIDDtool/picard.jar MarkDuplicates INPUT="$wd"/$file_bam_3 OUTPUT="$wd"/$file_bam_dup METRICS_FILE="$wd"/"$run"metrics.txt
+}
+haplotype1() {
+    java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$wd"/$file_bam_dup
+    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/$file_vcf_raw
+    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_variants.table
+}
+filter1() {
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -selectType SNP -o "$wd"/"$run"raw_snps.vcf
+    cp "$wd"/"$run"raw_snps.vcf "$rdvcf"/
+    ##runs variants to table for easier viewing of vcf files
+    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_snps.table
+    ##select more variants for filtering
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -selectType INDEL -o "$wd"/"$run"raw_indels.vcf
+    ##starting filtering steps
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_snps.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$wd"/"$run"filtered_snps.vcf
+    ##moves and converts vcf filtered snp file into table
+    cp "$wd"/"$run"filtered_snps.vcf "$rdvcf"/
+    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"filtered_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"filtered_snps.table
+    ##more filtering
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_indels.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o "$wd"/"$run"filtered_indels.vcf
+    ##rns base recalibrator to create new bam files with filtering taken into account
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T BaseRecalibrator -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -knownSites "$wd"/"$run"filtered_snps.vcf -knownSites "$wd"/"$run"filtered_indels.vcf --filter_reads_with_N_cigar -o "$wd"/"$run"recal_data.table
+    ##moves and converts vcf files
+    cp "$wd"/"$run"recal_data.table $dirqc/recalibration_plots/
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T BaseRecalibrator -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -knownSites "$wd"/"$run"filtered_snps.vcf -knownSites "$wd"/"$run"filtered_indels.vcf -BQSR "$wd"/"$run"recal_data.table --filter_reads_with_N_cigar -o "$wd"/"$run"post_recal_data.table
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T AnalyzeCovariates -R "$ref_dir_path"/ref2.fa -before "$wd"/"$run"recal_data.table -after "$wd"/"$run"post_recal_data.table -plots "$wd"/"$run"recalibration_plots.pdf
+    ##creates new bam file containing filtering data.
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T PrintReads -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -BQSR "$wd"/"$run"recal_data.table --filter_reads_with_N_cigar -o "$wd"/$file_bam_recal
+}
+move_vcf() {
+mv "$wd"/$file_vcf_raw "$rdvcf"/
+mv "$wd"/"$run"filtered_snps.vcf "$rdvcf"/
+mv "$wd"/"$run"recal_data.table $dirqc/recalibration_plots/
+mv "$wd"/"$run"raw_snps.vcf "$rdvcf"/
+rm "$wd"/"$run"raw_indels.vcf
+rm "$wd"/"$run"filtered_indels.vcf
+if [ -f "$wd"/"$run"recalibration_plots.pdf ];
+then
+  rm "$wd"/"$run"recal_data.table
+  rm "$wd"/"$run"post_recal_data.table
+fi
+}
+move_vcf2() {
+mv "$wd"/"$file_vcf_raw_recal" "$rdvcf"/
+mv "$wd"/"$file_vcf_recal" "$rdvcf"/
+mv "$wd"/"$file_vcf_finalAll" "$rdvcf"/
+}
+haplotype2() {
+  java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_recal --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/"$file_vcf_raw_recal"
+  java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_variants_recal.table   
+}
+filter2() {
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -selectType SNP -o "$wd"/"$file_vcf_recal"
+    cp "$wd"/"$file_vcf_recal" "$rdvcf"/
+    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_recal -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_snps_recal.table
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -selectType INDEL -o "$wd"/"$run"raw_indels_recal.vcf
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_recal" --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$wd"/"$file_vcf_finalAll"
+    cp "$wd"/"$file_vcf_finalAll" "$rdvcf"/
+    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_finalAll" -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"filtered_snps_finalAll.table
+    ##this finishes filtering indels
+    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_indels_recal.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o "$wd"/"$run"filtered_indels_recal.vcf
+}
+excitome_vcf() { 
+## filter out everything that is not ADAR mediated editing
+awk -F "\t" '/^#/' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalinfo.vcf #
+awk -F "\t" ' { if (($4 == "A") && ($5 == "G")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalAG.vcf
+awk -F "\t" '{ if (($4 == "T") && ($5 == "C")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalTC.vcf
+cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalAG.vcf "$rdvcf"/"$run"filtered_snps_finalTC.vcf > "$rdvcf"/"$file_vcf_finalADAR"
+awk -F "\t" ' { if (($4 == "C") && ($5 == "T")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalCT.vcf
+awk -F "\t" '{ if (($4 == "G") && ($5 == "A")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalGA.vcf
+cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalCT.vcf "$rdvcf"/"$run"filtered_snps_finalGA.vcf > "$rdvcf"/"$file_vcf_finalAPOBEC"
+}
+snpEff() {
+    java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf"/"$file_vcf_final""$snptype".vcf -stats "$rdsnp"/"$snp_stats""$snptype" -csvStats "$rdsnp"/"$snp_csv""$snptype".csv > "$rdsnp"/"$snpEff_out""$snptype".vcf
+    ##converts final annotationed vcf to table for easier processing
+    #java "$javaset"  -jar "$AIDDtool"/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf -F CHROM -F POS -F ID -F REF -F ALT -F QUAL -F AC -F ANN -o "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".table
+}
+combine_file() {
+cat "$file_in" | sed '1!{/^CAT/d;}' | cut -d',' -f"$col_num" >> "$file_out"
+}
+Rbar() {
+Rscript "$sim_scripts"/barchart.R "$file_in" "$file_out" "$bartype"
+}
+
 run_tools() {
     if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
     then
@@ -147,53 +221,6 @@ run_tools() {
         mes_out # ERROR OUTPUT IS THERE
   fi
 }
-markduplicates(){
-    java $javaset -jar $AIDDtool/picard.jar MarkDuplicates INPUT="$wd"/$file_bam_3 OUTPUT="$wd"/$file_bam_dup METRICS_FILE="$wd"/"$run"metrics.txt
-}
-haplotype1() {
-    java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$wd"/$file_bam_dup
-    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/$file_vcf_raw
-    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_variants.table
-}
-filter1() {
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -selectType SNP -o "$wd"/"$run"raw_snps.vcf
-    cp "$wd"/"$run"raw_snps.vcf "$rdvcf"/
-    ##runs variants to table for easier viewing of vcf files
-    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_snps.table
-    ##select more variants for filtering
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_raw -selectType INDEL -o "$wd"/"$run"raw_indels.vcf
-    ##starting filtering steps
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_snps.vcf --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$wd"/"$run"filtered_snps.vcf
-    ##moves and converts vcf filtered snp file into table
-    cp "$wd"/"$run"filtered_snps.vcf "$rdvcf"/
-    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"filtered_snps.vcf -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"filtered_snps.table
-    ##more filtering
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_indels.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o "$wd"/"$run"filtered_indels.vcf
-    ##rns base recalibrator to create new bam files with filtering taken into account
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T BaseRecalibrator -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -knownSites "$wd"/"$run"filtered_snps.vcf -knownSites "$wd"/"$run"filtered_indels.vcf --filter_reads_with_N_cigar -o "$wd"/"$run"recal_data.table
-    ##moves and converts vcf files
-    cp "$wd"/"$run"recal_data.table $dirqc/recalibration_plots/
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T BaseRecalibrator -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -knownSites "$wd"/"$run"filtered_snps.vcf -knownSites "$wd"/"$run"filtered_indels.vcf -BQSR "$wd"/"$run"recal_data.table --filter_reads_with_N_cigar -o "$wd"/"$run"post_recal_data.table
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T AnalyzeCovariates -R "$ref_dir_path"/ref2.fa -before "$wd"/"$run"recal_data.table -after "$wd"/"$run"post_recal_data.table -plots "$wd"/"$run"recalibration_plots.pdf
-    ##creates new bam file containing filtering data.
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T PrintReads -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup -BQSR "$wd"/"$run"recal_data.table --filter_reads_with_N_cigar -o "$wd"/$file_bam_recal
-}
-haplotype2() {
-  java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_recal --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/"$file_vcf_raw_recal"
-  java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_variants_recal.table   
-}
-filter2() {
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -selectType SNP -o "$wd"/"$file_vcf_recal"
-    cp "$wd"/"$file_vcf_recal" "$rdvcf"/
-    java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/$file_vcf_recal -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"raw_snps_recal.table
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_raw_recal" -selectType INDEL -o "$wd"/"$run"raw_indels_recal.vcf
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_recal" --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$wd"/"$file_vcf_finalAll"
-    cp "$wd"/"$file_vcf_finalAll" "$rdvcf"/
-    java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$wd"/"$file_vcf_finalAll" -F CHROM -F POS -F ID -F QUAL -F AC -o "$rdvcf"/"$run"filtered_snps_finalAll.table
-    ##this finishes filtering indels
-    java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$wd"/"$run"raw_indels_recal.vcf --filterExpression 'QD < 2.0 || FS > 200.0 || SOR > 10.0' --filterName "basic_indel_filter" -o "$wd"/"$run"filtered_indels_recal.vcf
-}
-assem_string() { stringtie "$rdbam"/"$file_bam" -p3 -G "$ref_dir_path"/ref.gtf -A "$dir_path"/raw_data/counts/"$file_tab" -l -B -b "$dir_path"/raw_data/ballgown_in/"$sample"/"$run" -e -o "$dir_path"/raw_data/ballgown/"$sample"/"$file_name_gtf" ; }
 dir_path="$1"
 INPUT="$dir_path"/PHENO_DATA.csv
 OLDIFS=$IFS  
@@ -220,6 +247,16 @@ do
   snp_stats="$run";
   snpEff_in="$run"filtered_snps_final;
   ref_dir_path=/home/user/AIDD/references;
+  file_sra="$run";
+  file_fastq="$run".fastq;
+  file_fastq="$run".fastq;
+  file_fastqpaired1="$run"_1.fastq;
+  file_fastqpaired2="$run"_2.fastq;
+  file_fastqpaired1pass="$run"_pass_1.fastq;
+  file_fastqpaired2pass="$run"_pass_2.fastq;
+  file_fastqpaired1trim="$run"_trim_1.fastq;
+  file_fastqpaired2trim="$run"_trim_2.fastq;
+  file_sam="$run".sam;
   file_bam="$run".bam;
   file_bam_2="$run"_2.bam;
   file_bam_3="$run"_3.bam;
@@ -234,21 +271,28 @@ do
   file_vcf_finalAPOBEC="$run"filtered_snps_finalAPOBECediting.vcf;
   sum_file="$dirqc"/alignment_metrics/"$run".txt 
   fastq_dir_path=/home/user; # directory for local fastq files
-file_tab="$run".tab;
-file_name_gtf="$sample".gtf;
+  file_tab="$run".tab;
+  file_name_gtf="$sample".gtf;
 export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
-#   assem_string #runs stringtie to assemble and count transcripts
-  prep_bam_2 #runs bam file sorting for variant calling
-  prep_bam_3 #runs bam file reordering by chromosome for variant calling
-  prep_align_sum #collects alignment metrics and creates quality control file
-  markduplicates #marks duplicates in bam file for variant calling
-  haplotype1 #first variant calling step
-  filter1 #first round of filtering after variant calling
-  move_vcf
-  haplotype2 #second variant calling step
-  filter2 #second and final round of filtering
-  move_vcf2 
-  excitome_vcf 
+#  download
+#  fastqdumppaired
+#  movefastq
+#  fastqcpaired
+#  trimpaired
+#  HISAT2_paired
+#  samtobam
+#  assem_string #runs stringtie to assemble and count transcripts
+#  prep_bam_2 #runs bam file sorting for variant calling
+#  prep_bam_3 #runs bam file reordering by chromosome for variant calling
+#  prep_align_sum #collects alignment metrics and creates quality control file
+#  markduplicates #marks duplicates in bam file for variant calling
+#  haplotype1 #first variant calling step
+#  filter1 #first round of filtering after variant calling
+#  move_vcf
+#  haplotype2 #second variant calling step
+#  filter2 #second and final round of filtering 
+#  move_vcf2
+  excitome_vcf
   for snptype in All ADARediting APOBECediting AG GA CT TC ; # DO ALL VARIANTS, ADAR VARIANTS, AND APOBEC VARIANTS
   do
     snpEff #runs snp effect prediction
