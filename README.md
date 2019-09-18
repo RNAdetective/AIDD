@@ -170,11 +170,7 @@ A.	create a shared folder on your host system.
 
 ___
 
-### These are other options to create hard drive space for AIDD however if you plan to run the automated script you have to have a shared folder names AIDD to run as defaults if you choose to do another setup and have more hard drive space on the virtual box or have an instance you are running then you cannot run AIDD with defaults from the icon on the desktop. You will need to enter the following command prompt
-
-```
-AIDD.sh 1 /path/to/AIDD/directories /path/to/where/to/put/results
-```
+### These are other options to create hard drive space for AIDD explained below however to run default AIDD it is recommended to use the shared folder option as already outlined. If you choose the other options AIDD cannot be run from the icon on the desktop.
 
 ___
 
@@ -226,31 +222,101 @@ and wait for it to finish downloading before moving on to the next steps
 2. Go to create new machine in the oracle virtual machine window by clicking the new button
 
 * select a name, put in linux and ubuntu 64 
-* then click VDH create virtual hard disk now and select at least 40G of storage space to create the hard disk.  
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep1.png">
+ </p>
+ 
+<p align="center">Step 1 AIDD setup<p align="center">
+
+* select how much RAM to designate to AIDD
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep2.png">
+ </p>
+ 
+<p align="center">Step 2 AIDD setup<p align="center">
+
+* then click VDH create virtual hard disk now and select at least 40G of storage space to create the hard disk.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep3.png">
+ </p>
+ 
+<p align="center">Step 3 AIDD setup<p align="center">
+	
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep4.png">
+ </p>
+ 
+<p align="center">Step 4 AIDD setup<p align="center">
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep5.png">
+ </p>
+ 
+<p align="center">Step 5 AIDD setup<p align="center">
+
 * Click create
 
-3. When it asks where to load from click on ubuntu 18.04 file in your file system.
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep6.png">
+ </p>
+ 
+<p align="center">Step 6 AIDD setup<p align="center">
+	
+* Your new VM will now appear on your list of images. Make sure you have the apporpriate settings for RAM and CPU by highlighting you VM and clicking on the settings button.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep7.png">
+ </p>
+ 
+<p align="center">Step 7 AIDD setup<p align="center">
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep8.png">
+ </p>
+ 
+<p align="center">Step 8 AIDD setup<p align="center">
+
+3. Now double click the new VM image and when it asks where to load from click on ubuntu 18.04 file in your file system.
  
  * This will tell VM were to get install files from.
- * then install ubuntu following prompts until it is done.
+ 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep9.png">
+ </p>
+ 
+<p align="center">Step 9 AIDD setup<p align="center">
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep10.png">
+ </p>
+ 
+<p align="center">Step 10 AIDD setup<p align="center">
+ 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep11.png">
+ </p>
+ 
+<p align="center">Step 11 AIDD setup<p align="center">
+
+* Please note to run STAR aligner option you must select at least 40G of RAM.  
+* Check the settings system.  
+* Then check motherboard and processor make sure all the blue markers are in the green for your machine if not then you need to find a computer with the required specs to run AIDD fully.  
+
+ 4. Install ubuntu following prompts until it is done.
    first click install
    then use default english highlighted
    then select minimal installation and make sure third-party software is turned off then click continue
    select the option erase disk and install ubuntu then click install now
    click continue when the warning message pops up
    then click continue
-   userMake sure you use username = user and password = password you can also select to log in automatically but it really does not make a difference then click continue
- * Now ubuntu is installing when it is finished it will ask you to reset even if you follow the prompt for a system reset you still need to manually close you VM by clicking on the X and make sure you poweroff not save the state and re-start but before you restart do step
- 
-4. Make sure you have set aside enough RAM and CPU to run the machine you must select at least 6G of RAM and 1CPU to run at bare minimum (although at 16G is recommended to ensure accurate variant calling).  
-
-* Please note to run STAR aligner option you must select at least 40G of RAM.  
-* Check the settings system.  
-* Then check motherboard and processor make sure all the blue markers are in the green for your machine if not then you need to find a computer with the required specs to run AIDD fully.  
+   userMake sure you use username = user and password = password you can also select to log in automatically.
+   
+ * Now ubuntu is installing when it is finished it will ask you to reset even if you follow the prompt for a system reset you still need to manually close you VM by clicking on the X and make sure you poweroff not save the state and re-start.   
 
 5. Now restart your newly creaeted VM
-
-* click on the devices tab and from the drop down menu select install
 
 6.  Once you load your new virtual box open command prompt.  When your VM starts it will have a pop up just click next until you can click done then this will close that window. If it asks you to do updates click on no. 
 
@@ -259,11 +325,17 @@ and wait for it to finish downloading before moving on to the next steps
 ```
 sudo apt-get install git
 git clone https://github.com/RNAdetective/AIDD.git
-chmod +x /home/user/AIDD/Instancesetup/set_up.sh
+chmod +x ~/AIDD/Instancesetup/set_up.sh
 cp ~/AIDD/Desktop/Setup_AIDD.desktop ~/Desktop
 chmod +x ~/Desktop/Setup_AIDD.desktop
 ```
 Now you are ready to install AIDD by double clicking the icon on the desktop Setup_AIDD
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep12.png">
+ </p>
+ 
+<p align="center">Step 12 AIDD setup<p align="center">
 
 8. The program will run and ask you for the following prompts
 
@@ -278,6 +350,12 @@ Now you are ready to install AIDD by double clicking the icon on the desktop Set
 
 Close the virtualbox and restart again Then from the devices tab select insert guest additions CD image. When it asks if you would like to run the CD image click yes then enter the password for user then click authenticate.  Let the command run then when prompt hit return to close the window.
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep13.png">
+ </p>
+ 
+<p align="center">Step 13 AIDD setup<p align="center">
+
 Then paste the following command into the terminal to add shared folders to your virtual image
 
 ```
@@ -291,13 +369,10 @@ sudo su
 # enter your password
 ```
 Then copy the following
-
 ```
 Rscript /home/user/Instancesetup/set_up.R
-
 ```
-Then you should shutdown the VM
-make sure you go back and create a shared folder if you didnot make your virtual harddrive big enough to store all your data also make sure you adjust the processor and RAM according to the directions above to the right settings for AIDD and then restart the VM to run AIDD.
+Then shutdown the VM and make sure you go back and create a shared folder if you did not make your virtual harddrive big enough to store all your data also make sure you adjust the processor and RAM according to the directions above to the right settings for AIDD and then restart the VM to run AIDD.
 
 ___
 
@@ -374,6 +449,12 @@ The next four steps 2-5 are optional if you don't have any genes of interest or 
 
 Step 3: Simply double click the icon labeled Run_AIDD on the desktop to run AIDD with default settings.
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step12.png">
+ </p>
+ 
+<p align="center">Run AIDD by double clicking the icon on the desktop <p align="center">
+
 If you needed to install AIDD anywhere other then the defualt VM /home/user directory or want the output data stored somewhere other then the default /media/sf_AIDD/AIDD_data you need to specify this in the command line as explained below.
 
 copy and paste the following command into the command prompt
@@ -394,6 +475,12 @@ bash AIDD.sh 2 /path/to/AIDD /path/to/store/data
 ```
 
 Then follow the on screen prompts answering 1 when you want the defaults and 2 when you want a different option as defined by the on screen prompt.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/AIDDoptions.png">
+ </p>
+ 
+<p align="center">Run AIDD with options to download references see manual for more customiziable options <p align="center">
 
 For more details on options available for AIDD please see the manual here on github or included in you AIDD folder on the VM.
 
