@@ -32,6 +32,7 @@ then
   sudo apt install --yes default-jdk
   sudo apt-add-repository ppa:webupd8team/java
   sudo apt-get install oracle-java8-installer 
+
   ##this insalls python
   sudo apt-get --yes install python2.7
   sudo update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
@@ -59,7 +60,11 @@ then
   cd "$AIDD_tools"
   cat "$AIDD_tools"/* > AIDDtools.tar.gz
   tar -zxf AIDDtools.tar.gz
-  rm AIDDtools.tar.gz*
+  rm AIDDtools.tar.gz* 
+  sudo mkdir /usr/lib/jvm/java-1.8.0_221
+  sudo tar -zxf "$AIDDtools"/jdk-8u221-linux-x64.tar.gz -C /usr/lib/jvm/java.1.8.0_221
+  sudo update-alternatives -- install /usr/bin/java java /usr/lib/jvm/java-1.8.0_221/bin/java 100
+  sudo update-alternatives -- install /usr/bin/javac javac /usr/lib/jvm/java-1.8.0_221/bin/javac 100
   mv "$AIDD_tools"/AIDDtools/* "$tool_dir"
   rm -R "$AIDD_tools"
   cd "$tool_dir"
