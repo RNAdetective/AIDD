@@ -142,7 +142,7 @@ A.	create a shared folder on your host system.
  
 <p align="center">Step 3 shared folder setup<p align="center">
 	
-	<p align="center">
+<p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step10.png">
  </p>
  
