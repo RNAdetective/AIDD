@@ -21,7 +21,7 @@
 
 ___
 
-#### **AIDDv2.0.0 now allows for** 
+#### **AIDD now allows for** 
 
 * options of aligners, assemblers, and DE tools.
 * defining your own directories as well as setup scripts for instance setup.
