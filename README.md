@@ -324,6 +324,11 @@ and wait for it to finish downloading before moving on to the next steps
 
 ```
 sudo apt-get install git
+#answer y
+```
+When git is done installing copy and paste the following
+
+```
 git clone https://github.com/RNAdetective/AIDD.git
 chmod +x ~/AIDD/Instancesetup/set_up.sh
 cp ~/AIDD/Desktop/setup_AIDD.desktop ~/Desktop
@@ -342,10 +347,11 @@ Follow the onscreen prompts to finish the setup
 
 * Follow instructions while setup runs 
     first it will ask if you want to setup AIDD type yes
-    then it will ask for your user name type the user name you picked when setting up ubuntu
-    next it will ask you to supply a password
-    oracle will prompt you to hit enter to install updates for java and to install both java versions needed for the pipeline
-    then do you want to continue type y
+    then it will ask for your user name type the user name you picked when setting up ubuntu for default location type /home/user
+    next it will ask you to supply your password that you created when you setup ubuntu default here is password
+    oracle will then prompt you after a few seconds to hit enter to install updates for java and to install both java versions needed for the pipeline
+    It will then pause again for the older version of java hit enter again
+    Next it will ask if you want to install the softward package type y
     then a pop up window will ask you to hit ok then make sure you pick yes and hit enter
     When operating system and basic tools are done updating then AIDDtools are downloaded and installed from static copies
     then next pop up will ask you to hit enter
