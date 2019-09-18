@@ -93,6 +93,8 @@ toolz
 cp "$tool_dir"/hisat2-2.1.0/* "$tool_dir_bin"
 gsettings set org.gnome.desktop.background picture-uri "file://"$home"/AIDD/AIDDlogo.jpg"
 cd
+sudo ln -s "$home_dir"/AIDD/AIDD/AIDD.sh /usr/local/bin/AIDD
+chmod +x /home/user/AIDD/AIDD/AIDD.sh
 mv "$home_dir"/AIDD/Desktop/* "$home_dir"/Desktop
 sudo usermod -G vboxsf -a user
 Rscript "$home_dir"/AIDD/Instancesetup/set_up.R
