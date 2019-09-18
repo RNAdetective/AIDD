@@ -86,6 +86,8 @@ toolz
 cp "$tool_dir"/"$tool"/* "$tool_dir_bin"
 tool=snpEff_latest_core #install snpEff
 toolz
+cp "$tool_dir"/snpEff/snpEff.jar "$tool_dir"
+cp "$tool_dir"/snpEff/snpEff.config "$tool_dir"
 tool=hisat2-2.1.0-Linux_x86_64 #install HISAT2
 toolz
 cp "$tool_dir"/hisat2-2.1.0/* "$tool_dir_bin"
