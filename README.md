@@ -140,7 +140,7 @@ A.	create a shared folder on your host system.
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step9.png">
  </p>
  
-<p align="center">Steo 3 shared folder setup<p align="center">
+<p align="center">Step 3 shared folder setup<p align="center">
 	
 	<p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step10.png">
@@ -170,7 +170,11 @@ A.	create a shared folder on your host system.
 
 ___
 
-### These are other options to create hard drive space for AIDD however if you plan to run the automated script you have to have a shared folder names AIDD to run as defaults if you choose to do another setup and have more hard drive space on the virtual box or have an instance you are running then you cannot run AIDD with defaults and it will prompt you to enter the correct directories for your situation.
+### These are other options to create hard drive space for AIDD however if you plan to run the automated script you have to have a shared folder names AIDD to run as defaults if you choose to do another setup and have more hard drive space on the virtual box or have an instance you are running then you cannot run AIDD with defaults from the icon on the desktop. You will need to enter the following command prompt
+
+```
+AIDD.sh 1 /path/to/AIDD/directories /path/to/where/to/put/results
+```
 
 ___
 
@@ -250,16 +254,16 @@ and wait for it to finish downloading before moving on to the next steps
 
 6.  Once you load your new virtual box open command prompt.  When your VM starts it will have a pop up just click next until you can click done then this will close that window. If it asks you to do updates click on no. 
 
-7. Next you need to get and run AIDD Instance setup scripts from github.  Download scripts by copy and paste the following command into the terminal
+7. Next you need to get and run AIDD Instance setup scripts from github.  Download scripts by copy and paste the following command into the terminal.
 
 ```
-wget https://github.com/RNAdetective/AIDD/raw/master/Instancesetup.tar.gz
-
-tar -xvzf Instancesetup.tar.gz
-
-bash /home/user/Instancesetup/set_up.sh /home/user
+sudo apt-get install git
+git clone https://github.com/RNAdetective/AIDD.git
+chmod +x /home/user/AIDD/Instancesetup/set_up.sh
+cp ~/AIDD/Desktop/Setup_AIDD.desktop ~/Desktop
+chmod +x ~/Desktop/Setup_AIDD.desktop
 ```
-you can change the home dirctory of where to put the AIDD folder for scripts and indexes this is useful when creating a instance that has a different user name then user
+Now you are ready to install AIDD by double clicking the icon on the desktop Setup_AIDD
 
 8. The program will run and ask you for the following prompts
 
@@ -297,10 +301,12 @@ make sure you go back and create a shared folder if you didnot make your virtual
 
 ___
 
-## AML with RMD for R-studio
+## ZIKV with RMD for R-studio
 
 To run the tutorial open R studio and find the AIDDtutorial.rmd file under /home/user/AIDD/AIDD/AIDDtutorial.rmd.  Run the chunks from begining to end.  This tutorial explains each step of the AIDD pipeline and allow for user to change code as necessry.
 The tutorial allows for both understanding of the tools and statistical analysis performed by AIDD and can be used as an educational tool for hands on teaching of bioinformatic analysis of RNA sequencing data.
+
+Another option to run the tutorial to test for installation of tools is to simply run AIDD without changing any of the PHENO_DATA.csv file or adding anything to the directories on the desktop. AIDD is set to run the tutorial right "out of the box".
 
 ___
 
@@ -366,16 +372,30 @@ The next four steps 2-5 are optional if you don't have any genes of interest or 
  
 <p align="center">insert transcript lists you want to perform pathway DE analysis on files<p align="center">
 
-Step 3: copy and paste the following command into the command prompt
+Step 3: Simply double click the icon labeled Run_AIDD on the desktop to run AIDD with default settings.
+
+If you needed to install AIDD anywhere other then the defualt VM /home/user directory or want the output data stored somewhere other then the default /media/sf_AIDD/AIDD_data you need to specify this in the command line as explained below.
+
+copy and paste the following command into the command prompt
 
 ```
-bash /home/user/AIDD/AIDD/AIDD.sh 1 /home/user /media/sf_AIDD
+bash AIDD.sh 1 /path/to/AIDD /path/to/store/data
 ```
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/runAIDD.png">
  </p>
  
 <p align="center">Run AIDD with defaults see manual to customize<p align="center">
+	
+If you are running AIDD for the first time without using the prepared VM then you need to download references to use. To do this simply copy and paste the following command
+
+```
+bash AIDD.sh 2 /path/to/AIDD /path/to/store/data
+```
+
+Then follow the on screen prompts answering 1 when you want the defaults and 2 when you want a different option as defined by the on screen prompt.
+
+For more details on options available for AIDD please see the manual here on github or included in you AIDD folder on the VM.
 
 ___
 
