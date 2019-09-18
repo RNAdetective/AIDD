@@ -105,7 +105,11 @@ then
   cd
   sudo ln -s "$home_dir"/AIDD/AIDD/AIDD.sh /usr/local/bin/AIDD
   chmod +x "$home_dir"/AIDD/AIDD/AIDD.sh
+  sudo ln -s "$home_dir"/AIDD/updateAIDDscripts.sh /usr/local/bin/updateAIDDscripts
   chmod +x "$home_dir"/AIDD/updateAIDDscripts.sh
+  sudo ln -s "$home_dir"/AIDD/Instancesetup/set_up.sh /usr/local/bin/setupAIDD
+  chmod +x "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh
+    sudo ln -s "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh /usr/local/bin/ExToolset
   chmod +x "$home_dir"/AIDD/Instancesetup/set_up.sh
   mv "$home_dir"/AIDD/Desktop/* "$home_dir"/Desktop
   chmod +x ~/Desktop/run_AIDD.desktop
