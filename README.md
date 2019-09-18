@@ -480,7 +480,9 @@ Then follow the on screen prompts answering 1 when you want the defaults and 2 w
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/AIDDoptions.png">
  </p>
  
-<p align="center">Run AIDD with options to download references see manual for more customiziable options <p align="center">
+<p align="center">Run AIDD with options to download references <p align="center">
+
+* She the manual for more customizable options included with AIDD
 
 For more details on options available for AIDD please see the manual here on github or included in you AIDD folder on the VM.
 
