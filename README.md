@@ -326,10 +326,11 @@ and wait for it to finish downloading before moving on to the next steps
 sudo apt-get install git
 git clone https://github.com/RNAdetective/AIDD.git
 chmod +x ~/AIDD/Instancesetup/set_up.sh
-cp ~/AIDD/Desktop/Setup_AIDD.desktop ~/Desktop
-chmod +x ~/Desktop/Setup_AIDD.desktop
+cp ~/AIDD/Desktop/setup_AIDD.desktop ~/Desktop
+chmod +x ~/Desktop/setup_AIDD.desktop
 ```
-Now you are ready to install AIDD by double clicking the icon on the desktop Setup_AIDD
+Now you are ready to install AIDD by double clicking the icon on the desktop Setup_AIDD.
+Follow the onscreen prompts to finish the setup
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep12.png">
@@ -340,7 +341,9 @@ Now you are ready to install AIDD by double clicking the icon on the desktop Set
 8. The program will run and ask you for the following prompts
 
 * Follow instructions while setup runs 
-    first it will ask you to supply a password
+    first it will ask if you want to setup AIDD type yes
+    then it will ask for your user name type the user name you picked when setting up ubuntu
+    next it will ask you to supply a password
     oracle will prompt you to hit enter to install updates for java and to install both java versions needed for the pipeline
     then do you want to continue type y
     then a pop up window will ask you to hit ok then make sure you pick yes and hit enter
