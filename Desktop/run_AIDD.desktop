@@ -1,8 +1,8 @@
 [Desktop Entry]
 Version=1.0
-Exec=/home/user/AIDD/AIDD/AIDD.sh 1 /home/user /media/sf_AIDD
-Name=AIDD
-GnericName=AIDD
+Exec=/home/user/AIDD/AIDD/AIDD.sh 1 /home/user /media/sf_AIDD/AIDD_data
+Name=Run_AIDD
+GenericName=AIDD
 Comment=Run AIDD
 Icon=/home/user/AIDD/AIDD.gif
 Terminal=true

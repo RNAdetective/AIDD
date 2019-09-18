@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Exec=/home/user/AIDD/updateAIDDscripts.sh /home/user
+Name=updateAIDDscripts
+GenericName=updateAIDDscripts
+Comment=Run updateAIDDscripts
+Icon=/home/user/AIDD/AIDD.gif
+Terminal=true
+Type=Application
