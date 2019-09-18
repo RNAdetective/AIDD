@@ -288,9 +288,9 @@ sudo usermod -a -G vboxsf user
 
 ```
 sudo su
-
+# enter your password
 ```
-#enter your password
+Then copy the following
 
 ```
 Rscript /home/user/Instancesetup/set_up.R
