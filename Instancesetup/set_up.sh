@@ -117,8 +117,8 @@ then
   chmod +x ~/Desktop/get_references.desktop
   chmod +x ~/Desktop/run_ExToolset.desktop
   chmod +x ~/Desktop/setup_AIDD.desktop
-  sudo usermod -G vboxsf -a user
-  Rscript "$home_dir"/AIDD/Instancesetup/set_up.R
+  #sudo usermod -G vboxsf -a user
+  sudo Rscript "$home_dir"/AIDD/Instancesetup/set_up.R
 else
   echo "Not setting up AIDD at this time"
 fi
