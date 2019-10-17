@@ -68,6 +68,8 @@ then
   mv "$AIDD_tools"/AIDDtools/* "$tool_dir"
   rm -R "$AIDD_tools"
   cd "$tool_dir"
+  tool=jdk-8u221-linux-x64.tar.gz
+  untar_tool
   tool=stringtie-1.3.5.Linux_x86_64 #install stringtie
   untar_tool
   copy_tool
