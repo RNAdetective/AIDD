@@ -2,7 +2,7 @@
 
 #env variables can be changed only if we call the script with source setJavaVersion.sh  
 
-JDK8=/home/user/jdk1.8.0_221/
+JDK8=/usr/lib/jvm/java-8-oracle/jre/  
 JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
                                                                                                                      
 case $1 in
