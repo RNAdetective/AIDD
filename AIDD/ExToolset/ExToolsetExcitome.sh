@@ -93,8 +93,9 @@ then
   read
   while IFS=, read -r samp_name run condition sample condition2 condition3
   do
-    sed -i 's/condition=//g' "$dir_path"/AIDD/config.cfg.defaults
-    sed -i 's/condition2=//g' "$dir_path"/AIDD/config.cfg.defaults
+    file_in="$dir_path"/AIDD/config.cfg.defaults
+    cat "$file_in" | sed 's/condition=//g' | sed 's/condition2=//g' >> "$dir_path"/temp.csv
+    temp_file
     echo "condition="$condition"" >> "$dir_path"/AIDD/config.cfg.defaults
     echo "condition2="$condition2"" >> "$dir_path"/AIDD/config.cfg.defaults
     INPUT=/home/user/AIDD/AIDD/ExToolset/indexes/index/excitome_loc.csv
@@ -232,7 +233,8 @@ then
   names=$(echo "condition")
   temp_file="$dirres"/temp2.csv
   file_out="$dirres"/guttman_count_matrix.csv
-  sed -i sed 's/_[0-9]*//g' "$file_out"
+  cat "$file_out" | sed 's/_[0-9]*//g' >> "$dir_path"/temp.csv
+  temp_file
   echo1=$(echo "CREATING "$file_out"")
   mes_out
   mergeR

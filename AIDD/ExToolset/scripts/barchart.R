@@ -17,10 +17,10 @@ bartype <- paste0(args[3]);
 if ( bartype == "readdepth" ) {
 data_in <- read.csv(file_in);
 colnames(data_in)[2] <- "name"
-colnames(data_in)[5] <- "cond_1_name"
+colnames(data_in)[5] <- "condition_name"
 colnames(data_in)[7] <- "freq"
 tiff(file_out, units="in", width=10, height=10, res=600) #names the chart file
-q <- ggplot(data_in, aes(x=name, y=freq, fill=cond_1_name)) + geom_bar(stat="identity", color="black", position=position_dodge()) + theme_minimal() + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+q <- ggplot(data_in, aes(x=name, y=freq, fill=condition_name)) + geom_bar(stat="identity", color="black", position=position_dodge()) + theme_minimal() + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 p <- q + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 print(p)
 garbage <- dev.off()
@@ -49,32 +49,32 @@ if ( bartype == "excitome" ) {
 pheno <- paste0(args[4])
 freq <- (paste0(args[5]))
 sum_file <- paste0(args[6])
-cond_1_name <- paste0(args[7])
+condition_name <- paste0(args[7])
 pheno_in <- read.csv(pheno)
 data_in <- read.csv(file_in);
-  if ( cond_1_name == "samp_name" ) {
+  if ( condition_name == "samp_name" ) {
   colnames(data_in)[1] <- "samp_name"
   datamerge <- merge(pheno_in, data_in, by="samp_name")
   }
-  if ( cond_1_name == "cond_1_name" ) {
-  colnames(data_in)[1] <- "cond_1_name"
-  datamerge <- merge(pheno_in, data_in, by="cond_1_name")
+  if ( condition_name == "condition_name" ) {
+  colnames(data_in)[1] <- "condition_name"
+  datamerge <- merge(pheno_in, data_in, by="condition_name")
   }
-cdata <- ddply(datamerge, c("cond_1_name"), summarise, N = length(cond_1_name), mean=round(mean(cond_1_name),2), sd=round(sd(cond_1_name), 2))
-cdata$substitution <- rep("cond_1_name",nrow(cdata)) # make new column 
+cdata <- ddply(datamerge, c("condition_name"), summarise, N = length(condition_name), mean=round(mean(condition_name),2), sd=round(sd(condition_name), 2))
+cdata$substitution <- rep("condition_name",nrow(cdata)) # make new column 
 write.csv(cdata, sum_file, row.names=FALSE, quote=FALSE)
 #tiff(file_out, units="in", width=10, height=10, res=600) #names the chart file
-#q <- ggplot(cdata, aes(x=cond_1_name, y=mean, fill=cond_1_name)) + geom_bar(stat="identity", color="black", position=position_dodge()) + theme_minimal() + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+#q <- ggplot(cdata, aes(x=condition_name, y=mean, fill=condition_name)) + geom_bar(stat="identity", color="black", position=position_dodge()) + theme_minimal() + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 #p <- q + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 #r <- p + geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2, position=position_dodge(.9)) 
-#z <- r + labs(title="cond_1_name expression for cond_1_name", x="cond_1_name", y = "Expression(TPM)")
+#z <- r + labs(title="condition_name expression for condition_name", x="condition_name", y = "Expression(TPM)")
 #print(z)
 #garbage <- dev.off()
 }
 if ( bartype == "substitutions" ) {
 cdata <- read.csv(file_in)
 tiff(file_out, units="in", width=10, height=10, res=600) #names the chart file
-q <- ggplot(cdata, aes(x=substitution, y=mean, fill=cond_1_name)) + geom_bar(stat="identity", color="black", position=position_dodge()) + theme_minimal() + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+q <- ggplot(cdata, aes(x=substitution, y=mean, fill=condition_name)) + geom_bar(stat="identity", color="black", position=position_dodge()) + theme_minimal() + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 p <- q + theme(axis.text.x = element_text(angle = 90, hjust = 1))
 r <- p + geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2, position=position_dodge(.9)) 
 z <- r + labs(title="substitution", x="substitution", y = "Counts normalized by Read Depth")
@@ -100,28 +100,28 @@ if ( bartype == "ANOVA" ) {
   pheno <- paste0(args[4])
   count_of_interest <- paste0(args[5])
   sum_file <- paste0(args[6])
-  #cond_1_name <- paste0(args[7])
+  #condition_name <- paste0(args[7])
   file_out2 <- paste0(args[8])
   sum_file2 <- paste0(args[9])
   data <- read.csv(file_in)
   #data$suicide <- factor(data$suicide, levels = c("no","yes"), labels = c("no", "yes")) # suicide
   #data$Sex <- factor(data$Sex, levels = c("male","female"), labels = c("male","female")) # sex
   #data$MDD <- factor(data$MDD, levels = c("no","yes"), labels = c("no", "yes")) # MDD
-  cdata <- ddply(data, c("cond_1_name"), summarise, N = length(freq_name), mean=round(mean(freq_name),5), sd=round(sd(freq_name), 5))
+  cdata <- ddply(data, c("condition_name"), summarise, N = length(freq_name), mean=round(mean(freq_name),5), sd=round(sd(freq_name), 5))
   cdata$substitution <- rep("freq_name",nrow(cdata)) # make new column 
   write.csv(cdata, sum_file, row.names=FALSE, quote=FALSE)
   tiff(file_out, units="in", width=10, height=10, res=600) #names the chart file
-  q <- ggplot(cdata, aes(x=substitution, y=mean, fill=cond_1_name)) + geom_bar(stat="identity", color="black", position=position_dodge()) + theme_minimal() + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  q <- ggplot(cdata, aes(x=substitution, y=mean, fill=condition_name)) + geom_bar(stat="identity", color="black", position=position_dodge()) + theme_minimal() + theme(legend.position="bottom") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
   p <- q + theme(axis.text.x = element_text(angle = 90, hjust = 1))
   r <- p + geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2, position=position_dodge(.9)) 
-  z <- r + labs(title="cond_1_name expression for freq_name", x="freq_name", y = "Expression(TPM)")
+  z <- r + labs(title="condition_name expression for freq_name", x="freq_name", y = "Expression(TPM)")
   print(z)
   garbage <- dev.off()
   tiff(file_out2, units="in", width=10, height=10, res=600)
-  p <- ggboxplot(data, x= "cond_1_name", y = "freq_name", color = "cond_1_name")
+  p <- ggboxplot(data, x= "condition_name", y = "freq_name", color = "condition_name")
   print(p)
   garbage <- dev.off()
-res.aov <- anova(lm(freq_name~cond_1_name, data=data))
+res.aov <- anova(lm(freq_name~condition_name, data=data))
 out <- capture.output(summary(res.aov))
 write.csv(out, sum_file2, row.names=FALSE, quote=FALSE)
 cat("freq_nameANOVA", out, file=sum_file2, sep="n", append=TRUE)
@@ -132,7 +132,7 @@ suppressPackageStartupMessages(library("VennDiagram"))
 suppressPackageStartupMessages(library("gplots"))
 image_out <- paste0(args[4])
 gLists <- read.csv(file_in)
-gLists$freq_name <- NULL
+gLists$X <- NULL
 head(gLists)
 tail(gLists)
 gLS <- lapply(as.list(gLists), function(x) x[x != ""])

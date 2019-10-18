@@ -12,7 +12,7 @@ createindex() {
 cat "$allcm" | cut -d, --complement -f2-6 | sed 's/genename/sampname/g' | head -n 1 | tr ',' '\n' >> "$allindex"
 }
 Rbar() {
-Rscript "$ExToolset"/barchart.R "$file_in" "$file_out" "$bartype" "$pheno" "$freq" "$sum_file" "$sampname" "$file_out2" "$sum_file2"
+Rscript "$dir_path"/temp.R "$file_in" "$file_out" "$bartype" "$pheno" "$freq" "$sum_file" "$sampname" "$file_out2" "$sum_file2"
 } # runs bargraph R script
 
 cond_file() {
@@ -77,8 +77,8 @@ echo ""$name","$pcorr","$lowCI","$highCI","$p_value"" >> "$dirrescorr"/all_corr_
 corr_chart() {
 file_in="$dirrescorr"/all_corr_data.csv
 file_out="$dirrescorr"/all_corr_data.tiff
-sed -i '1i variables,Corr,lowCI,highCI,p_value' "$file_in"
-sed -i 's/ //' "$file_in"
+cat "$file_in" | sed '1i variables,Corr,lowCI,highCI,p_value' | sed 's/ //g' >> "$dir_path"/temp.R
+temp_file
 tool=Rbar
 bartype=linewerr
 #run_tools
@@ -100,7 +100,8 @@ ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
 allcm="$dirres"/"$count_matrix".csv
 allindex="$dirresall"/"$count_matrix"_index.csv
 file_in="$allcm"
-sed -i '/Inf/d' "$allcm"
+cat "$file_in" | sed '/Inf/d' >> "$dir_path"/temp.csv
+temp_file
 cat "$allcm" | sed 's/samp_name/sampname/g' | sed 's/_[0-9]//g' >> "$dirres"/"$count_matrix"2.csv
 file_in="$allcm"
 file_out="$allindex"
@@ -144,7 +145,8 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
       new_dir="$dirrescon";
       create_dir
       file_in="$dirres"/"$count_matrix"2.csv;
-      sed -i 's/'$cond_name'.x/'$cond_name'/g' "$file_in"
+      cat "$file_in" | sed 's/'$cond_name'.x/'$cond_name'/g' >> "$dir_path"/temp.csv
+      temp_file
       file_out="$dirrescon"/"$freq"summary.tiff;
       file_out2="$dirrescon"/"$freq"summary2.tiff;
       bartype=ANOVA
@@ -155,11 +157,10 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
       sum_file2="$dirrescon"/"$freq"ANOVA.txt
       tool=Rbar
       sum_file="$dirres"/"$count_matrix"/"$cond_name"/"$freq"summary.csv
-      sed -i 's/freq_name/'$freq'/g' "$ExToolset"/barchart.R
-      sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
+      file_in="$ExToolset"/barchart.R
+      cat "$file_in" | sed 's/freq_name/'$freq'/g' | sed 's/condition_name/'$cond_name'/g' >> "$dir_path"/temp.R
       run_tools
-      sed -i 's/'$freq'/freq_name/g' "$ExToolset"/barchart.R 
-      sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
+      rm "$dir_path"/temp.R
       if [ -s "$dirrescon"/"$freq"ANOVA.txt ];
       then
         line=$(echo "11")
@@ -180,7 +181,8 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
       new_dir="$dirrescon";
       create_dir
       file_in="$dirres"/"$count_matrix"2.csv;
-      sed -i 's/'$cond_name'.x/'$cond_name'/g' "$file_in"
+      cat "$file_in" | sed 's/'$cond_name'.x/'$cond_name'/g' >> "$dir_path"/temp.csv
+      temp_file
       file_out="$dirrescon"/"$freq"summary.tiff;
       file_out2="$dirrescon"/"$freq"summary2.tiff;
       bartype=ANOVA
@@ -191,11 +193,10 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
       sum_file2="$dirrescon"/"$freq"Ttest.txt
       tool=Rbar
       sum_file="$dirrescon"/"$freq"summary.csv
-      sed -i 's/freq_name/'$freq'/g' "$ExToolset"/barchart.R
-      sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
+      file_in="$ExToolset"/barchart.R
+      cat "$file_in" | sed 's/freq_name/'$freq'/g' | sed 's/condition_name/'$cond_name'/g' >> "$dir_path"/temp.R
       run_tools
-      sed -i 's/'$freq'/freq_name/g' "$ExToolset"/barchart.R 
-      sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
+      rm "$dir_path"/temp.R
       if [ -s "$dirrescon"/"$freq"Ttest.txt ];
       then
         line=$(echo "11")
@@ -245,9 +246,9 @@ cond_namecol=${cond_col%:*}
     file_out="$dirres"/"$count_matrix"/"$cond_name"allsummaries.tiff
     bartype=substitutions
     tool=Rbar
-    sed -i 's/condition_name/'$cond_name'/g' "$ExToolset"/barchart.R
+    cat "$file_in" | sed -i 's/condition_name/'$cond_name'/g' >> "$dir_path"/temp.R
     run_tools
-    sed -i 's/'$cond_name'/condition_name/g' "$ExToolset"/barchart.R
+    rm "$dir_path"/temp.R
   fi
   if [[ "$condcount" == "1" || "$condcount" == "" ]];
   then

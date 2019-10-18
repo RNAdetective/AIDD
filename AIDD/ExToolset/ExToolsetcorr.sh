@@ -16,15 +16,15 @@ downreg100="$dirresDELDEvd"/downregGListtop100.csv
 downregGlist="$dirresDELDEvd"/downregGList.csv
 heatmap="$dirresDELDE"/top60heatmap.tiff
 volcano="$dirresDELDE"/VolcanoPlot.tiff
-sed -i 's/set_design/'$condition_name'/g' "$ExToolset"/DE.R
-Rscript "$ExToolset"/DE.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
-sed -i 's/'$condition_name'/set_design/g' "$ExToolset"/DE.R
+cat "$ExToolset"/DE.R | sed 's/set_design/'$condition_name'/g' >> "$dir_path"/tempDE.R
+Rscript "$dir_path"/tempDE.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
+rm "$dir_path"/tempDE.R
 }
 Rbar() {
-Rscript "$ExToolset"/barchart.R "$file_in" "$file_out" "$bartype" "$pheno" "$freq" "$sum_file" "$sampname" "$file_out2" "$sum_file2"
+Rscript "$dir_path"/tempbarchart.R "$file_in" "$file_out" "$bartype" "$pheno" "$freq" "$sum_file" "$sampname" "$file_out2" "$sum_file2"
 } # runs bargraph R script
 GvennR() {
-Rscript "$ExToolset"/Gvenn.R "$file_in" "$file_out" "$image_out"
+Rscript "$dir_path"/temp.R "$file_in" "$file_out" "$image_out"
 }
 temp_file() {
 if [ -s "$dir_path"/temp.csv ];
@@ -106,17 +106,9 @@ do
   file_out2="$dirrescorr2"/"$scatter_x""$scatter_y"scatterplot.txt
   bartype=scatter
   tool=Rbar
-  sed -i 's/scatter_x/'$scatter_x'/g' "$ExToolset"/barchart.R
-  sed -i 's/scatter_y/'$scatter_y'/g' "$ExToolset"/barchart.R
-  sed -i 's/cond_1/'$con_name1'/g' "$ExToolset"/barchart.R
-  sed -i 's/cond_2/'$con_name2'/g' "$ExToolset"/barchart.R
-  sed -i 's/cond_4/'$con_name4'/g' "$ExToolset"/barchart.R
+  cat "$ExToolset"/barchart.R | sed 's/scatter_x/'$scatter_x'/g' | sed 's/scatter_y/'$scatter_y'/g' | sed 's/cond_1/'$con_name1'/g' | sed 's/cond_2/'$con_name2'/g' | sed 's/cond_4/'$con_name4'/g' >> "$dir_path"/tempbarchart.R
   run_tools
-  sed -i 's/'$scatter_x'/scatter_x/g' "$ExToolset"/barchart.R
-  sed -i 's/'$scatter_y'/scatter_y/g' "$ExToolset"/barchart.R
-  sed -i 's/'$con_name1'/cond_1/g' "$ExToolset"/barchart.R
-  sed -i 's/'$con_name2'/cond_2/g' "$ExToolset"/barchart.R
-  sed -i 's/'$con_name4'/cond_4/g' "$ExToolset"/barchart.R
+  rm "$dir_path"/tempbarchart.R
 done 
 } < $INPUT
 IFS=$OLDIFS

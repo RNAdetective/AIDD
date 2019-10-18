@@ -6,7 +6,9 @@ tab_count=$(echo "$tab_check" | wc -l)
 window_check=$(grep "\r" "$pheno_file")
 if [ "$window_check" != "" ];
 then
-  sed -i 's/\r//g' "$pheno_file"
+  file_in="$pheno_file"
+  cat "$file_in" | sed 's/\r//g' >> "$dir_path"/temp.csv
+  temp_file
 fi
 if [ "$phenocheck" != 6 ] ; 
 then
@@ -14,7 +16,9 @@ then
   mes_out
   if [ "$tab_count" != "0" ];
   then
-    sed -i 's/\t/,/g' "$pheno_file"
+    file_in="$pheno_file"
+    cat "$pheno_file" | sed 's/\t/,/g' >> "$dir_path"/temp.csv
+    temp_file
   fi
 else
   echo1=$(echo "PHENO_DATA FILE IS READY")
@@ -215,7 +219,9 @@ Rscript "$ExToolset"/barchart.R "$file_in" "$file_out" "$bartype" "$pheno" "$fre
 } # runs bargraph R script
 sum_combine() {
 cat "$dirqcalign"/*.csv | sed '/^$/d' | awk -F',' '!x[$1]++' >> "$dirqcalign"/all_summary.csv
-sed -i '1!{/^CAT/d;}' "$dirqcalign"/all_summary.csv
+file_in="$dirqcalign"/all_summary.csv
+cat "$file_in" | sed '1!{/^CAT/d;}' >> "$dir_path"/temp.csv 
+temp_file
 file_in="$dirqcalign"/all_summary.csv
 file_out="$dirqcalign"/all_summaryfilter.csv
 col_num=$(echo "1,6,7,13,18,20,21,22,23")
@@ -241,8 +247,8 @@ col_num=$(echo "1,"$colnum"")
 tool=combine_file
 run_tools
 file_in="$dirqcalign"/all_summary"$colname".csv
-sed -i '1d' "$file_in"
-sed -i '1i name,freq' "$file_in"
+cat "$file_in" | sed '1d' | sed '1i name,freq' >> "$dir_path"/temp.csv
+temp_file
 file_out="$dirqcalign"/all_summary"$colname".tiff
 bartype=$(echo "depth")
 tool=Rbar
@@ -304,9 +310,10 @@ downreg100="$dirresDELDEvd"/downregGListtop100.csv
 downregGlist="$dirresDELDEvd"/downregGList.csv
 heatmap="$dirresDELDE"/top60heatmap.tiff
 volcano="$dirresDELDE"/VolcanoPlot.tiff
-sed -i 's/set_design/'$condition_name'/g' "$ExToolset"/DE.R
-Rscript "$ExToolset"/DE.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
-sed -i 's/'$condition_name'/set_design/g' "$ExToolset"/DE.R
+file_in="$ExToolset"/DE.R
+cat "$file_in" | sed 's/set_design/'$condition_name'/g' >> "$dir_path"/temp.R
+Rscript "$dir_path"/temp.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
+rm "$dir_path"/temp.R
 }
 GvennR() {
 Rscript "$ExToolset"/Gvenn.R "$file_in" "$file_out" "$image_out"
@@ -452,10 +459,13 @@ make_cdef # makes config default files
 to_move="$home_dir"/Desktop/PHENO_DATA.csv
 pheno_file=$to_move
 pheno_check
-sed -i 's/\r//g' "$to_move"
-file_move="$dir_path"/PHENO_DATA.csv
-sed -i 's/\r//g' "$file_move"
-if [ ! -f "$file_move" ];
+file_in="$to_move"
+cat "$file_in" | sed 's/\r//g' >> "$dir_path"/temp.csv
+temp_file
+file_in="$dir_path"/PHENO_DATA.csv 
+cat "$file_in" | sed 's/\r//g' >> "$dir_path"/temp.csv
+temp_file
+if [ ! -f "$file_in" ];
 then
   get_file
 fi
@@ -516,8 +526,12 @@ new_dir="$dir_path"/Results
 create_dir
 echo1=$(echo "CHECKING DATA")
 mes_out
-sed -i 's/\r//g' "$dir_path"/PHENO_DATA.csv
-#sed -i 's/\r//g' "$dir_path"/PHENO_DATAalign.csv
+file_in="$dir_path"/PHENO_DATA.csv
+cat "$file_in" | sed 's/\r//g' >> "$dir_path"/temp.csv 
+temp_file
+#file_in="$dir_path"/PHENO_DATAalign.csv
+#cat "$file_in" | sed 's/\r//g' >> "$dir_path"/temp.csv
+#temp_file
 INPUT="$dir_path"/PHENO_DATA.csv
 OLDIFS=$IFS
 {
@@ -699,7 +713,10 @@ do
         tempf1="$dir_path"/tempR1.csv
         tempf2="$dir_path"/tempR2.csv
         tempf3="$dir_path"/tempR3.csv
-        sed -i 's/-/_/g' "$index_file"
+        file_in="$index_file"
+        cat "$index_file" | sed 's/-/_/g' >> "$dir_path"/temp.csv
+        temp_file
+        file_in="$dirres"/"$level"_count_matrix.csv
         echo1=$(echo "CREATING "$file_out"")
         mes_out
         matrixeditor
@@ -763,12 +780,15 @@ do
       mergefile="$ExToolsetix"/"$level"_list/DESeq2/"$level"ofinterest.csv #7
       phenofile="$dirres"/"$level"_count_matrixedited.csv #8
       level_name=$(echo ""$level"_name")
-      sed -i 's/-/_/g' "$mergefile"
+      file_in="$mergefile"
+      cat "$file_in" | sed 's/-/_/g' >> "$dir_path"/temp.csv
+      temp_file
       echo1=$(echo "CREATING "$file_out"")
       mes_out
       mergeR
-      sed -i 's/   //g' "$file_out"
-      sed -i 's/  //g' "$file_out"
+      file_in="$file_out"
+      cat "$file_in" | sed 's/   //g' | sed 's/  //g' >> "$dir_path"/temp.csv
+      temp_file
     else
       echo1=$(echo "ALREADY FOUND "$matrix_file3"")
       mes_out
@@ -936,7 +956,9 @@ then
         for i in xx* ; do \
           n=$(sed 's/>// ; s/ .*// ; 1q' "$i") ; \
           mv "$i" "$n.csv" ; \
-          sed -i '1d' ""$n".csv"
+          file_in="$n".csv
+          cat "$file_in" | sed '1d' >> "$dir_path"/temp.csv
+          temp_file
         done # now you have split files for each sample in the folder
         cd "$dir_path"/AIDD/
         for level in nucleotide amino_acid ;
@@ -947,8 +969,8 @@ then
           new_wkd="$dirVC"/"$level"/merge"$snptype"
           new_dir="$new_wkd"
           create_dir
-          sed -i 's/  //g'  "$file_in"
-          sed -i 's/ //g' "$file_in"
+          cat "$file_in" | sed 's/  //g' | sed 's/ //g' >> "$dir_path"/temp.csv
+          temp_file
           index_file="$ExToolsetix"/index/"$level"_names.csv
           pheno_file="$new_wkd"/"$run""$level"_count_matrixprep.csv # output file directory name
           Rtool=G_VEX
@@ -970,7 +992,9 @@ then
   IFS=$OLDIFS
   summaryfile="$dir_path"/quality_control/alignment_metrics/all_summaryPF_READS_ALIGNED.csv
   run=$(awk -F',' 'NR==2 { print $2 }' "$dir_path"/PHENO_DATA.csv)
-  sed -i 's/'$run'/'$run'.x/g' "$summaryfile"
+  file_in="$summaryfile"
+  cat "$file_in" | sed 's/'$run'/'$run'.x/g' >> "$dir_path"/temp.csv
+  temp_file
   if [ -s "$summaryfile" ];
   then
     for snptype in ADARediting APOBECediting All ;
@@ -1007,8 +1031,9 @@ then
         done
       done
     done
-  sed -i 's/.x//g' "$summaryfile"
-  sed -i 's/.y//g' "$summaryfile"
+  file_in="$summaryfile"
+  cat "$file_in" | sed 's/.x//g' | sed 's/.y//g' >> "$dir_path"/temp.csv
+  temp_file
   else
     echo1=$(echo "CANT FIND "$summaryfile"")
     mes_out
@@ -1055,7 +1080,9 @@ then
     echo1=$(echo "CREATING "$file_out"")
     mes_out
     mergeR
-    sed -i 's/\n//g' "$file_out"
+    file_in="$file_out"
+    cat "$file_in" | sed 's/\n//g' >> "$dir_path"/temp.csv
+    temp_file
   else
     echo1=$(echo "ALREADY FOUND "$matrix_file9"")
     mes_out
@@ -1071,7 +1098,9 @@ echo1=$(echo "CREATING I_VEX MATRIX")
 mes_out
 cd "$dir_path"/AIDD
 summaryfile="$dir_path"/quality_control/alignment_metrics/all_summaryPF_READS_ALIGNED.csv
-sed -i 's/name/CATEGORY/g' "$summaryfile"
+file_in="$summaryfile"
+cat "$file_in" | sed 's/name/CATEGORY/g' >> "$dir_path"/temp.csv
+temp_file
 if [ ! -s "$matrix_file10" ]; # can't find edited matrix
 then 
   if [ -s "$summaryfile" ];
@@ -1082,7 +1111,9 @@ then
     file_out="$dir_path"/PHENO_DATAalign.csv
     mergefile=none
     phenofile="$dir_path"/PHENO_DATA.csv
-    sed -i 's/.x//g' "$summaryfile"
+    file_in="$summaryfile"
+    cat "$file_in" | sed 's/.x//g' >> "$dir_path"/temp.csv
+    temp_file
     echo1=$(echo "CREATING "$file_out"")
     mes_out
     mergeR
@@ -1279,10 +1310,9 @@ then
     echo1=$(echo "CREATING "$file_out"")
     mes_out
     mergeR
-    sed -i '/Inf/d' "$file_out"
-    sed -i 's/gene_name/sampname/g' "$file_out"
-    sed -i 's/Var.1/sampname/g' "$file_out"
-    sed -i 's/_[0-9]*//g' "$file_out"
+    file_in="$file_out"
+    cat "$file_in" | sed '/Inf/d' | sed 's/gene_name/sampname/g' | sed 's/Var.1/sampname/g' | sed 's/_[0-9]*//g' >> "$dir_path"/temp.csv
+    temp_file
   else
     echo1=$(echo "CANT FIND "$matrix_file11"")
     mes_out
@@ -1350,7 +1380,9 @@ do
           tempf1="$dir_path"/tempR1.csv
           tempf2="$dir_path"/tempR2.csv
           tempf3="$dir_path"/tempR3.csv
-          sed -i 's/-/_/g' "$index_file"
+          file_in="$index_file"
+          cat "$file_in" | sed 's/-/_/g' >> "$dir_path"/temp.csv
+          temp_file
           echo1=$(echo "CREATING "$file_out"")
           mes_out
           matrixeditor
@@ -1457,7 +1489,10 @@ done
 # Statistical Analysis section                                                                                                         *WORKING ON IT
 ###############################################################################################################################################################
 cd "$dir_path"/AIDD
-bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 2 #creates guttman_count_matrix.csv and runs guttman tests (need to add this part)
+if [ ! -f "$dir_path"/Results/guttman_count_matrix.csv ];
+then
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 2 #creates guttman_count_matrix.csv and runs guttman tests (need to add this part)
+fi
 #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 1
 count_matrix=all_count_matrix
 bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on each gene in the excitome, each nt and AA substitution, and impact of subs.

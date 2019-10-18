@@ -20,9 +20,9 @@ downregGlist="$dirresDELDEvd"/downregGList.csv
 heatmap="$dirresDELDE"/top60heatmap.tiff
 volcano="$dirresDELDE"/VolcanoPlot.tiff
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
-sed -i 's/set_design/'$condition_name'/g' "$ExToolset"/DE.R
-Rscript "$ExToolset"/DE.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
-sed -i 's/'$condition_name'/set_design/g' "$ExToolset"/DE.R
+cat "$ExToolset"/tempDE.R | sed 's/set_design/'$condition_name'/g' >> "$dir_path"/tempDE.R
+Rscript "$dir_path"/tempDE.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
+rm "$dir_path"/tempDE.R
 }
 create_dir() {
 if [ ! -d "$new_dir" ];
@@ -31,7 +31,7 @@ then
 fi
 } # this creates directories $new_dir
 GvennR() {
-Rscript "$ExToolset"/Gvenn.R "$file_in" "$file_out" "$image_out"
+Rscript "$dir_path"/tempGvenn.R "$file_in" "$file_out" "$image_out"
 }
 temp_file() {
 if [ -s "$dir_path"/temp.csv ];
@@ -296,18 +296,14 @@ print s;s=""}}' | sed '1d' | sed '1i '$condition_name'top100upreg,'$condition_na
     fi
     for reg in updownGlist updownGlisttop100 ;
     do
-      sed -i 's/set_column_name/'$condition_name'top100upreg,'$condition_name'top100downreg/g' "$ExToolset"/barchart.R
-      sed -i 's/set_colors/red,blue/g' "$ExToolset"/barchart.R
-      sed -i 's/set_alpha/0.5,0.5/g' "$ExToolset"/barchart.R
+      cat "$ExToolset"/tempbarchart.R | sed 's/set_column_name/'$condition_name'top100upreg,'$condition_name'top100downreg/g' | sed 's/set_colors/red,blue/g' | sed 's/set_alpha/0.5,0.5/g' >> "$dir_path"/tempbarchart.R
       bartype=VENN
       file_in="$dirresDELDEvd"/"$reg".csv
       file_out="$dirresDELDEvd"/"$reg".txt
       image_out="$dirresDELDEvd"/"$reg".tiff
       tool=Rbar
       run_tools
-      sed -i 's/'$condition_name'top100upreg,'$condition_name'top100downreg/set_column_name/g' "$ExToolset"/barchart.R
-      sed -i 's/red,blue/set_colors/g' "$ExToolset"/barchart.R
-      sed -i 's/0.5,0.5/set_alpha/g' "$ExToolset"/barchart.R
+      "$dir_path"/tempbarchart.R
     done
   done
   for GL in Glisttop100 Glist ;
@@ -323,26 +319,20 @@ print s;s=""}}' | sed '1d' | sed '1i '$condition_name'top100upreg,'$condition_na
     dc6=$(echo "$datacond3" | awk -vORS=, '{ print $2 }' | sed 's/,$//')
     cat "$dc1" "$dc3" "$dc5" | sed '1d' | sed '1i '$con_name1'upreg,'$con_name2'upreg,'$con_name3'upreg' >> "$dirresDElevel"/Allcondupreg"$GL".csv
     cat "$dc2" "$dc4" "$dc6" | sed '1d' | sed '1i '$con_name1'downreg,'$con_name2'downreg,'$con_name3'downreg' >> "$dirresDElevel"/Allconddownreg"$GL".csv
-    sed -i 's/set_column_name/'$con_name1'upreg,'$con_name2'upreg,'$con_name3'upreg/g' "$ExToolset"/barchart.R
-    sed -i 's/set_colors/"red","blue","yellow"/g' "$ExToolset"/barchart.R
-    sed -i 's/set_alpha/0.5,0.5,0.5/g' "$ExToolset"/barchart.R
+    cat "$ExToolset"/barchart.R | sed 's/set_column_name/'$con_name1'upreg,'$con_name2'upreg,'$con_name3'upreg/g' sed 's/set_colors/"red","blue","yellow"/g' | sed 's/set_alpha/0.5,0.5,0.5/g' >> "$dir_path"/tempbarchart.R
     bartype=VENN
     file_in="$dirresDElevel"/Allcondupreg"$GL".csv
     file_out="$dirresDELDEvd"/Allcondupreg"$GL".txt
     image_out="$dirresDELDEvd"/Allcondupreg"$GL".tiff
     tool=Rbar
     run_tools
-    sed -i 's/'$con_name1'upreg,'$con_name2'upreg,'$con_name3'upreg/set_column_name/g' "$ExToolset"/barchart.R
-    sed -i 's/"red","blue","yellow"/set_colors/g' "$ExToolset"/barchart.R
-    sed -i 's/0.5,0.5,0.5/set_alpha/g' "$ExToolset"/barchart.R
+    rm "$dir_path"/tempbarchart.R
     bartype=VENN
     file_in="$dirresDElevel"/Allconddownreg"$GL".csv
     file_out="$dirresDELDEvd"/Allconddownreg"$GL".txt
     image_out="$dirresDELDEvd"/Allconddownreg"$GL".tiff
     tool=Rbar
     run_tools
-    sed -i 's/'$condition_name'upreg,'$condition_name'downreg/set_column_name/g' "$ExToolset"/barchart.R
-    sed -i 's/"red","blue","yellow"/set_colors/g' "$ExToolset"/barchart.R
-    sed -i 's/0.5,0.5,0.5/set_alpha/g' "$ExToolset"/barchart.R
+    rm "$dir_path"/tempbarchart.R
   done
 fi
