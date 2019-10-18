@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+home_dir="$1"
 create_dir() {
 if [ ! -d "$new_dir" ];
 then
@@ -19,13 +20,10 @@ toolz() {
 unzip "$tool".zip
 rm "$tool".zip
 }
-echo "Would you like to setup AIDD at this time? yes or no"
+echo "Would you like to setup AIDD on your ubuntu 18? yes or no"
 read answer
 if [ "$answer" == "yes" ];
 then
-  echo "SETTING UP AIDD"
-  echo "Type the path where your AIDD directory was downloaded."
-  read home_dir
   sudo apt-get --yes update
   sudo apt-get --yes upgrade
   sudo apt-get install build-essential gcc make perl dkms
@@ -60,16 +58,10 @@ then
   cd "$AIDD_tools"
   cat "$AIDD_tools"/* > AIDDtools.tar.gz
   tar -zxf AIDDtools.tar.gz
-  rm AIDDtools.tar.gz* 
-  sudo mkdir /usr/lib/jvm/java-1.8.0_221
-  sudo tar -zxf "$AIDDtools"/jdk-8u221-linux-x64.tar.gz -C /usr/lib/jvm/java.1.8.0_221
-  sudo update-alternatives -- install /usr/bin/java java /usr/lib/jvm/java-1.8.0_221/bin/java 100
-  sudo update-alternatives -- install /usr/bin/javac javac /usr/lib/jvm/java-1.8.0_221/bin/javac 100
+  rm AIDDtools.tar.gz*
   mv "$AIDD_tools"/AIDDtools/* "$tool_dir"
   rm -R "$AIDD_tools"
   cd "$tool_dir"
-  tool=jdk-8u221-linux-x64.tar.gz
-  untar_tool
   tool=stringtie-1.3.5.Linux_x86_64 #install stringtie
   untar_tool
   copy_tool
@@ -98,29 +90,14 @@ then
   cp "$tool_dir"/"$tool"/* "$tool_dir_bin"
   tool=snpEff_latest_core #install snpEff
   toolz
-  cp "$tool_dir"/snpEff/snpEff.jar "$tool_dir"
-  cp "$tool_dir"/snpEff/snpEff.config "$tool_dir"
   tool=hisat2-2.1.0-Linux_x86_64 #install HISAT2
   toolz
   cp "$tool_dir"/hisat2-2.1.0/* "$tool_dir_bin"
-  gsettings set org.gnome.desktop.background picture-uri "file://"$home"/AIDD/AIDDlogo.jpg"
+  gsettings set org.gnome.desktop.background picture-uri "file://"$home_dir"/AIDD/AIDDlogo.jpg"
   cd
-  sudo ln -s "$home_dir"/AIDD/AIDD/AIDD.sh /usr/local/bin/AIDD
-  chmod +x "$home_dir"/AIDD/AIDD/AIDD.sh
-  sudo ln -s "$home_dir"/AIDD/updateAIDDscripts.sh /usr/local/bin/updateAIDDscripts
-  chmod +x "$home_dir"/AIDD/updateAIDDscripts.sh
-  sudo ln -s "$home_dir"/AIDD/Instancesetup/set_up.sh /usr/local/bin/setupAIDD
-  chmod +x "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh
-    sudo ln -s "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh /usr/local/bin/ExToolset
-  chmod +x "$home_dir"/AIDD/Instancesetup/set_up.sh
   mv "$home_dir"/AIDD/Desktop/* "$home_dir"/Desktop
-  chmod +x ~/Desktop/run_AIDD.desktop
-  chmod +x ~/Desktop/updateAIDDscripts.desktop
-  chmod +x ~/Desktop/get_references.desktop
-  chmod +x ~/Desktop/run_ExToolset.desktop
-  chmod +x ~/Desktop/setup_AIDD.desktop
-  #sudo usermod -G vboxsf -a user
-  sudo Rscript "$home_dir"/AIDD/Instancesetup/set_up.R
+  sudo usermod -G vboxsf -a user
+  Rscript "$home_dir"/AIDD/Instancesetup/set_up.R
 else
   echo "Not setting up AIDD at this time"
 fi
