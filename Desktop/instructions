@@ -10,6 +10,4 @@ Directions to run AIDD
 
 5.) repeat this same procedure but for the insert_transcript_lists_for_pathways folder on the desktop.  Making sure to add you pathway names to the csv file names pathwayT_list.
 
-6.) When you are done entering the specifics for your experiment then copy and paste this into the command line and then follow on screen prompts.
-
-bash /home/user/AIDD/AIDD.sh
+6.) When you are done entering the specifics for your experiment then double click on the run_AIDD icon on the top right hand corner of the desktop.
