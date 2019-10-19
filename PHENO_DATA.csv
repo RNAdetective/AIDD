@@ -1,0 +1,6 @@
+﻿sampname,Run,diagnosis,sample,Sex,age_at_death,braak_score
+ADF_1,SRR5305477,Alzheimer''s disease,sample01,female,97,V
+ADF_2,SRR5305478,Alzheimer''s disease,sample02,female,97,IV
+ADF_3,SRR5305479,Alzheimer''s disease,sample03,female,87,V
+ADF_4,SRR5305482,Alzheimer''s disease,sample06,female,101,VI
+ADF_5,SRR5305484,Alzheimer''s disease,sample08,female,93,IV
