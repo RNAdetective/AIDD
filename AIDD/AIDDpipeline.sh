@@ -1068,7 +1068,7 @@ then
     dirqc="$dir_path"/quality_control; # qc directory
     AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
     rdvcf="$dir_path"/raw_data/vcf_files # directory for vcf files
-    rdvcf_final="$dir_path"/raw_data/vcf_files/final # directory for final vcf files
+    rdvcf_final="$dir_path"/raw_data/vcf_files # directory for final vcf files
     rdsnp="$dir_path"/raw_data/snpEff # directory for snpEff files
     rdbam="$dir_path"/raw_data/bam_files # directory for bam files
     javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
@@ -1086,8 +1086,8 @@ then
 #  EXCITOME FILTERING
 ####################################################################################################################
     tool=excitome_vcf
-    file_in="$rdvcf_final"/"$file_vcf_final"All.vcf
-    file_out="$rdvcf_final"/$file_vcf_finalADAR
+    file_in="$rdvcf"/"$file_vcf_final"All.vcf
+    file_out="$rdvcf"/$file_vcf_finalADAR
     run_tools
 ####################################################################################################################
 #  IMPACT PREDICTION
@@ -1095,7 +1095,7 @@ then
     for snptype in All AG TC CT GA ADARediting APOBECediting ; # DO ALL VARIANTS, ADAR VARIANTS, AND APOBEC VARIANTS
     do
       tool=snpEff
-      file_in="$rdvcf_final"/"$snpEff_in""$snptype".vcf    
+      file_in="$rdvcf"/"$snpEff_in""$snptype".vcf    
       file_out="$rdsnp"/"$snpEff_out""$snptype".vcf
       run_tools 
     done  
