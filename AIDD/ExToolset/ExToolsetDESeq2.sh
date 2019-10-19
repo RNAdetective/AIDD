@@ -20,7 +20,7 @@ downregGlist="$dirresDELDEvd"/downregGList.csv
 heatmap="$dirresDELDE"/top60heatmap.tiff
 volcano="$dirresDELDE"/VolcanoPlot.tiff
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
-cat "$ExToolset"/tempDE.R | sed 's/set_design/'$condition_name'/g' >> "$dir_path"/tempDE.R
+cat "$ExToolset"/DE.R | sed 's/set_design/'$condition_name'/g' >> "$dir_path"/tempDE.R
 Rscript "$dir_path"/tempDE.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
 rm "$dir_path"/tempDE.R
 }
@@ -231,12 +231,8 @@ else
   for condition_name in "$con_name1" "$con_name2" "$con_name3" ;
   do
     file_in="$dirres"/"$count_matrix".csv
-   # cat "$file_in" | sort -t',' -u -k1,1 | uniq >> tempor.csv
-   # if [ -f tempor.csv ];
-   # then
-   #   rm "$file_in"
-   #   mv tempor.csv "$file_in"
-   # fi
+    cat "$file_in" | sort -t',' -u -k1,1 | uniq >> "$dir_path"/temp.csv
+    temp_file
     echo1=$(echo "STARTING "$file_in"")
     mes_out
     file_in="$dirres"/"$count_matrix".csv

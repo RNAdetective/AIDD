@@ -157,8 +157,7 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
       sum_file2="$dirrescon"/"$freq"ANOVA.txt
       tool=Rbar
       sum_file="$dirres"/"$count_matrix"/"$cond_name"/"$freq"summary.csv
-      file_in="$ExToolset"/barchart.R
-      cat "$file_in" | sed 's/freq_name/'$freq'/g' | sed 's/condition_name/'$cond_name'/g' >> "$dir_path"/temp.R
+      cat "$ExToolset"/barchart.R | sed 's/freq_name/'$freq'/g' | sed 's/condition_name/'$cond_name'/g' >> "$dir_path"/temp.R
       run_tools
       rm "$dir_path"/temp.R
       if [ -s "$dirrescon"/"$freq"ANOVA.txt ];
@@ -193,8 +192,7 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
       sum_file2="$dirrescon"/"$freq"Ttest.txt
       tool=Rbar
       sum_file="$dirrescon"/"$freq"summary.csv
-      file_in="$ExToolset"/barchart.R
-      cat "$file_in" | sed 's/freq_name/'$freq'/g' | sed 's/condition_name/'$cond_name'/g' >> "$dir_path"/temp.R
+      cat "$ExToolset"/barchart.R | sed 's/freq_name/'$freq'/g' | sed 's/condition_name/'$cond_name'/g' >> "$dir_path"/temp.R
       run_tools
       rm "$dir_path"/temp.R
       if [ -s "$dirrescon"/"$freq"Ttest.txt ];
@@ -246,7 +244,7 @@ cond_namecol=${cond_col%:*}
     file_out="$dirres"/"$count_matrix"/"$cond_name"allsummaries.tiff
     bartype=substitutions
     tool=Rbar
-    cat "$file_in" | sed -i 's/condition_name/'$cond_name'/g' >> "$dir_path"/temp.R
+    cat "$ExToolset"/barchart.R | sed 's/condition_name/'$cond_name'/g' >> "$dir_path"/temp.R
     run_tools
     rm "$dir_path"/temp.R
   fi
