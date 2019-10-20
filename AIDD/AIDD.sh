@@ -6,6 +6,13 @@ echo "Please see the manual for set up and instructions to run AIDD.  Make sure 
 default="$1" # defaut is first space
 home_dir="$2" # home directory is second space
 dir_path="$3" # working directory is third space
+LOG_LOCATION="$dir_path"/quality_control/logs
+new_dir="$LOG_LOCATION"
+create_dir
+exec > >(tee -i $LOG_LOCATION/AIDDpipeline.log)
+exec 2>&1
+
+echo "Log Location should be: [ $LOG_LOCATION ]"
 if [ "$default" == "2" ]; #this allows for download of sequences or starting with your own .fastq files 
 then
   echo "Are you running a batch instance? 1=(default)no 2=yes" # do you want to download your pheno_data file

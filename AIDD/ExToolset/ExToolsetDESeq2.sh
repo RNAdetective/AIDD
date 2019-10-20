@@ -231,8 +231,8 @@ else
   for condition_name in "$con_name1" "$con_name2" "$con_name3" ;
   do
     file_in="$dirres"/"$count_matrix".csv
-    cat "$file_in" | sort -t',' -u -k1,1 | uniq >> "$dir_path"/temp.csv
-    temp_file
+    #cat "$file_in" | sort -t',' -u -k1,1 | uniq >> "$dir_path"/temp.csv
+    #temp_file
     echo1=$(echo "STARTING "$file_in"")
     mes_out
     file_in="$dirres"/"$count_matrix".csv

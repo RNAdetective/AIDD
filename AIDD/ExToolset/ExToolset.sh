@@ -416,6 +416,13 @@ data_summary_file5="$dirres"/amino_acid/amino_acidallsummaries.csv;
 data_summary_file6="$dirres"/impact/impactallsummaries.csv;
 data_summary_file6a="$dirres"/VEXallsummaries.csv;
 data_summary_filefinal="$dirres"/allsummaries.csv;
+LOG_LOCATION="$dir_path"/quality_control/logs
+new_dir="$LOG_LOCATION"
+create_dir
+exec > >(tee -i $LOG_LOCATION/ExToolset.log)
+exec 2>&1
+
+echo "Log Location should be: [ $LOG_LOCATION ]"
 if [ "$default" == "2" ];
 then
 ###############################################################################################################################################################
@@ -1493,7 +1500,7 @@ if [ ! -f "$dir_path"/Results/guttman_count_matrix.csv ];
 then
   bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 2 #creates guttman_count_matrix.csv and runs guttman tests (need to add this part)
 fi
-#bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 1
+bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 1
 count_matrix=all_count_matrix
 bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on each gene in the excitome, each nt and AA substitution, and impact of subs.
 for level in gene transcript ;
@@ -1503,7 +1510,7 @@ do
     for snptype in ADARediting APOBECediting All ;
     do
       count_matrix="$level"_"$impact"_"$snptype"edits_count_matrixeditedall
-      #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on number of edits found in each gene or transcript
+      bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on number of edits found in each gene or transcript
     done
   done
 done
@@ -1573,3 +1580,4 @@ END_TIME_HOUR=$(date +%H)
 END_TIME_MIN=$(date +%M)
 END_TIME_SEC=$(date +%S)
 echo "EXTOOLSET STARTED "$DATE_WITH_TIME" AND ENDED "$END_DATE_WITH_TIME""
+smart_script
