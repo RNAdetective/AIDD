@@ -1500,7 +1500,7 @@ if [ ! -f "$dir_path"/Results/guttman_count_matrix.csv ];
 then
   bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 2 #creates guttman_count_matrix.csv and runs guttman tests (need to add this part)
 fi
-bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 1
+#bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 1
 count_matrix=all_count_matrix
 bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on each gene in the excitome, each nt and AA substitution, and impact of subs.
 for level in gene transcript ;

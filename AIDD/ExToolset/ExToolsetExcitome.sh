@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 mes_out() {
 dirqc="$dir_path_vcf"/quality_control
 new_dir="$dirqc"
@@ -8,6 +9,13 @@ ___________________________________________________________________________"
 new_dir="$dirqc"/time_check
 create_dir
 echo "'$DATE_WITH_TIME',"$echo1"" >> "$dirqc"/time_check/time_check.csv
+}
+temp_file() {
+if [ -s "$dir_path"/temp.csv ];
+then
+  rm "$file_in"
+  mv "$dir_path"/temp.csv "$file_in"
+fi
 }
 run_tools() {
     if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE

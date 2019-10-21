@@ -230,6 +230,7 @@ for unwanted in "$wd" "$dir_path"/tmp "$dir_path"/temp ;
 do 
   rm -f -r "$unwanted" # REMOVE UNNEEDED DIRECTORIES
 done
+AIDD=AIDD_data
 tar -cvzf "$dir_path"/"$AIDD".tar.gz "$dir_path"
 split -d -b 8G "$dir_path"/"$AIDD".tar.gz """$dir_path""/"$AIDD".tar.gz." # REMOVE UNNEEDED DIRECTORIES
 ##add gdrive command here to upload bam files
