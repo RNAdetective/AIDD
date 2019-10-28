@@ -370,17 +370,7 @@ Then paste the following command into the terminal to add shared folders to your
 ```
 sudo usermod -a -G vboxsf user
 ```
-	
-### After this script is done copy and paste the following in the terminal to install the Rpackages needed to run AIDD
 
-```
-sudo su
-# enter your password
-```
-Then copy the following
-```
-Rscript /home/user/Instancesetup/set_up.R
-```
 Then shutdown the VM and make sure you go back and create a shared folder if you did not make your virtual harddrive big enough to store all your data also make sure you adjust the processor and RAM according to the directions above to the right settings for AIDD and then restart the VM to run AIDD.
 
 ___
@@ -499,6 +489,14 @@ ___
 
 ## Pipeline Flow Chart
 ![Screenshot](flow_chart.png)
+
+## AIDD directory structure for results
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/directoryAIDD.png">
+ </p>
+ 
+<p align="center">Run AIDD with options to download references <p align="center">
 
 ## Built With
 * [SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
