@@ -1,11 +1,6 @@
 Supplemental Manual:
-The pipeline incorporates open source tools into one easy to use virtual machine pipeline.  
-The user has the option to run the script to run the pipeline in limited user input option default mode. 
-The script is annotated with detailed descriptions with spots were variations can be made.  
-The user is free to use these for the optional steps indicated below.  
-The program and code used in the pipeline are described in detail below including the default pipeline steps and optional additions.
-
- # About AIDD
+# About AIDD
+ [![DOI](https://zenodo.org/badge/119888778.svg)](https://zenodo.org/badge/latestdoi/119888778)
  
 * AIDD incorporates open source tools into a static virtualbox to ensure reproducability in RNA-seq experiments.  
 * There is a bash script that completely automates the pipeline making it ease to use. 
@@ -19,7 +14,7 @@ The program and code used in the pipeline are described in detail below includin
 
 ___
 
-#### **AIDDv2.0.0 now allows for** 
+#### **AIDD now allows for** 
 
 * options of aligners, assemblers, and DE tools.
 * defining your own directories as well as setup scripts for instance setup.
@@ -40,19 +35,50 @@ These are the directions to download the premade AIDD virtualbox or to create a 
 https://www.virtualbox.org/wiki/Downloads 
 ```
 2. Download and install the extension pack as well.
+
 ```
 https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_Pack-5.2.6-120293.vbox-extpack
+
 ```
 
 ### Installing
 
-3. Download our ready to go AIDD virtualbox.
+3. Download our ready to go AIDD virtualbox from the following link.
+
 ```
-https://drive.google.com/drive/folders/1v0gus46csuThHODeB2KkA8_NlnGXj2Ta?usp=sharing
+https://drive.google.com/open?id=1bhSZdNznZtQcx8VNlaiysnIoLhVGtfJA
+
 ```
-4. Uncompress all 6 files.
+
+4. Uncompress the file.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step1.png">
+ </p>
+ 
+<p align="center">Step 4<p align="center">
+
+ When finished you will have a folder called AIDD in whichever directory you were currently in (Note you need to have 7zip installed to do the uncompression this way).
 
 5. Open Virtualbox manager and under the menu Machine select add.  A new pop window will allow you to find the file you just uncompressed.  Then click open.  AIDD will now appear on your list of virtualboxes.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step2.png">
+ </p>
+ 
+<p align="center">Step 5<p align="center">
+	
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step3.png">
+ </p>
+ 
+<p align="center">Step 5b<p align="center">
+	
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step4.png">
+ </p>
+ 
+<p align="center"Step 5c<p align="center">
 
 6. Make sure you check your setting for the machine and you have the correct amount of resources allocated to the virtualbox including RAM and CPU.
 
@@ -63,6 +89,18 @@ https://drive.google.com/drive/folders/1v0gus46csuThHODeB2KkA8_NlnGXj2Ta?usp=sha
 * Do the same under the tab processors.  
 * The top green bar is how much CPU to give to virtualbox and this needs to be in the green as well. 
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step5.png">
+ </p>
+ 
+<p align="center">Step 6<p align="center">
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step6.png">
+ </p>
+ 
+<p align="center">Step 6b<p align="center">
+	
 7. Set up ashared folder path for the pipeline to store files to.  The virtual box only has enough memory to run to the tools you will need a hard drive external to the virtual box below are the instructions to create the shared folder AIDD on your computer.  Just make sure the hard drive has enough space You will need about 50G for each file or more if you use deep sequencing.  You can also run AIDD in batches if space is a concern.
 
 ### How to create a shared folder to store results
@@ -73,17 +111,59 @@ A.	create a shared folder on your host system.
 * Name your folder AIDD.
 * Go into the setting in the virtualbox and click on shared folders. 
 * Click on the folder icon with the + sign on top of it.  
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step7.png">
+ </p>
+ 
+<p align="center">Step 1 shared folder setup<p align="center">
+
 * This will create a popup window and you should select you folder path by clicking the drop down option and click on other.  
 * This will create a pop up window and you can select your new shared folder AIDD. 
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step8.png">
+ </p>
+ 
+<p align="center">Step 2 shared folder setup<p align="center">
+	
+* Make sure you share your folder in windows right click, then select properties from the drop down menu then click the sharing tab and click the share button
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step9.png">
+ </p>
+ 
+<p align="center">Step 3 shared folder setup<p align="center">
+	
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step10.png">
+ </p>
+ 
+<p align="center">Step 4 shared folder setup<p align="center">
+
 * After you select the folder the pop up will close and you should make sure the auto-mount box is checked and the read-only box is not checked 
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step11.png">
+ </p>
+ 
+<p align="center">Step 5 shared folder setup<p align="center">
+
 * Then click ok.
 * Your new folder should show up on the list then click ok.  
 * Now start the virtual box and you should see you new folder AIDD under devices in the folder menu.  
 * Then use this path for the pipeline it should be /media/sf_AIDD.
 
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step12.png">
+ </p>
+ 
+<p align="center">Step 6 shared folder setup<p align="center">
+
 ___
 
-### These are other options to create hard drive space for AIDD however if you plan to run the automated script you have to have a shared folder names AIDD to run as defaults if you choose to do another setup and have more hard drive space on the virtual box or have an instance you are running then you cannot run AIDD with defaults and it will prompt you to enter the correct directories for your situation.
+### These are other options to create hard drive space for AIDD explained below however to run default AIDD it is recommended to use the shared folder option as already outlined. If you choose the other options AIDD cannot be run from the icon on the desktop.
 
 ___
 
@@ -135,84 +215,175 @@ and wait for it to finish downloading before moving on to the next steps
 2. Go to create new machine in the oracle virtual machine window by clicking the new button
 
 * select a name, put in linux and ubuntu 64 
-* then click VDH create virtual hard disk now and select at least 40G of storage space to create the hard disk.  
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep1.png">
+ </p>
+ 
+<p align="center">Step 1 AIDD setup<p align="center">
+
+* select how much RAM to designate to AIDD
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep2.png">
+ </p>
+ 
+<p align="center">Step 2 AIDD setup<p align="center">
+
+* then click VDH create virtual hard disk now and select at least 40G of storage space to create the hard disk.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep3.png">
+ </p>
+ 
+<p align="center">Step 3 AIDD setup<p align="center">
+	
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep4.png">
+ </p>
+ 
+<p align="center">Step 4 AIDD setup<p align="center">
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep5.png">
+ </p>
+ 
+<p align="center">Step 5 AIDD setup<p align="center">
+
 * Click create
 
-3. When it asks where to load from click on ubuntu 18.04 file in your file system.
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep6.png">
+ </p>
+ 
+<p align="center">Step 6 AIDD setup<p align="center">
+	
+* Your new VM will now appear on your list of images. Make sure you have the apporpriate settings for RAM and CPU by highlighting you VM and clicking on the settings button.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep7.png">
+ </p>
+ 
+<p align="center">Step 7 AIDD setup<p align="center">
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep8.png">
+ </p>
+ 
+<p align="center">Step 8 AIDD setup<p align="center">
+
+3. Now double click the new VM image and when it asks where to load from click on ubuntu 18.04 file in your file system.
  
  * This will tell VM were to get install files from.
- * then install ubuntu following prompts until it is done.
+ 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep9.png">
+ </p>
+ 
+<p align="center">Step 9 AIDD setup<p align="center">
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep10.png">
+ </p>
+ 
+<p align="center">Step 10 AIDD setup<p align="center">
+ 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep11.png">
+ </p>
+ 
+<p align="center">Step 11 AIDD setup<p align="center">
+
+* Please note to run STAR aligner option you must select at least 40G of RAM.  
+* Check the settings system.  
+* Then check motherboard and processor make sure all the blue markers are in the green for your machine if not then you need to find a computer with the required specs to run AIDD fully.  
+
+ 4. Install ubuntu following prompts until it is done.
    first click install
    then use default english highlighted
    then select minimal installation and make sure third-party software is turned off then click continue
    select the option erase disk and install ubuntu then click install now
    click continue when the warning message pops up
    then click continue
-   userMake sure you use username = user and password = password you can also select to log in automatically but it really does not make a difference then click continue
- * Now ubuntu is installing when it is finished it will ask you to reset even if you follow the prompt for a system reset you still need to manually close you VM by clicking on the X and make sure you poweroff not save the state and re-start but before you restart do step
- 
-4. Make sure you have set aside enough RAM and CPU to run the machine you must select at least 6G of RAM and 1CPU to run at bare minimum (although at 16G is recommended to ensure accurate variant calling).  
-
-* Please note to run STAR aligner option you must select at least 40G of RAM.  
-* Check the settings system.  
-* Then check motherboard and processor make sure all the blue markers are in the green for your machine if not then you need to find a computer with the required specs to run AIDD fully.  
+   userMake sure you use username = user and password = password you can also select to log in automatically.
+   
+ * Now ubuntu is installing when it is finished it will ask you to reset even if you follow the prompt for a system reset you still need to manually close you VM by clicking on the X and make sure you poweroff not save the state and re-start.   
 
 5. Now restart your newly creaeted VM
 
-* click on the devices tab and from the drop down menu select install
+6.  Once you load your new virtual box open command prompt.  When your VM starts it will have a pop up just click next until you can click done then this will close that window. If it asks you to do updates click on no. 
 
-6.  Once you load your new virtual box open command prompt.  When your VM starts it will have a pop up just click next until you can click done then this will close that window. If it asks you to do updates click on no. Then from the devices tab select insert guest additions CD image. When it asks if you would like to run the CD image click yes then enter the password for user then click authenticate.  Let the command run then when prompt hit return to close the window.
-
-7. Next you need to get and run AIDD Instance setup scripts from github.  Download scripts by copy and paste the following command into the terminal
+7. Next you need to get and run AIDD Instance setup scripts from github.  Download scripts by copy and paste the following command into the terminal.
 
 ```
-wget https://github.com/RNAdetective/AIDD/raw/master/Instancesetup.tar.gz
-
-tar -xvzf Instancesetup.tar.gz
-
-bash /home/user/Instancesetup/set_up.sh /home/user
+sudo apt-get install git
+#answer y
 ```
-you can change the home dirctory of where to put the AIDD folder for scripts and indexes this is useful when creating a instance that has a different user name then user
+When git is done installing copy and paste the following
+
+```
+git clone https://github.com/RNAdetective/AIDD.git
+chmod +x ~/AIDD/Instancesetup/set_up.sh
+cp ~/AIDD/Desktop/setup_AIDD.desktop ~/Desktop
+chmod +x ~/Desktop/setup_AIDD.desktop
+```
+Now you are ready to install AIDD by double clicking the icon on the desktop Setup_AIDD.
+Follow the onscreen prompts to finish the setup
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep12.png">
+ </p>
+ 
+<p align="center">Step 12 AIDD setup<p align="center">
 
 8. The program will run and ask you for the following prompts
 
 * Follow instructions while setup runs 
-    first it will ask you to supply a password
-    oracle will prompt you to hit enter to install updates for java and to install both java versions needed for the pipeline
-    then do you want to continue type y
+    first it will ask if you want to setup AIDD type yes
+    then it will ask for your user name type the user name you picked when setting up ubuntu for default location type /home/user
+    next it will ask you to supply your password that you created when you setup ubuntu default here is password
+    oracle will then prompt you after a few seconds to hit enter to install updates for java and to install both java versions needed for the pipeline
+    It will then pause again for the older version of java hit enter again
+    Next it will ask if you want to install the softward package type y
     then a pop up window will ask you to hit ok then make sure you pick yes and hit enter
     When operating system and basic tools are done updating then AIDDtools are downloaded and installed from static copies
     then next pop up will ask you to hit enter
     it finish after it downloads the AIDD scripts from github.
-    
-    # After this script is done copy and paste the following in the terminal to install the Rpackages needed to run AIDD
 
-```
-sudo su
-
-```
-#enter your password
-
-```
-Rscript /home/user/Instancesetup/set_up.R
-
-```
 Close the virtualbox and restart again Then from the devices tab select insert guest additions CD image. When it asks if you would like to run the CD image click yes then enter the password for user then click authenticate.  Let the command run then when prompt hit return to close the window.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/setupAIDDstep13.png">
+ </p>
+ 
+<p align="center">Step 13 AIDD setup<p align="center">
 
 Then paste the following command into the terminal to add shared folders to your virtual image
 
 ```
-sudo usermod -a -G vbox user
+sudo usermod -a -G vboxsf user
 ```
+	
+### After this script is done copy and paste the following in the terminal to install the Rpackages needed to run AIDD
 
-Then you should shutdown the VM
-make sure you go back and create a shared folder if you didnot make your virtual harddrive big enough to store all your data also make sure you adjust the processor and RAM according to the directions above to the right settings for AIDD and then restart the VM to run AIDD.
+```
+sudo su
+# enter your password
+```
+Then copy the following
+```
+Rscript /home/user/Instancesetup/set_up.R
+```
+Then shutdown the VM and make sure you go back and create a shared folder if you did not make your virtual harddrive big enough to store all your data also make sure you adjust the processor and RAM according to the directions above to the right settings for AIDD and then restart the VM to run AIDD.
+
 ___
 
-## AML with RMD for R-studio
+## ZIKV with RMD for R-studio
 
 To run the tutorial open R studio and find the AIDDtutorial.rmd file under /home/user/AIDD/AIDD/AIDDtutorial.rmd.  Run the chunks from begining to end.  This tutorial explains each step of the AIDD pipeline and allow for user to change code as necessry.
 The tutorial allows for both understanding of the tools and statistical analysis performed by AIDD and can be used as an educational tool for hands on teaching of bioinformatic analysis of RNA sequencing data.
+
+Another option to run the tutorial to test for installation of tools is to simply run AIDD without changing any of the PHENO_DATA.csv file or adding anything to the directories on the desktop. AIDD is set to run the tutorial right "out of the box".
 
 ___
 
@@ -220,10 +391,16 @@ ___
 
 To Run AIDD for RNAseq transcriptome diversity discovery copy and paste the following command and follow the on screen prompts.  For detailed instructions as well as ways to edit the script for even more options see the manual.
 
-Step 1: Make sure AIDD virutalbox is up an running following the steps outlined above.
+Step 1: Make sure AIDD virutalbox is up an running following the steps outlined above and make sure that you have opened this github page in AIDD by using the web browser (if you do not open a new web browser in AIDD and continue using the one on your main computer then you will not be able to copy and paste from github into the terminal so you will have to maually type the command into the terminal).
 
 Step 2: Follow the instructions on the desktop.
 * 1.) Open PHENO_DATA.csv on the desktop and fill out for your experiment.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/pheno.png">
+ </p>
+ 
+<p align="center">Set up your PHENO_DATA file<p align="center">
 
         * a.) On the desktop you will find a file PHENO_DATA.csv add your experimental information into this file
         
@@ -238,269 +415,83 @@ Step 2: Follow the instructions on the desktop.
         * f.) column 5-6: these are addition conditions to be with multivariate analysis if you do not have any additional conditions leave them empty.
         
         * g.) Now save the new data with the same name on the desktop.
+The next four steps 2-5 are optional if you don't have any genes of interest or pathways to investigate skip these and go right to running AIDD step 3.
 
 * 2.) Insert any gene lists of interest into the insert_gene_of_interest folder on the desk top.  Make .csv files with the first column numbered 1-X.  Then in the second column list your genes you want on one bar graph.  Also open GOI.csv and add to the list of genes any you want line graph count graphs for as well as a included in the table of gene of interest results.
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/geneinterest.png">
+ </p>
+ 
+<p align="center">insert gene of interest files<p align="center">
+
 * 3.) Do the same for transcript lists of interest into the insert_transcript_of_interest fold making sure you add your transcript of interest to the TOI.csv file.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/transinterest.png">
+ </p>
+ 
+<p align="center">insert transcript of interest files<p align="center">
 
 * 4.) Add any pathway lists to the insert_gene_lists_for_pathways folder on the desktop.  Make a csv file that contains the first column labeled gene numbered 1-X.  Then in the second column labeled gene_name enter as many genes you want to include in that pathway.  Then name the file XXXXXXXX.csv (the name of your pathway) then add this name to the csv file pathway_list in the same format as the others on the list.
 
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/genepathway.png">
+ </p>
+ 
+<p align="center">insert gene lists you want to perform pathway DE analysis on files<p align="center">
+
 * 5.) repeat this same procedure but for the insert_transcript_lists_for_pathways folder on the desktop.  Making sure to add you pathway names to the csv file names pathwayT_list.
 
-Step 3: copy and paste the following command into the command prompt
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/transpathway.png">
+ </p>
+ 
+<p align="center">insert transcript lists you want to perform pathway DE analysis on files<p align="center">
+
+Step 3: Simply double click the icon labeled Run_AIDD on the desktop to run AIDD with default settings.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step12.png">
+ </p>
+ 
+<p align="center">Run AIDD by double clicking the icon on the desktop <p align="center">
+
+If you needed to install AIDD anywhere other then the defualt VM /home/user directory or want the output data stored somewhere other then the default /media/sf_AIDD/AIDD_data you need to specify this in the command line as explained below.
+
+copy and paste the following command into the command prompt
 
 ```
-bash /home/user/AIDD/AIDD/AIDD.sh 1 /home/user /media/AIDD
+bash AIDD.sh 1 /path/to/AIDD /path/to/store/data
 ```
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/runAIDD.png">
+ </p>
+ 
+<p align="center">Run AIDD with defaults see manual to customize<p align="center">
+	
+If you are running AIDD for the first time without using the prepared VM then you need to download references to use. To do this simply copy and paste the following command
+
+```
+bash AIDD.sh 2 /path/to/AIDD /path/to/store/data
+```
+
+Then follow the on screen prompts answering 1 when you want the defaults and 2 when you want a different option as defined by the on screen prompt.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/AIDDoptions.png">
+ </p>
+ 
+<p align="center">Run AIDD with options to download references <p align="center">
+
+* She the manual for more customizable options included with AIDD
+
+For more details on options available for AIDD please see the manual here on github or included in you AIDD folder on the VM.
+
 ___
 
-### The following are optional and are for users who need to run AIDD not in default mode they describe all the possible options available as well as someways to customize the scripts
-
-If you are using some other setup besides the VM enviroment for example in a instance on a server then you will need to change /home/user argument to where ever the AIDD folder (containing scripts and references) is located 
-If you are using the defualt shared folder on your computers harddrive otherwise for example on a server instance where the AIDD script containing folder and the ending Results folder are stored on the same hard drive then change this to the directory where AIDD will deposit the results.
-
-The above command will run AIDD with default parameters option 1 if you don't want to run default enter 2 instead of 1 in the above command
-Then follow the onscreen prompts that are explained below
-
-1.) Are you running a batch instance?
-    if you are running one experiment with the PHENO_DATA file filled out on the desktop enter 1
-    if you are doing batch experiments then enter 2
-    you will then be prompted to tell AIDD how many samples you want from your main phenodata file in each batch 
-2.) Are you downloading sequences from NCBI?
-    enter 1 the deafult setting to download data from SRA database
-    enter 2 if you have experimentally derived fastq files in the folder labeled put insert_fastq_files
-       if you enter two you will prompted with Are your files in the folder on the desktop
-           enter 1 if you have them in the folder
-           enter 2 if you have them located somewhere else
-           you will then be prompted with Are you downloading the sequences from a previosuly preparred file according to the directions outlined in the manual
-             enter 1 if you don't need to download them and then you will be prompted to enter the directory where your files are located
-             enter 2 if you want to download the fastq files but they must all be in the same folder in fastq format with _1.fastq and _2.fastq for paired end reads then zipped and then you will prompted to enter the url to find your data.
-3.) Do you have bulk RNAseq data? 
-    enter 1 if you are using bulk RNA experimental dseign 
-    enter 2 if you have single cell data (currently only ________ single cell datasets are accepted Dropseq may be added in the future)
-4.) Do you have standard mRNA library prep protocols selecting for poly-A tails?
-    enter 1 if you do have poly-A selected data
-    enter 2 if you have miRNA library prep?
-       you will then be prompted whould you like to align to whole transcriptome
-           enter 1 if you would like to align to the whole transcriptome including mRNA, lncRNA, miRNA and more
-           enter 2 if you would like to align to just the current miRNA only. ( more options for this are coming in the future.)
-5.) Please enter the library layout type:
-    enter 1 if you would like to use the default paited end reads (remember if supplying your own fastq files they need to be divided into _1.fastq and _2.fastq)
-    enter 2 if you would like to use single reads
-6.) Which aligner would you like to use?
-    enter 1 if you would like to use the default HISAT2 (note if you use other aligners such as STAR currently known snps will not be used to annotate the alingment meaning variant calling for future steps may not be as accurate this can be overcome by creating your own reference library for alignment according to that specific tools manual)
-    enter 2 if you would like to use STAR
-    enter 3 if you would like to use BOWTIE2 ( this option is coming in the future and is currently only an option for miRNA only datasets)
-    enter 4 if you would like to use Kallisto (currently unavailable but will be offered in the near future as part of the pipeline more skilled users can modify the beta scripts to use if needed)
-    enter 5 if you would like to use Salmon (currently unavailable but will be offered in the near future as part of the pipeline more skilled users can modify the beta scripts to use if needed)
-7.) Which assembler would you like to use?
-    enter 1 if you would like to use the default stringite which is the recommended assembly tool to use with HISAT2 aligner
-    enter 2 if you would like to use cufflinks (currently this is only available as part of the miRNA only pipeline)
-8.) Would you like to do variant calling for RNAediting prediction at this time?
-    enter 1 if you would like to do ADAR editing prediction
-    enter 2 if you want to just do differential expression analysis and you will come back at a later time to do RNA editing analysis.
-9.) Do you want to start at the beginning or do you want to start with variant calling
-    enter 1 if you need to start AIDD from the beginning including downloading sequences, alignment and transcriptome assembly before you do variant calling for RNA editing analysis
-    enter 2 if you have aligned bam files ready to go from a previous run of AIDD or from other pipeline output (currently you need to have AIDD folder system already in the results directory with the bam files located in the raw_data folder in the future you will prompted where to download you files from)
-10.) Do you have referecnes downloaded already? 
-    enter 1 if you already have the correct references download and formatted in the references folder in your results directory for example if you ran AIDD previously or if you wish to manually get references for an organism other then human, mouse or chimpanzees
-    enter 2 if you wish to download the references need for alignment, assembly and variant calling at this time.
-        you will then be prompted with do you have bulk human data?
-            enter 1 if you have human data
-                you will then be prompted with which references genome build would like to use 
-                enter 1 if you would like to use GRCh37
-                enter 2 if you would like to use GRCh38 (currently the GRCh38 is ensembl release 84)
-                enter 3 if you would like to use hg19 build (this is not recommended due to tools in this pipeline work better with ensembl reference format and not all parts of the pipeline will work with this reference)
-            enter 2 if you have mouse data 
-            enter 3 if you have rat (other organisms will be added in the future but currently if you have something other then these you can open the script and manually download the right sequences from ensembl ftp sites)
-
-After you enter your options AIDD will run for days or weeks depending on number of samples and size of datasets.
-You can find all results in the shared folder (or other directory supplied in the beginning) 
-The following is the breakdown of where all the files are located you may only be interest in some of these files and you can manually delete ones you do not need for your experiment
-within the main directory you will find the following directories
-1.) AIDD (this contains the scripts used in this experiment as well as all of the indexes to ensure reproducability
-      ExToolset (contains the scripts to run the expression and ADAR editing analysis)
-        indexes (contains csv index files used in analysis)
-          these are default indexes combined with indexes supplied by the users placed in the desktop folders
-        scripts (all of the scripts used to generate data)
-      simulator (contains scripts needed to run simulated RNA seq data to use this tool see the simulated data tutorial)
-      then you will find the following files 
-        AIDD.sh which is the main AIDD bash script this creates directories, downloads references, and sets up users defined preferences 
-          This is where you can manually download different species references sets.  
-          Code:
-          # Rat
-          you can change rattus_norvegicus with any other species name available in ensembl release-84 which can be explored more by going to ftp://ftop.ensembl.org/pub/release-84
-          This is where you can also manually change reference building tools like STAR refernece to add snp annotations (warning you need upwards of 200G of RAM to generate the appropriatly annotated reference genomes) since HISAT2 references are downloaded from HISAT2's pool of pre assembled references)
-        AIDDpipeline.sh which is the wrapper script which runs the tools for alignment, transcriptome assembly, and variant calling.
-          This script can also be manually edited to run addition parameters in the individual tools if one has knowledge of those tools command line prompts you will need to find the function for that tool and you will see the command prompt that is automatically entered and you can add options as necessary to the command line then save and run.
-        AIDDtutorial.Rmd
-          This can be used as a tutorial to see how the scripts work and test out edits before use or can be used as an educational tool on RNAseq dataset analysis
-          It contains a default run of AIDD with a subset of the AML dataset used in the AIDD publication.
-        config files these contain all the user defined variables for reference after running AIDD and for AIDD to use during the run.
-        listofconditions.csv is the user generated file containing a summary of your variable especially useful with multivariate analysis.
-2.) quality_control (contains all the quality control data from the experiment)
-        alignment_metrics (contains individual files for alignment such as read depth, percent of reads aligned if you run the ExToolset you will also find files starting with all that are matrices containing each metric for all runs in your experiment
-        fastqc (these are the raw files for fastqc tool checking raw fastq files)
-        insert_matrics (another way to summarize alignment details showing the length of reads in the bam files used in variant calling)
-        logs (contains screen printouts only used in debugging errors in the pipeline)
-        recalibration_plots (contains pdf files showing filtering in variant calling to determine accuracy of predicting true RNA editing events)
-        if you already ran ExToolset you will also find these folders
-        filecheck which contains csv files showing which runs are missing transcriptome assembly gtf files and one telling which runs are missing alignment summaries these will need to be corrected before ExToolset can continue
-        filecheckVC contains csv files showing which runs are missing variant calling vcf files again these will need to be corrected before ExToolset can be run.
-3.) raw_data (contains raw data intermediary files including
-       ballgown (where the gtf files are stored output from stringtie these need to be organized by sample number in it's own folder for the ExToolset to run.
-         currently the python script located in /home/user/AIDD/ExToolset/scripts/prepDE.py will select TPM from gtf files you can change all of the TPM found in the file to FPKM or cov to change the normalization of counts used)
-       ballgown_in (contains files ready for input into ballgown (although there are scripts for this located in the /AIDD/ExToolset/scripts/extra folder there are not part of the default pipeline)
-       bam_files (contains all the bam files as output from stringtie. if you wish to do variant calling only this is where you need to place you prealigned bam files however you need to be careful you need to align them with the same refernece genome version that you want to use for variant calling)
-       counts (raw count csv files from stringtie contains raw,FPKM,TPM,and coverage) However this is only the gene level if transcriptome analysis is needed then you will need to extract these from the gtf files for the transcript level which AIDD does with the prepDE.py script as part of the default pipeline)
-       snpEff (these are the raw output files for each sample from output of snpEff tool including csv files of number of genes by impact type and html files summarizing substitutions matrixes as well as annotated vcf files) (ExToolset with generate impact and global RNA substitution matrices from this raw data as part of the default AIDD pipeline and these are found in the results directory)
-       vcf_files (these are the intermediary vcf files including raw variants only used to determine accuracy of final vcf files, filtered which contains the end of the first round of filtering before the second variant calling step, and final which has the vcf file used as input for snpEff)
-         all the vcf files have rows conatining one variant found with its corodinates according to the reference set selected in the beginning, the reference nucleotide the actual nucleotide seen at that position and if there is an associated known genomic variant snp with the corresponding rs number)
-4.) Results
-    all
-      correlations
-      and then a folder for each condition column in your experimental protocol
-    DESeq2
-      gene or transcript
-        a folder for each condition in your experimental protocol
-          calibration (contains figures showing transformation of data by DESeq2 including log transformations)
-          DE
-            vennD (contains genelists of up and down regulated genes or transcripts)
-            csv of all results of DESeq2 including log2foldchanges and p-values for wald's test corrected for multiple testing
-            the down regulated genes and the up regulated genes
-            a heatmap of the top 60 differentially expressed genes
-            a volcano plot labeling the top 10 significally differentially expressed genes or transcripts
-          PCA (contains figures showing principle component analysis of first two components from the top 500 differentially expressed genes)
-    variant_calling
-      amino_acid (contains intermediary files for generating matrices)
-      impact (contains the following folders and allgenelistsummary files for each condition specified in ExToolset which summarizes how many editing sites are found in each condition.)
-        final (most of these files are intermediary and aren't ment to be viewed but can be used for some experimental questions independent of AIDD pipeline
-          genelists (contains gene lists of editing events based on gene or transcript level high or moderate impact on protein structure or function and type of editing such as ADAR or APOBEC)
-          also contains counts of variants found in each gene
-     nucleotide nucleotide matrices intermediary files
-     substitutions - raw intermediary files for summarizing snpEff results
-     files found in the Results folder include matrices files used for ExToolset excitome summary and all have the _count_matrix in there name
-       all_count_matrix.csv is all of hte variable looked at in excitome analysis including substitutions nucleotide and amino acid as well as gene and transcript level expression counts for important ecitome genes.
-       amino_acid is amino acid substitution matrix for A to G substitutions only.
-       exctiome matrix is the predefined list of genes and transcripts for the exctiome 
-       gene and transcript_count_matrix.csv are the entire genome and transcriptome matrixes used for DESeq2 analysis
-       geneofinterest and transcriptome of interest are the matrixes containing only the user defined genes and transcripts to focus on.
-       You can also divid these by one of the conditions in your experimental protocol for example if you have a condition defined as sex and you want to look at just females or just males AIDD will rerun the results folder with just female and put it in the female directory under results and male if you want just male.
-5.) temp folder which can be deleted if AIDD doesn't automatically delete it
-6.) tmp folder which can also be deleted if AIDD doesn't automatically delete it
-7.) working_directory this is where AIDD stores unneeded intermediary files and can be deleted when done running AIDD.
-In the main folder you will also find files summarizing you experimental conditions including a 
-readdepth bargraph showing all the samples read depths to use if you need to filter out low read samples before running ExToolset
-A bar graph showing how many samples are in each condition in your PHENO_DATA file as well as the corresponding csv files used to generate bar graphs
-__________________________
-Detailed descriptions of scripts used in the pipeline in the AIDD/AIDD directory
-
-AIDD.sh
-
-# this sets up variables for options
-This section codes for the prompts used to generate user defined inputs (these need to not be edited or the pipeline will not run)
-If you run defaults with the 1 argument in the command then all of these variables will be assigned a value of 1
-
-# this defines functions
-This is the sections that contains all the functions used in the script including createing directories these cannot be changed
-
-# set up parent directories, pheno_data, and set_up config files and list of conditions
-Again this section setups files with all the variables in them according to your pheno_data file as well as creating summaries of each condition in your experiment these should not be altered or ExToolset will not run correctly
-
-# get fastq 
-if not downloading will move fastq files into newly created directories this should not be changed
-
-# download references 
-this will download and format all the references used by all the tools in the pipeline and can be saved for future experiments as it can take upwards of 2 hours to get all the references
-the first part will rename any references already download to oldreferences just incase you would like to save those for future experiments before downloading new ones
-Then each section is labeled with the refernece build it downloads.
-if you wish to download a species not included in the original options you can simply replace rattus norvegicus with any species as indicated above with the appriate species selected from ftp://ftp.ensembl.org/pub/release-84
-then run AIDD as normal and when prompted enter the choice for rat and your organisms references will be used instead of rat.
-
-# STAR references will create references used in STAR again this is not recommended because you need snp annotations to accurately filter variants and STAR requires over 200G of RAM to generate these references
-
-# Bowtie build references is currently only available if using miRNA data alone
-
-AIDDpipeline.sh
-
-#this sets up variable for options
-this section should not be changes as sets up the variable names used later in the pipeline
-
-# defines the functions
-this section containes functions used as wrappers for each tool.
-if you have knowledge of the command line prompt used for each tools then you can make adjustments here however AIDD is designed to run with variant calling in mind to determine RNA editing patterns and if parameters are changed the results may not be accurate
-
-#downloads all samples before starting AIDD
-AIDD is designed to download all samples at once so an internet connection is only needed for the beginning of the pipeline and once the sequences are all downloaded the analysis will begin and the internet is no longer needed.
-Some common errors here are with downloading too many or too big of files from ncbi all at once. The pipeline is designed to try to download each file three times however if the third time is unsuccessful then it will move on to the next and you may need to rerun AIDD after those samples are done processes to obtain any missing files.
-Again this section should not be altered if you have fastq files already on your computer you can put them in the folder on the desktop or supply AIDD with the appropriate directory when prompted during the non-default setup of AIDD.
-
-#NON-internet part of the pipeline no longer requires internet connection 
-
-# the next sections convert sra files into fastq based on single end or paired end reads supplied by the user
-# move fastq sections moves fastq files if SRA files are not downloaded
-# Quality control is preformed using fastqc tool and the reports generated can be used to trim sequences
-# TRIMMING section uses fastx_trimmer in the fastx-toolkit included in AIDD
-  these can be edited by changing the variables start=12 is currently set to trim 12 nucleotides off the beginning of each read and end=97 so it will trim 3 nucleotides off the end of the 100 base pair reads if you need different parameters you can change these manually in this section
-# ALIGNMENT with HISAT2 is the next step if you selected STAR or another aligner during the prompts they will be run instead of HISAT2
-  it is not recommended since the parameters defined are what was recommended by creators of GATK for variant calling in RNAseq data but these parameters can manually be changed please see each aligners manual for how to change parameters
-#samtobam
-  this stem will convert readable sam files to computer formated bam files for future steps
-#assembly is next and currently stringtie is the only assembler in the future cufflinks may be added but only for miRNA analysis alone.
-## the next sections perform variant calling for determining RNA editing and are modeled around the best practices outlined by GATK (https://gatkforums.broadinstitute.org/gatk/discussion/3892/the-gatk-best-practices-for-variant-calling-on-rnaseq-in-full-detail) as of March 2019.
-  ##The first part of the variant calling get the assembled bam file organized and formatted correctly for use with GATK and uses picard tools.
-    the file is annotated for filtering prep_bam_2
-    the file is reorganized for proper chromosome order prep_bam_3
-    the file is then inspected for alignment and qulaity control summaries including read depth and length these are stored in the quality control folder
-    the duplicates in the file are marked and filtered using markduplicates a picard tool
-    now the files are ready for the actual variant calling
-  ##The second part of variant calling uses GATK haplotype caller to find variants
-    after haplotype calling then using best practices defined filters we attempt to filter false positive and negatives using predefined quality control measures
-    then a new bam file is created by annotating the original file with those variants found and there appropriate quality control measures
-  ##The third part of variant calling takes the newly annotation variant called bam file and re runs haplotype and filtering to remove false positives resulting in the final vcf files with true RNA editing events
-  ##The forth part of variant calling uses the final vcf files as input for snpEff which predicts variants effect on protein structure and function
-    currently only protein coding RNA editing is analysed with AIDD although you can take the raw vcf files and use them to look at non-coding regions outside of AIDD
-    during this step vcf files are filtered and divided into RNA editing type AG is just A to G subs TC is just T to C subs CT is just C to T subs and G to A is just G to A subs ADARediting combines AG and TC and APOBECediting combines CT and GA then all the variants found are in the All file
-    this is important if you only want to look at ADAR editing or APOBEC editing and is used in ExToolset.  If you wish to look at ALL only you can manually remove the other options from the for loop under # impact prediction
-  ##When variant calling is finished The ExToolset will run and generate Results folders as described above.
-
-AIDD/AIDD/ExToolset/ExToolset.sh
-
-The first section defines all the functions used in the ExToolset these should not be altered or ExToolset will not run
-
-#creates directories, create config files and add condition variables are already done since you ran AIDD if you wish to run ExToolset on existed data not generated from AIDD then please follow the instructions here https://github.com/RNAdetective/ExToolset
-#moves available matrix and or raw data files is again an option for when ExToolset is run alone not as part of the AIDD pipeline
-#create file check files is the first section that is done with AIDD pipeline
-  this section checks for gtf files, alignment summary csv files, and snpEff output files for each RNAediting type
-  if you are missing files the screen will print out the error message saying which file to check and replace. The summary csv files can be found in the quality control directory mentioned earlier
-  you will need to replace missing files by re running AIDD with just those samples because ExToolset can not run without all files for all samples
-#create alignment summary file for normalization in extoolset this will summarize all alignments for all samples in one matrix and create bar graphs showing these results
-#creates GTEX 
-  this creates the gene and transcript TPM matrixes these can be changed to raw FPKM or coverage counts by altering the python script used as described previously
-  it will also create gene or transcript of interest files based on user defined gene lists they are interested in as well as the predifined genes and transcripts involved in the excitome
-  it will then combine all of these into one file the GTEX_count_matrix found in the results directory
-#global substitution variant matrix G_VEX matrix.
-  this next section takes the raw snpEff output and extract the appropriate nucleotide or amino_acid substitution matrices and combines then into one matrix for all samples
-  this G_VEX matrix is then normalized by dividing each sample count by it's read depth this will control for varying read depths between samples
-#impact of RNA editing matrix I_VEX matrix
-  this step will takes raw snpEff impact prediction files and creates one matrix with both gene level and transcript level detail for high impact and moderate impact variants as defined by snpEff usual manual
-  The user can change these to look at other columns of data from the orginal snpEff output and for example can look at 5 prime editing only by changing high_impact to the correct column name and then changes the following variable col_num= to the appropriate column numbers from the snpEff file
-  when finished this creates one matrix file with all these counts summarized for each sample across each condition (gene or transcript and high or moderate impact for each snptype All ADAR editing APOBEC editing)  Again the for loop for snptype can be changed to include only the type needed
-#Runs extoolset for correlation summary 
-  this will generate pearsons correlations for each experiment
-    add details of Rscript if want another type of correlation
-  This will also make one csv file summarized all the correlation coefficient and p-values for each variable run (the variables are the columns in the all_count_matrix.csv file.
-#Impact gene list prep
-  this will create gene names stored in the genelist folder described above.
-  these can be used for pathway analysis with outside tools like DAVID or panther to find pathways or process effected by RNA editing
-  it also creates a summary file of total number of impacted genes or transcripts found in each condition.
-  There are also gene lists with counts of how many variants were found in each gene that can be used to create charts outside of AIDD
-#The last section runs DESeq2 for each condition in PHENO_DATA.csv file
-
-For more details on how the scripts work please see the AIDDtutorial.Rmd files located in AIDD/AIDD directory
-This tutorial breaks down each step of the pipeline in Rmd format and each chunk can be run seperately and editing parameters or other manually changes to the scripts can be tested here.
-If you do not know how much your sequences need to be trimmed before starting this can be used to download a sample from the experiment and the generated fastqc report can be used to determine start and end of trimming if it is not 12 and 97 like what is used for 100 base pair reads as the default in AIDD
-This tutorial can also be used in a classroom setting to teach basic RNA sequencing analysis and RNA editing detection bioinformatic analysis with minimal prior knowledge of RNA seq bioinformatic analysis
+## Pipeline Flow Chart
+![Screenshot](flow_chart.png)
 
 ## Built With
 * [SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
@@ -553,5 +544,3 @@ Pertea, M., Kim, D., Pertea, G., Leek, J. T., & Steven, L. (2017). HHS Public Ac
 Pertea, M., Pertea, G. M., Antonescu, C. M., Chang, T.-C., Mendell, J. T., & Salzberg, S. L. (2015). StringTie enables improved reconstruction of a transcriptome from RNA-seq reads. Nature Biotechnology, 33(3), 290–295. http://doi.org/10.1038/nbt.3122
 
 ___
-
-
