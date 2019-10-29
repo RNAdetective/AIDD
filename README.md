@@ -632,15 +632,17 @@ ___
 ## Pipeline Flow Chart
 ![Screenshot](flow_chart.png)
 
-## AIDD directory structure for results
+## AIDD Results directory structure
+
+/media/sf_AIDD/ADD_data default directory structure.
+In addition these file are compressed in AIDD_data.tar.gz file saved in the same folder.
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/directoryAIDD.png">
  </p>
- 
-<p align="center">Run AIDD with options to download references <p align="center">
 
-## Built With
+
+## AIDD is built with
 * [SRAtoolkit] (https://www.ncbi.nlm.nih.gov/sra/docs/toolkitsoft/)
 * [Fastx-Toolkit] (http://hannonlab.cshl.edu/fastx_toolkit/)
 * [Samtools] (http://samtools.sourceforge.net/)
