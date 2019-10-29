@@ -482,9 +482,150 @@ Then follow the on screen prompts answering 1 when you want the defaults and 2 w
  
 <p align="center">Run AIDD with options to download references <p align="center">
 
-* She the manual for more customizable options included with AIDD
+## More customizable options available in AIDD
+To access the customizable options copy and paste the following command into the terminal
+```
+bash AIDD.sh 2 /path/to/AIDD /path/to/store/dataoutput
+```
+1.) Are you running a batch instance 1=(default)no 2=yes
+ *If you loaded one 
+ 
+2.) Are you downloading sequences from NCBI 1=(default) 2=no
+ *If you want to download sequences from SRA database by their SRAnumber enter 1
+ *If you want to supply your own .fastq files and will supply those file enter 2
+ *If you enter option 2 you will be asked to supply the directory these files are located in.
+ 
+3.) Do you have bulk RNAseq data? 1=(default) or 2=single
+ *If you want to use bulk RNAseq data enter 1
+ *If you want to use single cell RNA seq data enter 2
 
-For more details on options available for AIDD please see the manual here on github or included in you AIDD folder on the VM.
+4.) Do you have standard mRNA library prep selecting for poly-A tails? 1=(default)yes 2=no(miRNA)
+ *If you have standard library prep for mRNA with your data enter 1
+ *If you have micro RNA dataset enter 2
+
+5.) Please enter library layout type: 1=(default)paired or 2=single
+ *If you have paired end reads data enter 1
+ *If you have single end reads data enter 2 
+		*(NOTE: variant calling cannot be run with single read data so there will be no editome analysis with single reads.)
+
+6.) Which aligner would yo like to use? 1=(default)HISAT2 2=STAR 3=BOWTIE2
+ *If you would like to use HISAT2 for genomic alignment enter 1
+ *If you would like to use STAR for genomic alignemnt enter 2 
+		*(You will have to download STAR reference set when asked in later options)
+		*(editome analysis will not be as accurate without STAR references set with annotated snps which is only possible on a machine with at least 100G RAM)
+ *If you would like to use BOWTIE2 for genomic alingment enter 3 
+		*(This is not a recommended aligner for variant calling so it should be used with caution when uses it for more then differential expression analysis)
+		*(this is recommended aligner to use for miRNA alignment)
+
+7.) Which assembler would you like to use? 1=(default)stringtie, 2=cufflinks
+ *If you would like to use stringtie for assembly enter 1
+		*This is recommended assembler for HISAT2 alignment
+ *If you would like to use cufflinks for assembly enter 2
+		*This is the recommended assembler for STAR and BOWTIE2
+
+8.) Would you like to do variant calling for RNAediting prediction at this time? 1=(default) 2=no
+ *If you would like to do variant calling for editome exploration enter 1
+ *If you would like to not do variant calling enter 2
+		*This will still prep zipped file with bam files and proper directory structure to then run variant calling at a different time.
+		*This is recommended when you have single reads.
+
+9.) Do you want to start at the beginning or do you want to start with variant calling? 1=(default)beginning 2=variant calling I already have bam files present
+ *If you want to do alignemnt and asembly and are starting from raw sra or fastq files enter 1
+ *If you ran AIDD at a different time or have pre-aligned and assembled bam files enter 2
+		*You will then be prompted to enter the directory of those bam files 
+
+10.) Do you have references already downloaded? 1(default)yes 2=no
+ *If you already have references located in the ~/AIDD/references directory enter 1
+ *If you need to download references enter 2
+		*This is needed if you are installing AIDD for the first time without downloading the pre-made VM from github.
+		*This is recommended if you want to use something other then GRCh37.75 build (note this is the recommended build for the most accurate editome mapping)
+		*Do you have bulk human data? 1=(default)yes 2=no(mouse) 3=no(chimpanzee) 4=no(rat)
+				*If you have human data enter 1.
+						*Please choose a build to download and prepare references files for the while pipeline: 1=GRCh37 2=GRCh38 3=hg19
+								*It is recommended to use GRCh37 for accurate variant calling.
+								*GRCh38 is the option for the newest build but the variant calling is not as accurate since the reference build for HISAT does not have snp annotation available
+				*If you have an organisms not listed it is still possible to use AIDD you just have to download the correct reference set for you organism which includes:
+						*1.fa
+						*2.fa
+						*.gtf
+						*snps.vcf
+						**These can manually be placed in the ~/AIDD/referencs directory and then run AIDD as if you already have references
+
+## In addition ExToolset can be run by itself
+
+Step 1.) Do either of the following:
+		*(A)Place the matrix files from AIDD into folder on the desktop labeled put_counts_here including:
+				*gene_count_matrix.csv
+				*transcript_count_matrix.csv
+				*GTEX_count_matrix.csv
+				*subs_count_matrix.csv
+				*nucleotide_count_matrix.csv
+				*impact_count_matrix.csv
+				*amino_acid_count_matrix.csv
+				*all_count_matrix.csv
+				*VEX_count_matrix.csv
+				*geneofinterest_count_matrix.csv
+				*transcriptofinterest_count_matrix.csv
+		*(B)Place raw_data output from AIDD into the correct directories from AIDD
+				*bam files labeled with SRRXXXXXXXX.bam format into the directory ~/raw_data/bam_files/SRRXXXXXXX.bam
+				*count files output from stringtie assembly labled with sampleXX.gtf into the directory ~/raw_data/ballgown/sampleXX/sampleXX.gtf
+				*variant calling results from snpEffect prediction including:
+						*files labeled with snpEffSRRXXXXXXXADARediting.csv
+						*files labeled with snpEffSRRXXXXXXXADARediting.genes.txt
+						*files labeled with snpEffSRRXXXXXXXAllediting.csv
+						*files labeled with snpEffSRRXXXXXXXAllediting.genes.txt
+						*files labeled with snpEffSRRXXXXXXXAPOBECediting.csv
+						*files labeled with snpEffSRRXXXXXXXAPOBECediting.genes.txt
+						*files labeled with SRRXXXXXXXfiltered_snps_finalAnnADARediting.vcf
+						*files labeled with SRRXXXXXXXfiltered_snps_finalAnnAllediting.vcf
+						*files labeled with SRRXXXXXXXfiltered_snps_finalAnnAPOBECediting.vcf
+				*quality_control alignment metrics files labeled SRRXXXXXXX_alignment_metrics.txt into the directory ~/quality_control/alignment_metrics/SRRXXXXXXX_alignment_metrics.txt
+				*These file names need to match the PHENO_DATA.csv file on the desktop.
+Step 2.) Double click the ExToolset icon on the desktop.
+		*Wait for ExToolset to run a check for all the correct files if any of them are not found it will show these in the ~/quality_control/filecheck directories these files need to all be present for ExToolset to do all analysis.
+
+## Parts of ExToolset can be run by themselves
+
+ *To run ANOVA analysis for each column as a variable by up to three conditions stored in the PHENO_DATA.csv file on the desktop.
+		*Step 1: Fill out pheno_data.csv file for your experiment
+		*Step 2: Place count_matrix.csv file into the desktop folder put_counts_here
+		*Step 3: copy and paste the following into the terminal
+		```
+		cd /media/sf_AIDD/path/to/AIDDresults
+		bash /home/user/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh name_count_matrix.csv
+		```
+ *To create guttman matrix by itself from vcf files (option still in beta testing)
+		*Step 1: Make sure to place files labeled with SRRXXXXXXXfiltered_snps_finalAnnADARediting.vcf in the ~/raw_data/snpEff directory
+		*Step 2: Fill out PHENO_DATA.csv file on desktop
+		*Step 3: copy and paste the following into the terminal
+		```
+		bash /home/user/AIDD/AIDD/ExToolsetExcitome.sh
+		```
+ *To create editing frequency matrix by itself from bam files (option still in beta testing)
+		*Step 1: Make sure to place files labeled with SRRXXXXXXX.bam in the ~/raw_data/bam_files directory
+		*Step 2: Fill out PHENO_DATA.csv file on desktop
+		*Step 3: copy and paste the following into the terminal
+		```
+		bash /home/user/AIDD/AIDD/ExToolsetRF.sh
+		```
+		
+ *To run guttman (option still in beta testing)
+		*Step 1: Fill out PHENO_DATA.csv file for your experiment
+		*Step 2: Place count_matrix.csv file into the desktop folder put_counts_here
+		*Step 3: copy and paste the following into the terminal
+		```
+		cd /media/sf_AIDD/path/to/AIDDresults
+		bash /home/user/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh name_count_matrix.csv
+		```
+ *to run random forest (option still in beta testing)
+		*Step 1: Fill out PHENO_DATA.csv file for your experiment
+		*Step 2: Place count_matrix.csv file into the desktop folder put_counts_here
+		*Step 3: copy and paste the following into the terminal
+		```
+		cd /media/sf_AIDD/path/to/AIDDresults
+		bash /home/user/AIDD/AIDD/ExToolset/ExToolsetRF.sh name_count_matrix.csv
+		```		
+___
 
 ___
 
