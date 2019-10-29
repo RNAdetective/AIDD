@@ -487,28 +487,28 @@ To access the customizable options copy and paste the following command into the
 ```
 bash AIDD.sh 2 /path/to/AIDD /path/to/store/dataoutput
 ```
-1.) Are you running a batch instance 1=(default)no 2=yes
+1. Are you running a batch instance 1=(default)no 2=yes
 	* If you loaded one 
  
-2.) Are you downloading sequences from NCBI 1=(default) 2=no
+2. Are you downloading sequences from NCBI 1=(default) 2=no
 	* If you want to download sequences from SRA database by their SRAnumber enter 1
 	* If you want to supply your own .fastq files and will supply those file enter 2
 	* If you enter option 2 you will be asked to supply the directory these files are located in.
  
-3.) Do you have bulk RNAseq data? 1=(default) or 2=single
+3. Do you have bulk RNAseq data? 1=(default) or 2=single
 	* If you want to use bulk RNAseq data enter 1
 	* If you want to use single cell RNA seq data enter 2
 
-4.) Do you have standard mRNA library prep selecting for poly-A tails? 1=(default)yes 2=no(miRNA)
+4. Do you have standard mRNA library prep selecting for poly-A tails? 1=(default)yes 2=no(miRNA)
 	* If you have standard library prep for mRNA with your data enter 1
 	* If you have micro RNA dataset enter 2
 
-5.) Please enter library layout type: 1=(default)paired or 2=single
+5. Please enter library layout type: 1=(default)paired or 2=single
 	* If you have paired end reads data enter 1
 	* If you have single end reads data enter 2 
 		* (NOTE: variant calling cannot be run with single read data so there will be no editome analysis with single reads.)
 
-6.) Which aligner would yo like to use? 1=(default)HISAT2 2=STAR 3=BOWTIE2
+6. Which aligner would yo like to use? 1=(default)HISAT2 2=STAR 3=BOWTIE2
 	* If you would like to use HISAT2 for genomic alignment enter 1
 	* If you would like to use STAR for genomic alignemnt enter 2 
 		* (You will have to download STAR reference set when asked in later options)
@@ -517,24 +517,24 @@ bash AIDD.sh 2 /path/to/AIDD /path/to/store/dataoutput
 	* (This is not a recommended aligner for variant calling so it should be used with caution when uses it for more then differential expression analysis)
 	* (this is recommended aligner to use for miRNA alignment)
 
-7.) Which assembler would you like to use? 1=(default)stringtie, 2=cufflinks
+7. Which assembler would you like to use? 1=(default)stringtie, 2=cufflinks
 	* If you would like to use stringtie for assembly enter 1
 		* This is recommended assembler for HISAT2 alignment
 	* If you would like to use cufflinks for assembly enter 2
 		* This is the recommended assembler for STAR and BOWTIE2
 
-8.) Would you like to do variant calling for RNAediting prediction at this time? 1=(default) 2=no
+8. Would you like to do variant calling for RNAediting prediction at this time? 1=(default) 2=no
 	* If you would like to do variant calling for editome exploration enter 1
 	* If you would like to not do variant calling enter 2
 		* This will still prep zipped file with bam files and proper directory structure to then run variant calling at a different time.
 		* This is recommended when you have single reads.
 
-9.) Do you want to start at the beginning or do you want to start with variant calling? 1=(default)beginning 2=variant calling I already have bam files present
+9. Do you want to start at the beginning or do you want to start with variant calling? 1=(default)beginning 2=variant calling I already have bam files present
 	* If you want to do alignemnt and asembly and are starting from raw sra or fastq files enter 1
 	* If you ran AIDD at a different time or have pre-aligned and assembled bam files enter 2
 		*You will then be prompted to enter the directory of those bam files 
 
-10.) Do you have references already downloaded? 1(default)yes 2=no
+10. Do you have references already downloaded? 1(default)yes 2=no
 	* If you already have references located in the ~/AIDD/references directory enter 1
 	* If you need to download references enter 2
 		* This is needed if you are installing AIDD for the first time without downloading the pre-made VM from github.
