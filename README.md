@@ -586,8 +586,8 @@ bash AIDD.sh 2 /path/to/AIDD /path/to/store/dataoutput
 
 ## Parts of ExToolset can be run by themselves
 
- * To run ANOVA analysis for each column as a variable by up to three conditions stored in the PHENO_DATA.csv file on the desktop.
-		* Step 1: Fill out pheno_data.csv file for your experiment
+* To run ANOVA analysis for each column as a variable by up to three conditions stored in the PHENO_DATA.csv file on the desktop.
+	* Step 1: Fill out pheno_data.csv file for your experiment
 		* Step 2: Place count_matrix.csv file into the desktop folder put_counts_here
 		* Step 3: copy and paste the following into the terminal
 		```
@@ -595,36 +595,36 @@ bash AIDD.sh 2 /path/to/AIDD /path/to/store/dataoutput
 		bash /home/user/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh name_count_matrix.csv
 		```
  * To create guttman matrix by itself from vcf files (option still in beta testing)
-		* Step 1: Make sure to place files labeled with SRRXXXXXXXfiltered_snps_finalAnnADARediting.vcf in the ~/raw_data/snpEff directory
+	* Step 1: Make sure to place files labeled with SRRXXXXXXXfiltered_snps_finalAnnADARediting.vcf in the ~/raw_data/snpEff directory
 		* Step 2: Fill out PHENO_DATA.csv file on desktop
 		* Step 3: copy and paste the following into the terminal
 		```
 		bash /home/user/AIDD/AIDD/ExToolsetExcitome.sh
 		```
  * To create editing frequency matrix by itself from bam files (option still in beta testing)
-		* Step 1: Make sure to place files labeled with SRRXXXXXXX.bam in the ~/raw_data/bam_files directory
-		* Step 2: Fill out PHENO_DATA.csv file on desktop
-		* Step 3: copy and paste the following into the terminal
-		```
-		bash /home/user/AIDD/AIDD/ExToolsetRF.sh
-		```
+	* Step 1: Make sure to place files labeled with SRRXXXXXXX.bam in the ~/raw_data/bam_files directory
+	* Step 2: Fill out PHENO_DATA.csv file on desktop
+	* Step 3: copy and paste the following into the terminal
+	```
+	bash /home/user/AIDD/AIDD/ExToolsetRF.sh
+	```
 		
  * To run guttman (option still in beta testing)
-		* Step 1: Fill out PHENO_DATA.csv file for your experiment
-		* Step 2: Place count_matrix.csv file into the desktop folder put_counts_here
-		* Step 3: copy and paste the following into the terminal
-		```
-		cd /media/sf_AIDD/path/to/AIDDresults
-		bash /home/user/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh name_count_matrix.csv
-		```
+	* Step 1: Fill out PHENO_DATA.csv file for your experiment
+	* Step 2: Place count_matrix.csv file into the desktop folder put_counts_here
+	* Step 3: copy and paste the following into the terminal
+	```
+	cd /media/sf_AIDD/path/to/AIDDresults
+	bash /home/user/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh name_count_matrix.csv
+	```
  * to run random forest (option still in beta testing)
-		* Step 1: Fill out PHENO_DATA.csv file for your experiment
-		* Step 2: Place count_matrix.csv file into the desktop folder put_counts_here
-		* Step 3: copy and paste the following into the terminal
-		```
-		cd /media/sf_AIDD/path/to/AIDDresults
-		bash /home/user/AIDD/AIDD/ExToolset/ExToolsetRF.sh name_count_matrix.csv
-		```		
+	* Step 1: Fill out PHENO_DATA.csv file for your experiment
+	* Step 2: Place count_matrix.csv file into the desktop folder put_counts_here
+	* Step 3: copy and paste the following into the terminal
+	```
+	cd /media/sf_AIDD/path/to/AIDDresults
+	bash /home/user/AIDD/AIDD/ExToolset/ExToolsetRF.sh name_count_matrix.csv
+	```		
 ___
 
 ___
