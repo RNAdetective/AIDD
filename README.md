@@ -9,25 +9,26 @@
  # About AIDD
  [![DOI](https://zenodo.org/badge/119888778.svg)](https://zenodo.org/badge/latestdoi/119888778)
  
-* AIDD incorporates open source tools into a static virtualbox to ensure reproducability in RNA-seq experiments.  
-* There is a bash script that completely automates the pipeline making it ease to use. 
-* The manual also instructs the more advanced user how to change the script to add more individual options.  
-* It is capable of looking at the transcriptome and editome in both global and local environments.
-* It includes a novel ExToolset which can look at all levels of transcriptome diversity in a RNA-seq dataset.
-* There is an ability to explore differential expression trends for entire pathways of genes at once with heatmaps and PCA plots.
-* There is an options to look at just one gene at time and it's isoform expression as well.
-* Variant Calling is used to find evidence of RNA editing and predict the impact effects of those variants.
-* Gene enrichment analysis is to highlight pathways affected by variants.
+* AIDD incorporates open source tools into a static virtualbox to ensure reproducability in RNA-seq analysis.  
+* AIDD includes a collection of scripts that completely automates the pipeline making it ease to use by simply double clicking the icon on the desktop.
+* AIDD also has easy to use customizable options for more advance RNAseq analysis.  
+* AIDD produces publication ready figures for gene and transcript level differential expression analysis.
+* AIDD explores editome by mapping both ADAR and APOBEC editing sites on a global and local level and produces publication ready visualization of ADAR editing landscapes.
+* AIDD includes a novel ExToolset which can look at all levels of transcriptome diversity in a RNA-seq dataset.
+* AIDD has the ability to explore differential expression trends for entire pathways of genes at once with heatmaps and PCA plots.
+* AIDD also has the ability to focus on just one gene isoform differential expression patterns.
+* AIDD uses variant calling and snp effect to predict RNA editings role on protein diversity.
+* AIDD uses gene enrichment analysis is to highlight pathways affected by variants.
 
 ___
 
-#### **AIDD now allows for** 
+#### **AIDD also allows for customizable options** 
 
 * options of aligners, assemblers, and DE tools.
-* defining your own directories as well as setup scripts for instance setup.
-* analysis of mouse data and more human reference set options.
+* options for running VM on servers.
+* analysis of mouse, rat, chimp data and more human reference version set options.
 * analysis of scRNA-seq, miRNAseq, and lcRNAseq in addition to bulk RNAseq.
-* normalization of editing sites, multivariate analysis and demension reduction as well as ANOVA and correlation analysis of the excitome. 
+* multivariate analysis, dimension reduction, ANOVA, correlation analysis, and random forest of the excitome
 
 ___
 
