@@ -292,13 +292,13 @@ export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
 #  prep_bam_3 #runs bam file reordering by chromosome for variant calling
 #  prep_align_sum #collects alignment metrics and creates quality control file
 #  markduplicates #marks duplicates in bam file for variant calling
-#  haplotype1 #first variant calling step
-#  filter1 #first round of filtering after variant calling
-#  move_vcf
-#  haplotype2 #second variant calling step
-#  filter2 #second and final round of filtering 
-#  move_vcf2
-#  excitome_vcf
+  haplotype1 #first variant calling step
+  filter1 #first round of filtering after variant calling
+  move_vcf
+  haplotype2 #second variant calling step
+  filter2 #second and final round of filtering 
+  move_vcf2
+  excitome_vcf
   for snptype in All ADARediting APOBECediting AG GA CT TC ; # DO ALL VARIANTS, ADAR VARIANTS, AND APOBEC VARIANTS
   do
     snpEff #runs snp effect prediction

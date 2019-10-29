@@ -25,7 +25,12 @@ event.labels <- c(FALSE, TRUE)
 data1=read.csv(file_in)
 #dta <- melt(data1, id.vars=c("region","GRIA2_1edited"))
 #ggplot(dta, aes(x=region, y=value, color=GRIA2_1edited)) + geom_point(alpha=.4) + geom_rug(data=dta %>% filter(is.na(value))) + scale_color_brewer(palette="Set2") + facet_wrap(~variable, scales="free_y", ncol=3)
-rfsrc_regions <- rfsrc(sampname~.,data=data1,nodesize=6,na.action = "na.impute",importance=TRUE)
+rfsrc_regions <- rfsrc(samp_name~.,data=data1,nodesize=6,na.action = "na.impute",importance=TRUE)
+rfsrc_regions
+out <- capture.output(rfsrc_regions)
+write.csv(out, file_out, row.names=FALSE, quote=FALSE)
+cat("file_nameRF", out, file=file_out, sep="n", append=TRUE)
+
 tiff(image1, units="in", width=10, height=10, res=600)
 plot(gg_rfsrc(rfsrc_regions), alpha=.33)
 dev.off()

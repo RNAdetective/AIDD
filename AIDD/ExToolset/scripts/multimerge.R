@@ -18,15 +18,12 @@ if ( Rtype == "multi" ){
       if (!exists("dataset")){
         dataset <- read.csv(file)
         dataset[!duplicated(dataset$level), ]
-        dataset[!grepl("ENSG00000066468", dataset$level),]
       } 
       # if the merged dataset does exist, append to it
       if (exists("dataset")){
         temp_dataset <- read.csv(file)
-        temp_dataset[!grepl("ENSG00000066468", temp_dataset$level),]
         dataset <- merge(dataset, temp_dataset, by=level, all=T)
         dataset[!duplicated(dataset$level), ]
-        dataset[!grepl("ENSG00000066468", dataset$level),]
         rm(temp_dataset)
       }
      write.csv(dataset, tempfile, row.names=FALSE, quote = FALSE)
@@ -87,7 +84,7 @@ write.csv(final, file_out, quote=FALSE, row.names=FALSE)
 if ( Rtool == "transpose" ) {
 data <- read.csv(file_out, row.names=1)
 data2 <- t(data)
-write.csv(data2, file_out, quote=FALSE)
+write.csv(data2, tempfile, quote=FALSE)
 }
 if ( Rtooltrans == "transpose" ) {
 data <- read.csv(file_out, row.names=1)

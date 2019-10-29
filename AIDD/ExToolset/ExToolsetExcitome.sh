@@ -17,6 +17,13 @@ then
   mv "$dir_path"/temp.csv "$file_in"
 fi
 }
+RFR() {
+cat "$ExToolset"/randomforest.R | sed 's/file_name/"$bamfile"/g' >> "$dir_path"/tempRF.R # need to change alpha to number of conditions
+#also need to add mtry best fit node size is currently set to 6
+#also net to set model currently set to only have one condition in the matrix sampname.
+Rscript "$dir_path"/tempRF.R "$file_in" "$image1" "$image2" "$image3" "$image4" "$image5" "$image6" "$image7" "$image8" "$image9" "$file_out"
+rm "$dir_path"/tempRF.R
+}
 run_tools() {
     if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
     then
@@ -78,8 +85,15 @@ USCOUNTER=$(expr $USCOUNTER + 1)
 echo "sample$USCOUNTER"
 }
 mergeR() {
-Rscript /home/user/AIDD/AIDD/ExToolset/scripts/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" "$temp_file" #creates level of interest files
+Rscript "$ExToolset"/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" "$GOI_file" "$temp_file1" "$temp_file2" "$temp_file3" "$rename" #creates level of interest files
 } # Runs multimerge R
+temp_file() {
+if [ -s "$dir_path"/temp.csv ];
+then
+  rm "$file_in"
+  mv "$dir_path"/temp.csv "$file_in"
+fi
+}
 #grep '^#' "$file_in" > "$file_out" && grep -v '^#' "$file_in" | LC_ALL=C sort -t $'\t' -k1,1 -k2,2n >> "$file_out
 ######################################################################################
 # makes a text file with all lines from all vcf files with gene name in the line
@@ -246,4 +260,162 @@ then
   echo1=$(echo "CREATING "$file_out"")
   mes_out
   mergeR
+######################################################################################
+# makes list of excitome genes in each sample for random_forest
+######################################################################################
+  INPUT="$ExToolsetix"/index/excitome_loc.csv
+  {
+  [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+  read
+  while IFS=, read -r excitome_gene gene_id chrome coord express_value
+  do
+    #source config.shlib;
+    home_dir=/home/user
+    dir_path=/media/sf_AIDD/MDD
+    dirres=/media/sf_AIDD/MDD/Results
+    ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
+    ExToolsetix="$home_dir"/AIDD/ExToolset/indexes
+    allcm="$dirres"/all_count_matrix.csv
+    dirresRF="$dirres"/random_forest
+    new_dir="$dirresRF"
+    create_dir
+    AIDDtool="$home_dir"/AIDD/AIDD_tools
+    USCOUNTER="0"
+    for files in "$dir_path"/raw_data/bam_files/* ;
+    do
+      file_in="$files"
+      bamfiles=$(echo "${file_in##*/}")
+      bamfile=$(echo "${bamfiles%%.*}")
+      #extension=$(echo "${bamfiles##*.}")
+      echo "Now starting editing profiles for $bamfile in "$excitome_gene""
+      new_dir="$dirresRF"/"$bamfile"
+      create_dir
+      temp_file="$dirresRF"/"$bamfile"/"$excitome_gene".csv
+      if [ "$coord" != "0" ];
+      then
+        cat "$ExToolset"/basecount.R | sed 's/coord/'$coord'/g' | sed 's/chrome/'$chrome'/g' >> "$dir_path"/tempbasecount.R
+        bambai="$dir_path"/raw_data/bam_files/"$bamfile".bai
+        if [ "$file_in" != "$bambai" ];
+        then
+          if [ ! -f "$bambai" ];
+          then
+            java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$file_in"
+          fi
+          Rscript "$dir_path"/tempbasecount.R "$file_in" "$temp_file"
+          rm "$dir_path"/tempbasecount.R
+          nucA=$(awk -F',' 'NR==2{print $1}' "$temp_file")
+          nucC=$(awk -F',' 'NR==2{print $2}' "$temp_file")
+          nucG=$(awk -F',' 'NR==2{print $3}' "$temp_file")
+          nucT=$(awk -F',' 'NR==2{print $4}' "$temp_file")
+          nuctotal=$(expr "$nucA" + "$nucG" + "$nucC" + "$nucT")
+          if [ "$nucG" == "0" ];
+          then
+            percentG="0"
+          else
+            freqG=$(expr "$nucG" / "$nuctotal")
+            percentG=$(awk 'BEGIN{print '$nucG' / '$nuctotal' * 100}')
+          fi
+          if [ "$nucC" == "0" ];
+          then
+            percentC="0"
+          else
+            freqC=$(expr "$nucC" / "$nuctotal")
+            percentC=$(awk 'BEGIN{print '$nucC' / '$nuctotal' * 100}')
+          fi
+          RF_matrix_dir="$dirresRF"/mergesamples
+          new_dir="$RF_matrix_dir"
+          create_dir
+          RF_matrix="$RF_matrix_dir"/"$bamfile"editingfreq.csv
+          if [ ! -f "$RF_matrix" ];
+          then
+            echo "excitome_site,'$bamfile'" >> "$RF_matrix"
+          fi
+          if [[ "$percentC" != "0" && "$nucC" -gt "$nucG" ]];
+          then
+            echo ""$excitome_gene","$percentC"" >> "$RF_matrix" 
+          fi
+          if [[ "$percentG" != "0" && "$nucG" -gt "$nucC" ]];
+          then
+            echo ""$excitome_gene","$percentG"" >> "$RF_matrix" 
+          fi
+          if [[ "$percentG" == "0" && "$percentC" == "0" ]];
+          then
+            echo ""$excitome_gene",0" >> "$RF_matrix"
+          fi
+            echo ""$bamfile" has "$nucA" A's "$nucC" C's "$nucG" G's "$nucT" T's for a total of "$nuctotal" read depth which a "$percentG" % edited to a G or "$percentC" % edited to a C"
+        fi
+      else
+        echo "Moving on to next sample"
+      fi
+    done
+  done
+  } < $INPUT
+  IFS=$OLDIFS
+# next transpose
+dirres="$dir_path"/Results
+dirresRF="$dirres"/random_forest
+RF_matrix_dir="$dirresRF"/mergesamples
+for files in "$RF_matrix_dir"/* ;
+do
+  file_in="$files"
+  bamfiles=$(echo "${file_in##*/}")
+  bamfile=$(echo "${bamfiles%%.*}")
+  cat "$file_in" | awk -F',' '{for(i=1;i<=NF;i++){A[NR,i]=$i};if(NF>n){n=NF}}
+        END{for(i=1;i<=n;i++){
+        for(j=1;j<=NR;j++){
+        s=s?s","A[j,i]:A[j,i]}
+        print s;s=""}}' | sed 's/frequencyofediting/'$bamfile'/g' >> "$RF_matrix_dir"/"$bamfile"trans.csv
+done
+cat "$RF_matrix_dir"/*trans.csv >> "$dirres"/RF_count_matrix.csv
+matrix_file="$dirres"/excitome_count_matrix.csv
+matrix_file4="$dirres"/RFexcitome_count_matrix.csv
+if [ -s "$matrix_file" ];
+then
+  if [ ! -s "$matrix_file4" ];
+  then
+    cur_wkd="$dirres"
+    summaryfile=none
+    Rtool=finalmerge
+    Rtype=single2f
+    file_out="$dirres"/RFexcitome_count_matrix.csv
+    mergefile="$dirres"/excitome_count_matrix.csv
+    phenofile="$dirres"/RF_count_matrix.csv
+    level_name=$(echo "sample")
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    mergeR
+  else
+    echo1=$(echo "ALREADY FOUND "$matrix_file4"")
+    mes_out
+  fi
+else
+  echo1=$(echo "CANT FIND "$matrix_file"") 
+  mes_out
+fi # NOW HAVE EXCTIOME RANDOM FOREST MATRIX
+matrix1="$dirres"/RF_count_matrix.csv
+matrix2="$dirres"/RFexcitome_count_matrix.csv
+for matrix in "$matrix1" "$matrix2" ;
+do
+  file_in="$matrix"
+  bamfiles=$(echo "${file_in##*/}")
+  bamfile=$(echo "${bamfiles%%.*}")
+  image1="$dirresRF"/"$bamfile"plot1.tiff
+  image2="$dirresRF"/"$bamfile"plot2.tiff
+  image3="$dirresRF"/"$bamfile"plot3.tiff
+  image4="$dirresRF"/"$bamfile"plot4.tiff
+  image5="$dirresRF"/"$bamfile"plot5.tiff
+  image6="$dirresRF"/"$bamfile"plot6.tiff
+  image7="$dirresRF"/"$bamfile"plot7.tiff
+  image8="$dirresRF"/"$bamfile"plot8.tiff
+  image9="$dirresRF"/"$bamfile"plot9.tiff
+  file_out="$dirresRF"/"$bamfile"RFstats.txt
+  tool=RFR
+  run_tools
+done
+
+# then run random_forest R for this file
+
+#can also Rmerge "$dirres"/RF_count_matrix.csv "$dirres"/excitome_count_matrix.csv >> "$dirres"/RFex_count_matrix.csv
+# then run random_forest R for this file
+
 fi
