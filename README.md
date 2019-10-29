@@ -553,8 +553,8 @@ bash AIDD.sh 2 /path/to/AIDD /path/to/store/dataoutput
 
 ## In addition ExToolset can be run by itself
 
-1.) Do either of the following:
-		* (A)Place the matrix files from AIDD into folder on the desktop labeled put_counts_here including:
+* 1.) Do either of the following:
+		** (A)Place the matrix files from AIDD into folder on the desktop labeled put_counts_here including:
 				* gene_count_matrix.csv
 				* transcript_count_matrix.csv
 				* GTEX_count_matrix.csv
@@ -566,7 +566,7 @@ bash AIDD.sh 2 /path/to/AIDD /path/to/store/dataoutput
 				* VEX_count_matrix.csv
 				* geneofinterest_count_matrix.csv
 				* transcriptofinterest_count_matrix.csv
-		* (B)Place raw_data output from AIDD into the correct directories from AIDD
+		** (B)Place raw_data output from AIDD into the correct directories from AIDD
 				* bam files labeled with SRRXXXXXXXX.bam format into the directory ~/raw_data/bam_files/SRRXXXXXXX.bam
 				* count files output from stringtie assembly labled with sampleXX.gtf into the directory ~/raw_data/ballgown/sampleXX/sampleXX.gtf
 				* variant calling results from snpEffect prediction including:
@@ -581,7 +581,7 @@ bash AIDD.sh 2 /path/to/AIDD /path/to/store/dataoutput
 						* files labeled with SRRXXXXXXXfiltered_snps_finalAnnAPOBECediting.vcf
 				* quality_control alignment metrics files labeled SRRXXXXXXX_alignment_metrics.txt into the directory ~/quality_control/alignment_metrics/SRRXXXXXXX_alignment_metrics.txt
 				* These file names need to match the PHENO_DATA.csv file on the desktop.
-2.) Double click the ExToolset icon on the desktop.
+* 2.) Double click the ExToolset icon on the desktop.
 		* Wait for ExToolset to run a check for all the correct files if any of them are not found it will show these in the ~/quality_control/filecheck directories these files need to all be present for ExToolset to do all analysis.
 
 ## Parts of ExToolset can be run by themselves
