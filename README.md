@@ -521,6 +521,14 @@ R packages
 * [Ballgown] (http://bioconductor.org/packages/release/bioc/html/ballgown.html)
 * [Ggplot2] (https://cran.r-project.org/web/packages/ggplot2/index.html)
 * [topGO] (http://bioconductor.org/packages/release/bioc/html/topGO.html)
+* [ggbiplot] (http://github.com/vqv/ggbiplot)
+* [randomForestSRC] (https://cran.r-project.org/web/packages/randomForest/randomForest.pdf)
+* [cluster] (https://cran.r-project.org/web/packages/cluster/cluster.pdf)
+* [edgeR] (http://bioconductor.org/packages/release/bioc/html/edgeR.html)
+* [FactoMineR] (https://cran.r-project.org/web/packages/FactoMineR/FactoMineR.pdf)
+* [ggplot2] (https://cran.r-project.org/web/packages/ggplot2/ggplot2.pdf)
+* [GenomicAllignments] (https://bioconductor.org/packages/release/bioc/manuals/GenomicAlignments/man/GenomicAlignments.pdf)
+* [sirt] (https://cran.r-project.org/web/packages/sirt/sirt.pdf)
 
 ___
 
