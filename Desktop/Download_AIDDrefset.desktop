@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Exec=/home/user/AIDD/AIDD/AIDDrefset.sh /home/user /media/sf_AIDD/AIDD_data
+Name=Download_AIDDrefsest
+GenericName=AIDDrefset
+Comment=Download AIDDrefset
+Icon=/home/user/AIDD/AIDD/Downloadrefset.gif
+Terminal=true
+Type=Application

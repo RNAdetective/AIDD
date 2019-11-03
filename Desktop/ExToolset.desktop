@@ -1,9 +1,9 @@
 [Desktop Entry]
 Version=1.0
-Exec=/home/user/AIDD/AIDD/ExToolset/ExToolset.sh 2 /home/user /media/sf_AIDD/AIDD_data
+Exec=/home/user/AIDD/AIDD/ExToolset/ExToolset.sh 2 /home/user /media/sf_AIDD/McGrath2
 Name=ExToolset
 GenericName=ExToolset
 Comment=Run ExToolset
-Icon=/home/user/AIDD/AIDD.gif
+Icon=/home/user/AIDD/ExToolset.gif
 Terminal=true
 Type=Application
