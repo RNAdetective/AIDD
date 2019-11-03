@@ -477,84 +477,105 @@ If you are running AIDD for the first time without using the prepared VM then yo
 bash AIDD.sh 2 /path/to/AIDD /path/to/store/data
 ```
 
-Then follow the on screen prompts answering 1 when you want the defaults and 2 when you want a different option as defined by the on screen prompt.
+Then follow the on screen prompts answering by typing your response to each question.
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/AIDDoptions.png">
  </p>
  
-<p align="center">Run AIDD with options to download references <p align="center">
+<p align="center">Run AIDD with options <p align="center">
 
 ## More customizable options available in AIDD
-To access the customizable options copy and paste the following command into the terminal
-```
-bash AIDD.sh 2 /path/to/AIDD /path/to/store/dataoutput
-```
-1. Are you running a batch instance 1=(default)no 2=yes
-	* If you loaded one 
- 
-2. Are you downloading sequences from NCBI 1=(default) 2=no
-	* If you want to download sequences from SRA database by their SRAnumber enter 1
-	* If you want to supply your own .fastq files and will supply those file enter 2
-	* If you enter option 2 you will be asked to supply the directory these files are located in.
- 
-3. Do you have bulk RNAseq data? 1=(default) or 2=single
-	* If you want to use bulk RNAseq data enter 1
-	* If you want to use single cell RNA seq data enter 2
+To access double click run AIDD and answer options to the first prompt.
 
-4. Do you have standard mRNA library prep selecting for poly-A tails? 1=(default)yes 2=no(miRNA)
-	* If you have standard library prep for mRNA with your data enter 1
-	* If you have micro RNA dataset enter 2
+1. Do you need to download sequences from NCBI? Please choose from the following:
+	* If you want to download sequences from SRA database by their SRAnumber enter yes
+	* If you want to supply your own .fastq files and will supply those file enter no
+	* If you enter option no you will be asked to supply the directory these files are located in.
+ 
+2. Do yo have bulk RNAseq data or single cell RNAseq data? Please choose from the following:
+	* If you want to use bulk RNAseq data enter bulk
+	* If you want to use single cell RNA seq data enter single
 
-5. Please enter library layout type: 1=(default)paired or 2=single
-	* If you have paired end reads data enter 1
-	* If you have single end reads data enter 2 
+3. Do you have standard mRNA library prep selecting for poly-A tails (mRNA) or microRNA (miRNA)? Please choose from the following:
+	* If you have standard library prep for mRNA with your data enter mRNA
+	* If you have micro RNA dataset enter miRNA
+
+4. Please enter library layout type. Please choose one of the following
+	* If you have paired end reads data enter paired
+	* If you have single end reads data enter single 
 		* (NOTE: variant calling cannot be run with single read data so there will be no editome analysis with single reads.)
 
-6. Which aligner would yo like to use? 1=(default)HISAT2 2=STAR 3=BOWTIE2
-	* If you would like to use HISAT2 for genomic alignment enter 1
-	* If you would like to use STAR for genomic alignemnt enter 2 
+5. Which aligner would yo like to use? Please choose one of the following:
+	* If you would like to use HISAT2 for genomic alignment enter HISAT2
+	* If you would like to use STAR for genomic alignemnt enter STAR 
 		* (You will have to download STAR reference set when asked in later options)
 		* (editome analysis will not be as accurate without STAR references set with annotated snps which is only possible on a machine with at least 100G RAM)
-*If you would like to use BOWTIE2 for genomic alingment enter 3 
+	* If you would like to use BOWTIE2 for genomic alingment enter BOWTIE2 
 	* (This is not a recommended aligner for variant calling so it should be used with caution when uses it for more then differential expression analysis)
 	* (this is recommended aligner to use for miRNA alignment)
 
-7. Which assembler would you like to use? 1=(default)stringtie, 2=cufflinks
-	* If you would like to use stringtie for assembly enter 1
+6. Which assembler would you like to use? Please choose one of the following
+	* If you would like to use stringtie for assembly enter stringtie
 		* This is recommended assembler for HISAT2 alignment
-	* If you would like to use cufflinks for assembly enter 2
+	* If you would like to use cufflinks for assembly enter cufflinks
 		* This is the recommended assembler for STAR and BOWTIE2
 
-8. Would you like to do variant calling for RNAediting prediction at this time? 1=(default) 2=no
-	* If you would like to do variant calling for editome exploration enter 1
-	* If you would like to not do variant calling enter 2
+7. Would you like to do variant calling for RNAediting prediction at this time? Please choose one of the following
+	* If you would like to do variant calling for editome exploration enter yes
+	* If you would like to not do variant calling enter no
 		* This will still prep zipped file with bam files and proper directory structure to then run variant calling at a different time.
 		* This is recommended when you have single reads.
 
-9. Do you want to start at the beginning or do you want to start with variant calling? 1=(default)beginning 2=variant calling I already have bam files present
-	* If you want to do alignemnt and asembly and are starting from raw sra or fastq files enter 1
-	* If you ran AIDD at a different time or have pre-aligned and assembled bam files enter 2
-		*You will then be prompted to enter the directory of those bam files 
+8. Do you want to start at the beginning or do you want to start with variant calling? Please choose one of the following
+	* If you want to do alignemnt and asembly and are starting from raw sra or fastq files enter beginning
+	* If you ran AIDD at a different time or have pre-aligned and assembled bam files enter variantcalling
+		* You will then be prompted to enter the directory of those bam files 
+## To download references if you are not using the default ones already installed in the static VM or if you setup your own VM you need to manually download references before your first run of AIDD
 
-10. Do you have references already downloaded? 1(default)yes 2=no
-	* If you already have references located in the ~/AIDD/references directory enter 1
-	* If you need to download references enter 2
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/Refset.png">
+ </p>
+ 
+<p align="center">Download Reference sets <p align="center">
+	
+Here are the options explained
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/Refset2.png">
+ </p>
+ 
+<p align="center">Download Reference sets options <p align="center">
+	
+1. Would you like to download references at this time? yes or no
+	* If you already have references located in the ~/AIDD/references directory enter no and it will close
+	* If you need to download references enter yes
 		* This is needed if you are installing AIDD for the first time without downloading the pre-made VM from github.
 		* This is recommended if you want to use something other then GRCh37.75 build (note this is the recommended build for the most accurate editome mapping)
-		* Do you have bulk human data? 1=(default)yes 2=no(mouse) 3=no(chimpanzee) 4=no(rat)
-				* If you have human data enter 1.
-						* Please choose a build to download and prepare references files for the while pipeline: 1=GRCh37 2=GRCh38 3=hg19
-								* It is recommended to use GRCh37 for accurate variant calling.
-								* GRCh38 is the option for the newest build but the variant calling is not as accurate since the reference build for HISAT does not have snp annotation available
-				* If you have an organisms not listed it is still possible to use AIDD you just have to download the correct reference set for you organism which includes:
-						* 1.fa
-						* 2.fa
-						* .gtf
-						* snps.vcf
-						**These can manually be placed in the ~/AIDD/referencs directory and then run AIDD as if you already have references
+
+2. Which aligner will you be using? Please select one of the following:
+HISAT2, STAR, or BOWTIE2
+
+3. Do you have poly-A tail prepped mRNA or are you using miRNA? Please chooes one of the following:
+mRNA or miRNA
+
+4. Which organism would you like to use Please responw with one of the following choices:
+	* If you have human data enter human.
+		* Please choose a build to download and prepare references files for the while pipeline: 1=GRCh37 2=GRCh38 3=hg19
+			* It is recommended to use GRCh37 for accurate variant calling.
+			* GRCh38 is the option for the newest build but the variant calling is not as accurate since the reference build for HISAT does not have snp annotation available
+	* If you have mouse rat C. elegans, D. melanogaster, or S. cerevisiae enter the correct choice.
+
+* If you have an organisms not listed it is still possible to use AIDD you just have to download the correct reference set for you organism which includes:
+	* 1.fa
+	* 2.fa
+	* .gtf
+	* snps.vcf
+	* **These can manually be placed in the ~/AIDD/referencs directory and then run AIDD as if you already have references
 
 ## In addition ExToolset can be run by itself
+
+If you have already run AIDD and have the directories setup then you can continue with the instructions if not then you need to run AIDD by double clicking the icon and on the first promt enter the directories. This will create them and then you can move the correct files as instructed below.
 
 * 1.) Do either of the following:
 	* (A)Place the matrix files from AIDD into folder on the desktop labeled put_counts_here including:
@@ -586,8 +607,16 @@ bash AIDD.sh 2 /path/to/AIDD /path/to/store/dataoutput
 		* These file names need to match the PHENO_DATA.csv file on the desktop.
 * 2.) Double click the ExToolset icon on the desktop.
 	* Wait for ExToolset to run a check for all the correct files if any of them are not found it will show these in the ~/quality_control/filecheck directories these files need to all be present for ExToolset to do all analysis.
+	
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/ExToolset.png">
+ </p>
+ 
+<p align="center">Run ExToolset <p align="center">	
 
 ## Parts of ExToolset can be run by themselves
+
+If you have already run AIDD and have the directories setup then you can continue with the instructions if not then you need to run AIDD by double clicking the icon and on the first promt enter the directories. This will create them and then you can move the correct files as instructed below.
 
 * To run ANOVA analysis for each column as a variable by up to three conditions stored in the PHENO_DATA.csv file on the desktop.
 	* Step 1: Fill out pheno_data.csv file for your experiment
