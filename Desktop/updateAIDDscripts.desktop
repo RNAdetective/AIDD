@@ -4,6 +4,6 @@ Exec=/home/user/AIDD/updateAIDDscripts.sh /home/user
 Name=updateAIDDscripts
 GenericName=updateAIDDscripts
 Comment=Run updateAIDDscripts
-Icon=/home/user/AIDD/AIDD.gif
+Icon=/home/user/AIDD/UpdateAIDDscripts.gif
 Terminal=true
 Type=Application

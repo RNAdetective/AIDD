@@ -4,6 +4,6 @@ Exec=/home/user/AIDD/Instancesetup/set_up.sh
 Name=Setup_AIDD
 GenericName=Setup_AIDD
 Comment=Run setup_AIDD
-Icon=/home/user/AIDD/AIDD.gif
+Icon=/home/user/AIDD/setup_AIDD.gif
 Terminal=true
 Type=Application
