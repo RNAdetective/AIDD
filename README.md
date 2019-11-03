@@ -377,6 +377,53 @@ Then shutdown the VM and make sure you go back and create a shared folder if you
 
 ___
 
+## Downloading references
+
+* To download references if you are not using the default ones already installed in the static VM or if you setup your own VM you need to manually download references before your first run of AIDD
+
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/Refset.png">
+ </p>
+ 
+<p align="center">Download Reference sets <p align="center">
+	
+Here are the options explained
+<p align="center">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/Refset2.png">
+ </p>
+ 
+<p align="center">Download Reference sets options <p align="center">
+	
+1. Would you like to download references at this time? yes or no
+	* If you already have references located in the ~/AIDD/references directory enter no and it will close
+	* If you need to download references enter yes
+		* This is needed if you are installing AIDD for the first time without downloading the pre-made VM from github.
+		* This is recommended if you want to use something other then GRCh37.75 build (note this is the recommended build for the most accurate editome mapping)
+
+2. Which aligner will you be using? Please select one of the following:
+HISAT2, STAR, or BOWTIE2
+
+3. Do you have poly-A tail prepped mRNA or are you using miRNA? Please chooes one of the following:
+mRNA or miRNA
+
+4. Which organism would you like to use Please responw with one of the following choices:
+	* If you have human data enter human.
+		* Please choose a build to download and prepare references files for the while pipeline: 1=GRCh37 2=GRCh38 3=hg19
+			* It is recommended to use GRCh37 for accurate variant calling.
+			* GRCh38 is the option for the newest build but the variant calling is not as accurate since the reference build for HISAT does not have snp annotation available
+	* If you have mouse rat C. elegans, D. melanogaster, or S. cerevisiae enter the correct choice.
+
+* If you have an organisms not listed it is still possible to use AIDD you just have to download the correct reference set for you organism which includes:
+	* 1.fa
+	* 2.fa
+	* .gtf
+	* snps.vcf
+	* **These can manually be placed in the ~/AIDD/referencs directory and then run AIDD as if you already have references
+
+
+___
+
 ## ZIKV with RMD for R-studio
 
 To run the tutorial open R studio and find the AIDDtutorial.rmd file under /home/user/AIDD/AIDD/AIDDtutorial.rmd.  Run the chunks from begining to end.  This tutorial explains each step of the AIDD pipeline and allow for user to change code as necessry.
@@ -456,14 +503,8 @@ Step 3: Simply double click the icon labeled Run_AIDD on the desktop to run AIDD
  
 <p align="center">Run AIDD by double clicking the icon on the desktop <p align="center">
 
-If you needed to install AIDD anywhere other then the defualt VM /home/user directory or want the output data stored somewhere other then the default /media/sf_AIDD/AIDD_data you need to specify this in the command line as explained below.
-
-copy and paste the following command into the command prompt
-
-```
-bash AIDD.sh 1 /path/to/AIDD /path/to/store/data
-```
 Once AIDD starts a terminal will open and ask you if you want to run defaults or with some user defined options or if you want to just make the AIDD directories to run AIDD later or to run parts of the ExToolset without having to run AIDD.
+To run with defaults and no futher prompts enter defaults
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/runAIDD.png">
@@ -471,13 +512,17 @@ Once AIDD starts a terminal will open and ask you if you want to run defaults or
  
 <p align="center">Run AIDD with defaults see manual to customize<p align="center">
 	
-If you are running AIDD for the first time without using the prepared VM then you need to download references to use. To do this simply copy and paste the following command
+___
+	
+If you needed to install AIDD anywhere other then the defualt VM /home/user directory or want the output data stored somewhere other then the default /media/sf_AIDD/AIDD_data you need to specify this in the command line as explained below.
+
+copy and paste the following command into the command prompt
 
 ```
-bash AIDD.sh 2 /path/to/AIDD /path/to/store/data
+bash AIDD.sh /path/to/AIDD /path/to/store/data
 ```
 
-Then follow the on screen prompts answering by typing your response to each question.
+___
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/AIDDoptions.png">
@@ -531,47 +576,7 @@ To access double click run AIDD and answer options to the first prompt.
 	* If you want to do alignemnt and asembly and are starting from raw sra or fastq files enter beginning
 	* If you ran AIDD at a different time or have pre-aligned and assembled bam files enter variantcalling
 		* You will then be prompted to enter the directory of those bam files 
-## To download references if you are not using the default ones already installed in the static VM or if you setup your own VM you need to manually download references before your first run of AIDD
-
-
-<p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/Refset.png">
- </p>
- 
-<p align="center">Download Reference sets <p align="center">
-	
-Here are the options explained
-<p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/Refset2.png">
- </p>
- 
-<p align="center">Download Reference sets options <p align="center">
-	
-1. Would you like to download references at this time? yes or no
-	* If you already have references located in the ~/AIDD/references directory enter no and it will close
-	* If you need to download references enter yes
-		* This is needed if you are installing AIDD for the first time without downloading the pre-made VM from github.
-		* This is recommended if you want to use something other then GRCh37.75 build (note this is the recommended build for the most accurate editome mapping)
-
-2. Which aligner will you be using? Please select one of the following:
-HISAT2, STAR, or BOWTIE2
-
-3. Do you have poly-A tail prepped mRNA or are you using miRNA? Please chooes one of the following:
-mRNA or miRNA
-
-4. Which organism would you like to use Please responw with one of the following choices:
-	* If you have human data enter human.
-		* Please choose a build to download and prepare references files for the while pipeline: 1=GRCh37 2=GRCh38 3=hg19
-			* It is recommended to use GRCh37 for accurate variant calling.
-			* GRCh38 is the option for the newest build but the variant calling is not as accurate since the reference build for HISAT does not have snp annotation available
-	* If you have mouse rat C. elegans, D. melanogaster, or S. cerevisiae enter the correct choice.
-
-* If you have an organisms not listed it is still possible to use AIDD you just have to download the correct reference set for you organism which includes:
-	* 1.fa
-	* 2.fa
-	* .gtf
-	* snps.vcf
-	* **These can manually be placed in the ~/AIDD/referencs directory and then run AIDD as if you already have references
+___
 
 ## In addition ExToolset can be run by itself
 
