@@ -11,7 +11,7 @@ then
   rm AIDDscripts.tar.gz #remove compressed file
   mkdir "$home_dir"/AIDD/AIDD
   cp -r "$home_dir"/AIDDscripts/* /home/user/AIDD/AIDD/ #moves all the updated scripts to the correct directory
-  AIDDs="$home_dir"/AIDD/AIDD
+  AIDDs="$home_dir"/AIDD
   gsettings set org.gnome.desktop.background picture-uri "file://"$AIDDs"/AIDDlogo.jpg"
   rm -r "$home_dir"/AIDDscripts
 else
