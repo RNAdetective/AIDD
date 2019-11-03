@@ -96,6 +96,15 @@ then
   gsettings set org.gnome.desktop.background picture-uri "file://"$home_dir"/AIDD/AIDDlogo.jpg"
   cd
   mv "$home_dir"/AIDD/Desktop/* "$home_dir"/Desktop
+  for i in AIDD AIDDpipeline AIDD AIDDrefset ;
+  do
+    chmod +x ~/AIDD/"$i".sh
+  done
+  for i in Download_AIDDrefset Run_AIDD Setup_AIDD updateAIDDscripts ;
+  do
+    chmod +x ~/Desktop/"$i".desktop
+  done
+  
   sudo usermod -G vboxsf -a user
   Rscript "$home_dir"/AIDD/Instancesetup/set_up.R
 else
