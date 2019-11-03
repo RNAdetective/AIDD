@@ -451,7 +451,7 @@ The next four steps 2-5 are optional if you don't have any genes of interest or 
 Step 3: Simply double click the icon labeled Run_AIDD on the desktop to run AIDD with default settings.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step12.png">
+<img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/step12b.png">
  </p>
  
 <p align="center">Run AIDD by double clicking the icon on the desktop <p align="center">
@@ -463,6 +463,8 @@ copy and paste the following command into the command prompt
 ```
 bash AIDD.sh 1 /path/to/AIDD /path/to/store/data
 ```
+Once AIDD starts a terminal will open and ask you if you want to run defaults or with some user defined options or if you want to just make the AIDD directories to run AIDD later or to run parts of the ExToolset without having to run AIDD.
+
 <p align="center">
 <img src="https://raw.githubusercontent.com/RNAdetective/AIDD/master/steps/runAIDD.png">
  </p>
