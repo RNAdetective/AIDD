@@ -92,8 +92,15 @@ runfoldernameup=${run:0:3}
 runfoldername=$(echo "$runfoldernameup" | tr '[:upper:]' '[:lower:]')
 runfolder=${run:0:6}
 lastnum=${run:9:10}
+countrun=$(echo -n "$run" | wc -c)
+if [ "$countrun" == "11" ];
+then
+  finallastnum=$(echo ""$lastnum"")
+else
+  finallastnum=$(echo "0"$lastnum"")
+fi
 cd "$wd"/
-wget ftp://ftp.sra.ebi.ac.uk/vol1/"$runfoldername"/"$runfolder"/00"$lastnum"/"$run"
+wget ftp://ftp.sra.ebi.ac.uk/vol1/"$runfoldername"/"$runfolder"/0"$finallastnum"/"$run"
 # wget ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/"$runfoldername"/"$runfolder"/"$run"/"$run".sra # this was for ncbi but ebi works better
 cd "$dir_path"/AIDD
 }
@@ -112,6 +119,8 @@ HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$
 HISAT2_single() { hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$wd"/"$file_fastq" -t --summary-file "$dir_path"/raw_data/counts/"$run".txt -S "$wd"/"$file_sam" ; }
 STAR_paired() { echo "STAR some text line on how to run" ; }
 STAR_single() { echo "STAR some text line on how to run" ; }
+BOWTIE2_paired() { echo "BOWTIE2 some text line on how to run" ; }
+BOWTIE2_single() { echo "BOWTIE2 some text line on how to run" ; }
 samtobam() { java -Djava.io.tmpdir="$dir_path"/tmp -jar "$AIDDtool"/picard.jar SortSam INPUT="$wd"/"$file_sam" OUTPUT="$rdbam"/$file_bam SORT_ORDER=coordinate ; }
 assem_string() { stringtie "$rdbam"/"$file_bam" -p3 -G "$ref_dir_path"/ref.gtf -A "$dir_path"/raw_data/counts/"$file_tab" -l -B -b "$dir_path"/raw_data/ballgown_in/"$sample"/"$run" -e -o "$dir_path"/raw_data/ballgown/"$sample"/"$file_name_gtf" ; }
 temp_dir() {
@@ -474,8 +483,6 @@ esac
 ####################################################################################################################
 ####################################################################################################################
 ####################################################################################################################
-if [ ! -f "$rdbam"/"$file_bam" ];
-then
 INPUT="$dir_path"/PHENO_DATA.csv
 OLDIFS=$IFS
 {
@@ -503,7 +510,7 @@ do
 ####################################################################################################################
 #  DOWNLOADS
 ####################################################################################################################
-  if [[ "$sra" == 1 && "$bamfile" == 1 ]]; # IF DOWNLOAD SRA
+  if [[ "$sra" == "yes" && "$bamfile" == "beginning" ]]; # IF DOWNLOAD SRA
   then
     if [ ! -f "$wd"/"$file_sra" ]; # IF OUTPUT FILE IS NOT THERE
     then
@@ -537,7 +544,6 @@ step2=$(echo "ALIGN_AND_ASSEMBLE")
 steps
 } < $INPUT
 IFS=$OLDIFS
-fi
 ####################################################################################################################
 ####################################################################################################################
 ####################################################################################################################
@@ -547,236 +553,274 @@ fi
 ####################################################################################################################
 export PATH=$PATH:$AIDDtool/bin
 cd "$dir_path"/AIDD
-INPUT="$dir_path"/PHENO_DATA.csv
-OLDIFS=$IFS
-{
-[ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
-read
-while IFS=, read -r samp_name run condition sample condition2 condition3
-do
-  source config.shlib; # load the config library functions
-  dir_path="$(config_get dir_path)"; # main directory
-  wd="$dir_path"/working_directory; # working directory
-  home_dir="$(config_get home_dir)"; # home directory
-  ref_dir_path="$(config_get ref_dir_path)"; # reference directory
-  dirqc="$dir_path"/quality_control; # qc directory
-  AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
-  rdvcf="$dir_path"/raw_data/vcf_files # directory for vcf files
-  rdbam="$dir_path"/raw_data/bam_files # directory for bam files
-  rdsnp="$dir_path"/raw_data/snpEff #directory for snp files
-  javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
-  fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
-  ref_dir_path="$(config_get ref_dir_path)"; # directory for where to put the reference files
-  sra="$(config_get sra)"; # downloading sra files or have your own
-  library="$(config_get library)"; # paired or single
-  aligner="$(config_get aligner)"; # HISAT2 or STAR
-  assembler="$(config_get assembler)"; # Strintie or cufflinks
-  variant="$(config_get variant)"; # variant calling
-  start=12;
-  end=97;
-  file_sra="$run";
-  file_fastq="$run".fastq;
-  file_fastq="$run".fastq;
-  file_fastqpaired1="$run"_1.fastq;
-  file_fastqpaired2="$run"_2.fastq;
-  file_fastqpaired1pass="$run"_pass_1.fastq;
-  file_fastqpaired2pass="$run"_pass_2.fastq;
-  file_fastqpaired1trim="$run"_trim_1.fastq;
-  file_fastqpaired2trim="$run"_trim_2.fastq;
-  file_sam="$run".sam;
-  file_bam="$run".bam;
-  file_tab="$run".tab;
-  file_name_gtf="$sample".gtf;
+if [ "$bamfile" != "variantcalling" ];
+then
+  INPUT="$dir_path"/PHENO_DATA.csv
+  OLDIFS=$IFS
+  {
+  [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+  read
+  while IFS=, read -r samp_name run condition sample condition2 condition3
+  do
+    source config.shlib; # load the config library functions
+    dir_path="$(config_get dir_path)"; # main directory
+    wd="$dir_path"/working_directory; # working directory
+    home_dir="$(config_get home_dir)"; # home directory
+    ref_dir_path="$(config_get ref_dir_path)"; # reference directory
+    dirqc="$dir_path"/quality_control; # qc directory
+    AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
+    rdvcf="$dir_path"/raw_data/vcf_files # directory for vcf files
+    rdbam="$dir_path"/raw_data/bam_files # directory for bam files
+    rdsnp="$dir_path"/raw_data/snpEff #directory for snp files
+    javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
+    fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
+    ref_dir_path="$(config_get ref_dir_path)"; # directory for where to put the reference files
+    sra="$(config_get sra)"; # downloading sra files or have your own
+    library="$(config_get library)"; # paired or single
+    aligner="$(config_get aligner)"; # HISAT2 or STAR
+    assembler="$(config_get assembler)"; # Strintie or cufflinks
+    variant="$(config_get variant)"; # variant calling
+    start=12;
+    end=97;
+    file_sra="$run";
+    file_fastq="$run".fastq;
+    file_fastq="$run".fastq;
+    file_fastqpaired1="$run"_1.fastq;
+    file_fastqpaired2="$run"_2.fastq;
+    file_fastqpaired1pass="$run"_pass_1.fastq;
+    file_fastqpaired2pass="$run"_pass_2.fastq;
+    file_fastqpaired1trim="$run"_trim_1.fastq;
+    file_fastqpaired2trim="$run"_trim_2.fastq;
+    file_sam="$run".sam;
+    file_bam="$run".bam;
+    file_tab="$run".tab;
+    file_name_gtf="$sample".gtf;
 ####################################################################################################################
 # CONVERT SRA TO FASTQ
 ####################################################################################################################
-  if [[ "$sra" == 1 && "$library" == 1 ]];
-  then
-    tool=fastqdumppaired
-    file_in="$wd"/$file_sra
-    file_out="$wd"/$file_fastqpaired1
-    file_out2="$wd"/$file_fastqpaired2
-    run_tools2o
-  fi
+    if [[ "$sra" == "yes" && "$library" == "paired" ]];
+    then
+      tool=fastqdumppaired
+      file_in="$wd"/$file_sra
+      file_out="$wd"/$file_fastqpaired1
+      file_out2="$wd"/$file_fastqpaired2
+      run_tools2o
+    fi
 ####################################################################################################################
 #  CONVERT SRA TO FASTQ
 ####################################################################################################################
-  if [[ "$sra" == 1 && "$library" == 2 ]];
-  then
-    tool=fastqdumpsingle
-    file_in="$wd"/$file_sra   
-    file_out="$wd"/$file_fastq
-    run_tools
-  fi
+    if [[ "$sra" == "yes" && "$library" == "single" ]];
+    then
+      tool=fastqdumpsingle
+      file_in="$wd"/$file_sra   
+      file_out="$wd"/$file_fastq
+      run_tools
+    fi
 ####################################################################################################################
 # MOVEFASTQPAIRED
 ####################################################################################################################
-  if [[ "$sra" == 2 && "$library" == 1 ]];
-  then
-    tool=movefastqpaired
-    file_in=$fastq_dir_path/$file_fastqpaired1
-    file_in2=$fastq_dir_path/$file_fastqpaired2
-    file_out="$wd"/$file_fastqpaired1
-    file_out2="$wd"/$file_fastqpaired2
-    run_tools2i2o
-   fi
+    if [[ "$sra" == "no" && "$library" == "paired" ]];
+    then
+      tool=movefastqpaired
+      file_in=$fastq_dir_path/$file_fastqpaired1
+      file_in2=$fastq_dir_path/$file_fastqpaired2
+      file_out="$wd"/$file_fastqpaired1
+      file_out2="$wd"/$file_fastqpaired2
+      run_tools2i2o
+     fi
 ####################################################################################################################
 #  MOVEFASTQSINGLE
 ####################################################################################################################
-  if [[ "$sra" == 2 && "$library" == 2 ]];
-  then
-    tool=movefastqsingle
-    file_in=$fastq_dir_path/$file_fastq   
-    file_out="$wd"/$file_fastq
-    run_tools
-  fi
+    if [[ "$sra" == "no" && "$library" == "single" ]];
+    then
+      tool=movefastqsingle
+      file_in=$fastq_dir_path/$file_fastq   
+      file_out="$wd"/$file_fastq
+      run_tools
+    fi
 ####################################################################################################################
 # PAIRED QUALITY CONTROL
 ####################################################################################################################
-  if [ "$library" == 1 ];
-  then
-    tool=fastqcpaired
-    file_in="$wd"/$file_fastqpaired1
-    file_in2="$wd"/$file_fastqpaired2
-    file_out=$dirqc/fastqc/"$run"_1_fastqc.html
-    file_out2=$dirqc/fastqc/"$run"_2_fastqc.html
-    JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
-    version=11
-    setjavaversion
-    run_tools2i2o
-    version=8
-    JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
-    setjavaversion
-  fi
+    if [ "$library" == "paired" ];
+    then
+      tool=fastqcpaired
+      file_in="$wd"/$file_fastqpaired1
+      file_in2="$wd"/$file_fastqpaired2
+      file_out=$dirqc/fastqc/"$run"_1_fastqc.html
+      file_out2=$dirqc/fastqc/"$run"_2_fastqc.html
+      JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+      version=11
+      setjavaversion
+      run_tools2i2o
+      version=8
+      JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
+      setjavaversion
+    fi
 ####################################################################################################################
 #  SINGLE QUALITY CONTROL
 ####################################################################################################################
-  if [ "$library" == 2 ];
-  then
-    tool=fastqcsingle
-    file_in="$wd"/$file_fastq    
-    file_out=$dirqc/fastqc/"$run"_fastqc.html
-    rm -f "$wd"/"$file_sra"
-    JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
-    version=11
-    setjavaversion
-    run_tools
-    JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
-    version=8
-    setjavaversion
-  fi
+    if [ "$library" == "single" ];
+    then
+      tool=fastqcsingle
+      file_in="$wd"/$file_fastq    
+      file_out=$dirqc/fastqc/"$run"_fastqc.html
+      rm -f "$wd"/"$file_sra"
+      JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+      version=11
+      setjavaversion
+      run_tools
+      JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
+      version=8
+      setjavaversion
+    fi
 ####################################################################################################################
 # PAIRED TRIMMING
 ####################################################################################################################
-  if [ "$library" == 1 ];
-  then
-    tool=trimpaired
-    file_in="$wd"/$file_fastqpaired1
-    file_in2="$wd"/$file_fastqpaired2
-    file_out=$dirqc/fastqc/"$run"_trim_1_fastqc.html 
-    file_out2=$dirqc/fastqc/"$run"_trim_2_fastqc.html
-    JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
-    version=11
-    setjavaversion 
-    start=12
-    end=97  
-    run_tools2i2o
-    JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/
-    version=8 
-    setjavaversion
-  fi
+    if [ "$library" == "paired" ];
+    then
+      tool=trimpaired
+      file_in="$wd"/$file_fastqpaired1
+      file_in2="$wd"/$file_fastqpaired2
+      file_out=$dirqc/fastqc/"$run"_trim_1_fastqc.html 
+      file_out2=$dirqc/fastqc/"$run"_trim_2_fastqc.html
+      JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+      version=11
+      setjavaversion 
+      start=12
+      end=97  
+      run_tools2i2o
+      JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/
+      version=8 
+      setjavaversion
+    fi
 ####################################################################################################################
 # TRIMMING SINGLE
 ####################################################################################################################
-  if [ "$library" == 2 ];
-  then
-    tool=trimsingle
-    file_in="$wd"/$file_fastq    
-    file_out=$dirqc/fastqc/"$run"_trim_fastqc.html
-    JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
-    version=11
-    setjavaversion
-    start=12
-    end=97
-    run_tools
-    JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
-    version=8
-    setjavaversion
-  fi
+    if [ "$library" == "single" ];
+    then
+      tool=trimsingle
+      file_in="$wd"/$file_fastq    
+      file_out=$dirqc/fastqc/"$run"_trim_fastqc.html
+      JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+      version=11
+      setjavaversion
+      start=12
+      end=97
+      run_tools
+      JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
+      version=8
+      setjavaversion
+    fi
 ####################################################################################################################
 # ALIGNMENT HISAT2 PAIRED
 ####################################################################################################################
-  if [[ "$library" == 1 && "$aligner" == 1 ]];
-  then
-    tool=HISAT2_paired
-    file_in="$wd"/$file_fastqpaired1
-    file_in2="$wd"/$file_fastqpaired2    
-    file_out="$wd"/$file_sam
-    rm -f "$wd"/"$file_sra"
-    run_tools2i
-  fi
+    if [[ "$library" == "paired" && "$aligner" == "HISAT2" ]];
+    then
+      tool=HISAT2_paired
+      file_in="$wd"/$file_fastqpaired1
+      file_in2="$wd"/$file_fastqpaired2    
+      file_out="$wd"/$file_sam
+      rm -f "$wd"/"$file_sra"
+      run_tools2i
+    fi
 ####################################################################################################################
 # ALIGNMENT HISAT2 SINGLE
 ####################################################################################################################
-  if [[ "$library" == 2 && "$aligner" == 1 ]];
-  then
-    tool=HISAT2_single
-    file_in="$wd"/$file_fastq    
-    file_out="$wd"/$file_sam
-    run_tools
-  fi
+    if [[ "$library" == "single" && "$aligner" == "HISAT2" ]];
+    then
+      tool=HISAT2_single
+      file_in="$wd"/$file_fastq    
+      file_out="$wd"/$file_sam
+      run_tools
+    fi
 ####################################################################################################################
 # ALIGNMENT STAR PAIRED
 ####################################################################################################################
-  if [[ "$library" == 1 && "$aligner" == 2 ]];
-  then
-    tool=STAR_paired
-    file_in="$wd"/$file_fastqpaired1    
-    file_in2="$wd"/$file_fastqpaired2    
-    file_out="$wd"/$file_sam
-    run_tools2i
-  fi
+    if [[ "$library" == "paired" && "$aligner" == "STAR" ]];
+    then
+      tool=STAR_paired
+      file_in="$wd"/$file_fastqpaired1    
+      file_in2="$wd"/$file_fastqpaired2    
+      file_out="$wd"/$file_sam
+      run_tools2i
+    fi
 ####################################################################################################################
 # ALIGNMENT STAR SINGLE
 ####################################################################################################################
-  if [[ "$library" == 2 && "$aligner" == 2 ]];
-  then
-    tool=STAR_single
-    file_in="$wd"/$file_fastq    
-    file_out="$wd"/$file_sam
-    run_tools
-  fi
+    if [[ "$library" == "single" && "$aligner" == "STAR" ]];
+    then
+      tool=STAR_single
+      file_in="$wd"/$file_fastq    
+      file_out="$wd"/$file_sam
+      run_tools
+    fi
+####################################################################################################################
+# ALIGNMENT BOWTIE2 PAIRED
+####################################################################################################################
+    if [[ "$library" == "paired" && "$aligner" == "STAR" ]];
+    then
+      tool=BOWTIE2_paired
+      file_in="$wd"/$file_fastqpaired1    
+      file_in2="$wd"/$file_fastqpaired2    
+      file_out="$wd"/$file_sam
+      run_tools2i
+    fi
+####################################################################################################################
+# ALIGNMENT BOWTIE2 SINGLE
+####################################################################################################################
+    if [[ "$library" == "single" && "$aligner" == "STAR" ]];
+    then
+      tool=BOWTIE2_single
+      file_in="$wd"/$file_fastq    
+      file_out="$wd"/$file_sam
+      run_tools
+    fi
 ####################################################################################################################
 #  samtobam
 ####################################################################################################################
-  tool=samtobam
-  file_in="$wd"/$file_sam    
-  file_out="$rdbam"/$file_bam
-  rm -f "$wd"/*.fastq
-  run_tools
+    tool=samtobam
+    file_in="$wd"/$file_sam    
+    file_out="$rdbam"/$file_bam
+    rm -f "$wd"/*.fastq
+    run_tools
 ####################################################################################################################
 #  ASSEMBLY STRINGTIE
 ####################################################################################################################
-  tool=assem_string
-  file_in="$rdbam"/"$file_bam"    
-  file_out="$dir_path"/raw_data/counts/"$file_tab" 
-  run_tools
-  rm -f "$wd"/"$file_sam"
-  filecheckVC="$dirqc"/filecheck
-  type1="$dir_path"/raw_data/ballgown/"$sample"/"$sample".gtf
-  snptype=gtf
-  temp_dir # delete temp directories if present
-  create_filecheck
+    if [ "$assembler" == "stringtie" ];
+    then
+      tool=assem_string
+      file_in="$rdbam"/"$file_bam"    
+      file_out="$dir_path"/raw_data/counts/"$file_tab" 
+      run_tools
+      rm -f "$wd"/"$file_sam"
+    fi
+####################################################################################################################
+#  ASSEMBLY CUFFLINKS
+####################################################################################################################
+    if [ "$assembler" == "cufflinks" ];
+    then
+      tool=assem_cuff
+      file_in="$rdbam"/"$file_bam"
+      file_out="$dir_path"/raw_data/counts
+      run_tools
+      rm -f "$wd"/"$file_sam"
+    fi
+    filecheckVC="$dirqc"/filecheck
+    type1="$dir_path"/raw_data/ballgown/"$sample"/"$sample".gtf
+    snptype=gtf
+    temp_dir # delete temp directories if present
+    create_filecheck
 ####################################################################################################################
 #  FINISH
 ####################################################################################################################
-next_samp
-done
-step1=$(echo "ALIGN_AND_ASSEMBLE")
-step2=$(echo "VARIANT_CALLING_1_PREP_BAM_FILES")
-steps
-} < $INPUT
-IFS=$OLDIFS
+  next_samp
+  done
+  step1=$(echo "ALIGN_AND_ASSEMBLE")
+  step2=$(echo "VARIANT_CALLING_1_PREP_BAM_FILES")
+  steps
+  } < $INPUT
+  IFS=$OLDIFS
+fi
 ####################################################################################################################
 ####################################################################################################################
 ####################################################################################################################
@@ -784,7 +828,7 @@ IFS=$OLDIFS
 ####################################################################################################################
 ####################################################################################################################
 ####################################################################################################################
-if [[ "$variant" == 1 || "$variant" == 3 ]]; # IF DO DOWNLOAD NOW OR JUST DO VARIANT CALLING
+if [[ "$variant" == "yes" || "$bamfile" == "variantcalling" ]]; # IF DO DOWNLOAD NOW OR JUST DO VARIANT CALLING
 then
   INPUT="$dir_path"/PHENO_DATA.csv
   OLDIFS=$IFS  
@@ -1132,7 +1176,7 @@ fi
 ####################################################################################################################
 ####################################################################################################################
 ####################################################################################################################
-if [ "$variant" == 2 ];
+if [ "$variant" == "no" ];
 then
   step1=$(echo "AIDD_ANALYSIS_WITHOUT_VARIANTS_COMPLETE")
   step2=$(echo "NOW_CLEANING_UP_AND_COMPRESSING_RESULTS")

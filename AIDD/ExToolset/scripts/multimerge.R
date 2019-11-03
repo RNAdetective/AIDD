@@ -80,11 +80,11 @@ colnames(pheno_in)[1] <- level_name
 }
 final <- merge(pheno_in, data_in, by=level_name)
 final[!duplicated(final$level_name), ]
-write.csv(final, file_out, quote=FALSE, row.names=FALSE)
+write.csv(final, tempfile, quote=FALSE, row.names=FALSE)
 if ( Rtool == "transpose" ) {
-data <- read.csv(file_out, row.names=1)
+data <- read.csv(tempfile, row.names=1)
 data2 <- t(data)
-write.csv(data2, tempfile, quote=FALSE)
+write.csv(data2, file_out, quote=FALSE)
 }
 if ( Rtooltrans == "transpose" ) {
 data <- read.csv(file_out, row.names=1)

@@ -2,97 +2,72 @@
 ####################################################################################################################
 # this sets up variables for options
 ####################################################################################################################
-echo "Please see the manual for set up and instructions to run AIDD.  Make sure before you start you have created the auto mount shared folder called AIDD on your host computer and completed the directions on the desktop. If not running defaults please follow the prompts to fill in the details for your experiment."
-default="$1" # defaut is first space
-home_dir="$2" # home directory is second space
-dir_path="$3" # working directory is third space
-LOG_LOCATION="$dir_path"/quality_control/logs
-new_dir="$LOG_LOCATION"
-create_dir
-exec > >(tee -i $LOG_LOCATION/AIDDpipeline.log)
-exec 2>&1
-
-echo "Log Location should be: [ $LOG_LOCATION ]"
-if [ "$default" == "2" ]; #this allows for download of sequences or starting with your own .fastq files 
+home_dir="$1" # home directory is second space
+dir_path="$2" # working directory is third space
+echo "Please see the manual for set up and instructions to run AIDD.  Make sure before you start you have created the auto mount shared folder called AIDD on your host computer and completed the directions on the desktop. Would you like to run AIDD with defaults? Please select from the following: (note default = runs AIDD with all default setting from start to finish; options = prompts user to select from various tool and dataset options; diretories = to run just the AIDD file setup and not run the rest of AIDD at this time."
+echo "default, options or directories"
+read AIDD
+if [ "$AIDD" != "default" ]; #this allows for download of sequences or starting with your own .fastq files 
 then
-  echo "Are you running a batch instance? 1=(default)no 2=yes" # do you want to download your pheno_data file
-  read pheno
-  if [ "$pheno" == "2" ];
-  then
-    echo "How many samples do you want in each batch?"
-    read splitnum
-  fi
-  echo "Are you downloading sequences from NCBI 1=(default)yes 2=no" # download sequences
+  #echo "Are you running a batch instance? Please choose from the following:"
+  #echo "1=(default)no 2=yes" # do you want to download your pheno_data file
+  #read pheno
+  #if [ "$pheno" == "2" ];
+  #then
+  #  echo "How many samples do you want in each batch?"
+  #  read splitnum
+  #fi
+  echo "Do you need to download sequences from NCBI? Please choose from the following:"
+  echo "yes or no" # download sequences
   read sra
-  if [ "$sra" == "2" ]; # if no downloads
+  if [ "$sra" == "no" ]; # if no downloads
   then
-    echo "Are your files in the folder on the desktop? 1=(default)yes 2=no"
-    read fastq
-    if [ "$fastq" == "2" ];
-    then
-      echo "Are you downloading the sequences from a previously preparred file accroding to the directions outlined in the manual? 1=no they are located somewhere other then the folder on the desktop. 2=yes I need to download them"
-      read fastqdown
-      if [ "$fastqdown" == "1" ];
-      then
-        echo "Please enter the directory where the fastq files are located."
-        read fastq_dir_path # where to find fastq files
-      fi
-      if [ "$fastqdown" == "2" ];
-      then
-        echo "Please enter the url to download the sequences."
-        read fastq_url # where to find fastq files
-      fi
-    fi
+    echo "Please enter the directory where the fastq files are located. Please make sure these are files have the correct naming format SRRXXXXXXX_1.fastq more details can be found in the manual"
+    read fastq_dir_path # where to find fastq files
   fi  
-  echo "Do you have bulk RNAseq data? 1=(default)yes 2=no (single cell)" # do you have bulk or single reads
-  read scRNA
-  echo "Do you have standard mRNA library prep selecting for poly-A tails? 1=(default)yes 2=no (miRNA)" # mRNA or miRNA data
+  echo "Do you have bulk RNAseq data or single cell RNAseq data? Please choose from the following:"
+  echo "bulk single" # do you have bulk or single reads
+  read scRNA 
+  echo "Do you have standard mRNA library prep selecting for poly-A tails (mRNA) or microRNA library prep (miRNA)? Please choose one of the following:"
+  echo "mRNA or miRNA" # mRNA or miRNA data
   read miRNA
-  if [ "$miRNA" == "2" ];
+  if [ "$miRNA" == "miRNA" ];
   then
-    echo "Would you like to align to whole transcriptome? 1=(default)yes 2=no(hairpin) 3=no(mature)"
+    echo "Would you like to align to whole genome, just hairpin miRNA or just the mature miRNA? Please choose one of the following:"
+echo "whole, hairpin or mature"
     read miRNAtype
   fi
-  echo "Please enter library layout type: 1=(default)paired or 2=single" # this allows for selection between paired and single end data
+  echo "Please enter library layout type. Please choose one of the following:"
+  echo "paired or single" # this allows for selection between paired and single end data
   read library
-  echo "Which aligner would you like to use? 1=(default)HISAT2, 2=STAR, 3=BOWTIE2" # which alignment tool
+  echo "Which aligner would you like to use? Please choose one of the following: (note that if you are using STAR or BOWTIE2 you need to make sure you download the correct reference sets before you run AIDD by double clicking on the AIDDrefset icon on the desktop."
+echo "HISAT2, STAR or BOWTIE2" # which alignment tool
   read aligner 
-  echo "Which assembler would you like to use? 1=(default)stringtie, 2=cufflinks" # which assembly tool
+  echo "Which assembler would you like to use? Please choose one of the following: (note that if you are using HISAT2 stringtie is suggested and with STAR and BOWTIE2 cufflinks is recommended)"
+  echo "stringtie or cufflinks" # which assembly tool
   read assembler 
-  echo "Would you like to do variant calling for RNAediting prediction at this time? 1=(default)yes 2=no" # run variant calling
+  echo "Would you like to do variant calling for RNAediting prediction at this time? Please choose one of the following:" 
+  echo "yes or no" # run variant calling
   read variant
-  echo "Do you want to start at the beginning or do you want to start with variant calling? 1=(default)beginning 2=variant calling I already have bam files present" # do you need to download bam files
+  echo "Do you want to start at the beginning or do you want to start with variant calling? Please choose one of the following:"
+  echo "beginning variantcalling" # do you need to download bam files
   read bamfile
- ## if [ "$bamfile" == "2" ];
- ##   echo "Do you need to download bam files?"
-  echo "Do you have references already downloaded? 1=(default)yes 2=no" # do you want to download references now
-  read ref
-  if [ "$ref" == 2 ];
-  then
-    echo "Do you have bulk human data? 1=(default)yes 2=no(mouse) 3=no(chimpanzee)" # human or mouse data
-    read human
-    if [ "$human" == "1" ];
-    then
-      echo "Please choose a build to download and prepare reference files for the whole pipeline. 1=GRCh37, 2=GRCh38, 3=hg19" # which build for ref
-      read ref_set
-    fi
-  fi
+ ## if [ "$bamfile" == "variantcalling" ];
+ ##   echo "Please enter the directory?"
+ ##   read bamfile_dir
+ ## fi
 else
-  pheno=$"1";
-  instancebatch=$"1";
-  indexes=$"1";
-  sra=$"1";
-  scRNA=$"1";
-  miRNA=$"1";
-  miRNAtype=$"1";
-  library=$"1";
-  aligner=$"1";
-  assembler=$"1";
-  variant=$"1";
-  bamfile=$"1";
-  ref=$"1";
-  human=$"1";
-  ref_set=$"1";
+  #pheno=$"1";
+  #instancebatch=$"1";
+  sra=$"yes";
+  scRNA=$"bulk";
+  miRNA=$"mRNA";
+  miRNAtype=$"whole";
+  library=$"paired";
+  aligner=$"HISAT2";
+  assembler=$"stringtie";
+  variant=$"yes";
+  bamfile=$"beginning";
 fi
 ####################################################################################################################
 #THIS DEFINES FUNCTIONS 
@@ -397,9 +372,8 @@ DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
 TIME_HOUR=$(date +%H)
 TIME_MIN=$(date +%M)
 TIME_SEC=$(date +%S)
-default="$1"
-home_dir="$2" # home_dir=/home/user
-dir_path="$3" # dir_path=/home/user/testAIDD 
+home_dir="$1" # home_dir=/home/user
+dir_path="$2" # dir_path=/home/user/testAIDD 
 ref_dir_path="$home_dir"/AIDD/references  # this is where references are stored
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
@@ -435,6 +409,16 @@ data_summary_file5="$dirres"/amino_acid/amino_acidallsummaries.csv;
 data_summary_file6="$dirres"/impact/impactallsummaries.csv;
 data_summary_file6a="$dirres"/VEXallsummaries.csv;
 data_summary_filefinal="$dirres"/allsummaries.csv;
+qc_dir="$dir_path"/quality_control
+new_dir="$qc_dir"
+create_dir
+LOG_LOCATION="$dir_path"/quality_control/logs
+new_dir="$LOG_LOCATION"
+create_dir
+exec > >(tee -i $LOG_LOCATION/AIDDpipeline.log)
+exec 2>&1
+
+echo "Log Location will be: [ $LOG_LOCATION ]"
 ###############################################################################################################################################################
 # CREATE DIRECTORIES                                                                                                                           *TESTED
 ###############################################################################################################################################################
@@ -442,7 +426,7 @@ echo1=$(echo "CREATING DIRECTORIES")
 mes_out
 new_dir="$dir_path"
 create_dir # creates new directory to store results
-if [ "$pheno" == "1" ];
+if [ ! -f "$dir_path"/PHENO_DATA.csv ];
 then
   to_move="$home_dir"/Desktop/PHENO_DATA.csv
   file_move="$dir_path"/PHENO_DATA.csv
@@ -551,191 +535,10 @@ fastq_dir_path="$home_dir"" >> "$dir_path"/AIDD/config.cfg # add special directo
   get_fastq
 fi
 ####################################################################################################################
-#  DOWNLOAD REFERENCES
-####################################################################################################################
-if [ "$ref" = 2 ];
-then
-  new_dir="$ref_dir_path"
-  create_dir
-  ref_files="$(ls -1 "$ref_dir_path" | wc -l)"
-  if [ ! "$ref_files" == 0 ];
-  then
-    mv "$ref_dir_path" "$ref_dir_path"_old # THIS WILL STORY ANY OLD REFERENCES FOR LATER USE
-    mkdir "$ref_dir_path"
-  fi
-  cd "$ref_dir_path"
-####################################################################################################################
-#  GRCh37.75
-####################################################################################################################
-  if  [ "$ref_set" == "1" ]; 
-  then
-    if [ "$aligner" == "1" ];
-    then
-      ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch37_snp_tran.tar.gz
-      set_ref=grch37_snp_tran
-      HISAT_ref
-    fi
-    ftpsite=ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh37.75.cdna.all.fa.gz # ref.fa
-    ref_name=ref.fa
-    downloaded_ref
-    if [ "$miRNA" == "1" ];
-    then
-      ftpsite=ftp://ftp.ensembl.org/pub/release-75/gtf/homo_sapiens/Homo_sapiens.GRCh37.75.gtf.gz # ref.gtf
-      ref_name=ref.gtf
-      downloaded_ref
-    fi
-    if [ "$miRNA" == "2" ];
-    then
-      ftpsite=ftp://mirbase.org/pub/mirbase/CURRENT/genomes/hsa.gff3 # ref.gtf
-      ref_name=ref.gtf
-      downloaded_ref
-    fi
-    if [ "$miRNA" == "1" ];
-    then
-      ftpsite=ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz # ref1.fa
-      ref_name=ref1.fa
-      downloaded_ref
-    fi
-    if [[ "$miRNA" == "2" && "$miRNAtype" == "1" ]];
-    then
-      ftpsite=ftp://ftp.ensembl.org/pub/release-75/fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz # ref1.fa
-      ref_name=ref1.fa
-      downloaded_ref
-    fi
-    if [[ "$miRNA" == "2" && "$miRNAtype" == "2" ]];
-    then
-      ftpsite=ftp://mirbase.org/pub/mirbase/CURRENT/hairpin.fa.gz # ref1.fa
-      ref_name=ref1.fa
-      downloaded_ref
-    fi
-    if [[ "$miRNA" == "2" && "$miRNAtype" == "3" ]];
-    then
-      ftpsite=ftp://mirbase.org/pub/mirbase/CURRENT/mature.fa.gz # ref1.fa
-      ref_name=ref1.fa
-      downloaded_ref
-    fi
-    ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.b37.vcf.gz
-    ref_name=dbsnp.vcf
-    downloaded_ref
-    wget https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh37.75.zip/download
-    gunzip download
-    organize_ref
-  fi
-####################################################################################################################
-#  GRCh38.92
-####################################################################################################################
-  if  [ "$ref_set" == "2" ]; then
-    if [ "$aligner" == "1" ]; then
-    ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch38_snp_tran.tar.gz
-    set_ref=grch38_snp_tran
-    HISAT_ref
-    fi
-    ftpsite=ftp://ftp.ensembl.org/pub/release-84/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz # ref.fa
-    ref_name=ref.fa
-    downloaded_ref
-    ftpsite=ftp://ftp.ensembl.org/pub/release-84/gtf/homo_sapiens/Homo_sapiens.GRCh38.84.gtf.gz # ref.gtf
-    ref_name=ref.gtf
-    downloaded_ref 
-    ftpsite=ftp://ftp.ensembl.org/pub/release-84/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz # ref1.fa
-    ref_name=ref1.fa
-    downloaded_ref
-    ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg38/dbsnp_138.hg38.vcf.gz # dpsnp.vcf
-    ref_name=dbsnp.vcf
-    downloaded_ref
-    wget https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.92.zip
-    gunzip download
-    organize_ref
-  fi
-####################################################################################################################
-#  hg19 FILL THESE IN
-####################################################################################################################
-  if  [ "$ref_set" == "3" ]; then
-    ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/hg19.tar.gz
-    set_ref=hg19
-    HISAT_ref
-    ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz # ref.fa
-    ref_name=ref.fa
-    downloaded_ref
-    ftpsite=ftp://ftp.ensembl.org/pub/release-92/gtf/homo_sapiens/Homo_sapiens.GRCh38.92.gtf.gz # ref.gtf
-    ref_name=ref.gtf
-    downloaded_ref 
-    ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz # ref1.fa
-    ref_name=ref1.fa
-    downloaded_ref
-    ftpsite=https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.92.zip # snpEff
-    ref_name=
-    downloaded_ref
-    ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.hg38.vcf.gz # dpsnp.vcf
-    ref_name=dbsnp.vcf
-    downloaded_ref
-    organize_ref
-  fi
-####################################################################################################################
-#  Mouse
-####################################################################################################################
-  if  [ "$human" == "2" ]; then
-  ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grcm38_snp_tran.tar.gz
-  set_ref=grcm38_snp_tran
-  HISAT_ref
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/mus_musculus/cdna/Mus_musculus.GRCm38.cdna.all.fa.gz # ref.fa
-  ref_name=ref.fa
-  downloaded_ref
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/gtf/homo_sapiens/Homo_sapiens.GRCh38.92.gtf.gz # ref.gtf
-  com_ref=Homo_sapiens.GRCh38.92.gtf
-  ref_name=ref.gtf
-  downloaded_ref 
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.primary_assembly.fa.gz # ref1.fa
-  ref_name=ref1.fa
-  downloaded_ref
-  ftpsite=https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.92.zip # snpEff
-  com_ref=download
-  downloaded_ref
-  ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.hg38.vcf.gz # dpsnp.vcf
-  com_ref=dbsnp_138.hg38.vcf
-  downloaded_ref
-  organize_ref
-  fi
-####################################################################################################################
-#  Rat
-####################################################################################################################
-  if  [ "$human" == "3" ]; then
-  ftpsite=ftp://ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/rn6.tar.gz
-  set_ref=rn6
-  HISAT_ref
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/rattus_norvegicus/cdna/Rattus_norvegicus.Rnor_6.0.cdna.all.fa.gz # ref.fa
-  ref_name=ref.fa
-  downloaded_ref
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/gtf/mus_musculus/Mus_musculus.GRCm38.92.gtf.gz # ref.gtf
-  ref_name=ref.gtf
-  downloaded_ref 
-  ftpsite=ftp://ftp.ensembl.org/pub/release-92/fasta/rattus_norvegicus/dna/Rattus_norvegicus.Rnor_6.0.dna.toplevel.fa.gz # ref1.fa
-  ref_name=ref1.fa
-  downloaded_ref
-  ftpsite=ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/b37/dbsnp_138.hg38.vcf.gz # dpsnp.vcf
-  ref_name=dbsnp.vcf
-  downloaded_ref
-  wget https://sourceforge.net/projects/snpeff/files/databases/v4_3/snpEff_v4_3_GRCh38.92.zip # snpEff
-  gunzip download
-  organize_ref
-  fi
-####################################################################################################################
-#  STAR References
-####################################################################################################################
-  if [ "$aligner" == "2" ];
-  then
-    star --runMode genomeGenerate --genomeDir "$ref_dir_path"/ --genomeFastaFiles "$ref_dir_path"/ref1.fa --sjdbGTFfile "$ref_dir_path"/ref.gtf
-  fi
-####################################################################################################################
-#  Bowtie2 Build References
-####################################################################################################################
-  if [ "$aligner" == "3" ];
-  then
-    bowtie2-build [options]* "$ref_dir_path"/ref1.fa "$ref_dir_path"/genome
-  fi
-fi
-####################################################################################################################
 #  Run AIDD
 ####################################################################################################################
-cd "$dir_path"/AIDD
-bash "$dir_path"/AIDD/AIDDpipeline.sh # runs AIDD pipeline
-  
+if [ "$AIDD" != "directories" ];
+then
+  cd "$dir_path"/AIDD
+  bash "$dir_path"/AIDD/AIDDpipeline.sh # runs AIDD pipeline
+fi  
