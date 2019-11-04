@@ -1478,7 +1478,7 @@ then
               #percentGint=$(echo "${percentG%%.*}")
               #percentGint=$(echo "$percentGint")
               percentGint=${percentG%.*}
-              if [ "$percentG" -gt "$edit_value" ];
+              if [ "$percentGint" -gt "$edit_value" ];
               then 
                 answer="1"
               fi  
@@ -1496,19 +1496,20 @@ then
           fi
           count_matrix="$dir_path"/Results/excitome_count_matrixrun.csv
           excit_pres=$(cat "$file_in" | awk '{if ($1 ~ /'"$chrome"'/) print $2}' | awk '{if ($1 ~ /'"$coord"'/) print $0}')
+          excitome_gene_short=${excitome_gene%_*}
           if [ "$excitome_gene" == "ADAR.1" ];
           then
-            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene'/) print NR}')
+            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
           fi
           if [ "$excitome_gene" == "ADAR.B1" ];
           then
-            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene'/) print NR}')
+            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
           fi
           if [ "$excitome_gene" == "ADAR.B2" ];
           then
-            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene'/) print NR}')
+            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
           fi
-          express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene'/) print NR}')
+          express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
           if [ "$express_col" == "" ];
           then
             excit_express=$(echo "0")
@@ -1517,7 +1518,7 @@ then
           else
             express_row=$(cat "$count_matrix" | awk -F',' '{if (/'$bamfile'/) print NR}')
             excit_express=$(cat "$count_matrix" | awk -F',' 'NR=='$express_row'{print $'$express_col'}')
-            echo1=$(echo ""$bamfile".bam "$excitome_gene_s" with editing coordinate "$chrome":"$coord" is located at "$express_col":"$express_row" in "$count_matrix" having a TPM of "$excit_express" Expression is marked 1 if it is above "$express_value"")
+            echo1=$(echo ""$bamfile".bam "$excitome_gene" with editing coordinate "$chrome":"$coord" is located at "$express_col":"$express_row" in "$count_matrix" having a TPM of "$excit_express" Expression is marked 1 if it is above "$express_value"")
             mes_out
             if [ "$excit_express" -gt "$express_value" ];
             then
@@ -1525,8 +1526,26 @@ then
             else
               ex_answer="0" 
             fi
-            echo ""$excitome_gene","$answer"" >> "$gutt_matrix1"
-            echo ""$excitome_gene","$ex_answer"" >> "$gutt_matrix2"
+            in_file="$gutt_matrix1"
+            phrase=$(echo "$excitome_gene_short")
+            missing=$(grep -o "$phrase" "$in_file" | wc -l)
+            if [ ! "$missing" == "0" ];
+            then
+              echo1=$(echo "ALREADY FOUND "$excitome_gene_short" in "$gutt_matrix1"")
+              mes_out
+            else
+              echo ""$excitome_gene_short","$answer"" >> "$gutt_matrix1"
+            fi
+            in_file="$gutt_matrix2"
+            phrase=$(echo "$excitome_gene")
+            missing=$(grep -o "$phrase" "$in_file" | wc -l)
+            if [ ! "$missing" == "0" ];
+            then
+              echo1=$(echo "ALREADY FOUND "$excitome_gene" in "$gutt_matrix2"")
+              mes_out
+            else
+              echo ""$excitome_gene","$ex_answer"" >> "$gutt_matrix2"
+            fi
           fi
         fi
       else

@@ -100,7 +100,7 @@ else
   finallastnum=$(echo "0"$lastnum"")
 fi
 cd "$wd"/
-wget ftp://ftp.sra.ebi.ac.uk/vol1/"$runfoldername"/"$runfolder"/0"$finallastnum"/"$run"
+wget -q --tries=5 ftp://ftp.sra.ebi.ac.uk/vol1/"$runfoldername"/"$runfolder"/0"$finallastnum"/"$run"
 # wget ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/"$runfoldername"/"$runfolder"/"$run"/"$run".sra # this was for ncbi but ebi works better
 cd "$dir_path"/AIDD
 }
