@@ -96,11 +96,15 @@ then
   gsettings set org.gnome.desktop.background picture-uri "file://"$home_dir"/AIDD/AIDDlogo.jpg"
   cd
   mv "$home_dir"/AIDD/Desktop/* "$home_dir"/Desktop
-  for i in AIDD AIDDpipeline AIDD AIDDrefset ;
+  for i in AIDD AIDDpipeline AIDDrefset ;
   do
     chmod +x ~/AIDD/"$i".sh
   done
-  for i in Download_AIDDrefset Run_AIDD Setup_AIDD updateAIDDscripts ;
+    for i in ExToolset ExToolsetANOVA ExToolsetcorr ExToolsetDESeq2 ExToolsetFrequency ExToolsetGEApanther ExToolsetGuttman ExToolsetParts ExToolsetsplit ;
+  do
+    chmod +x ~/AIDD/ExToolset/"$i".sh
+  done
+  for i in AIDDdirectories Download_AIDDrefset ExToolset ExToolsetFrequency ExToolsetParts Run_AIDD Setup_AIDD updateAIDDscripts ;
   do
     chmod +x ~/Desktop/"$i".desktop
   done
