@@ -37,7 +37,7 @@ then
   sudo apt-get --yes install build-essential python2.7-dev python-htseq
   sudo apt-get install python-pip
   pip install biopython --upgrade
-  for tool in sra-toolkit fastx-toolkit samtools fastqc csvtools r-base-core gdebi-core  libcurl4-openssl-dev libxml2-dev libssl-dev r-cran-rmysql libmysql++-dev ;
+  for tool in sra-toolkit fastx-toolkit samtools fastqc csvtool r-base-core gdebi-core  libcurl4-openssl-dev libxml2-dev libssl-dev r-cran-rmysql libmysql++-dev ;
   do
     intool="$tool"
     install_tool # installs tools
