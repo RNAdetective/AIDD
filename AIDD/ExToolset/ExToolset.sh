@@ -318,6 +318,24 @@ rm "$dir_path"/temp.R
 GvennR() {
 Rscript "$ExToolset"/Gvenn.R "$file_in" "$file_out" "$image_out"
 }
+basecount() {
+Rscript "$dir_path"/tempbasecount.R "$file_in" "$temp_file"
+rm "$dir_path"/tempbasecount.R
+}
+add_conditions() {
+  ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
+  count_matrix="$dirres"/"$name"_count_matrix.csv
+  Rtool=finalmerge
+  Rtype=single2f
+  GOI_file="$dirres"/"$name"_count_matrixrun.csv
+  file_out="$dirres"/"$name"_count_matrixrun.csv
+  mergefile="$dirres"/"$name"_count_matrix.csv
+  phenofile="$dir_path"/PHENO_DATA.csv
+  level_name=$(echo "samp_name")
+  echo1=$(echo "CREATING "$file_out"")
+  mes_out
+  mergeR
+}
 end_check() {
 if [ "$var1" == "$varA" ];
 then
@@ -807,6 +825,7 @@ do
     mes_out
   fi
 done
+
 if [ -s "$matrix_file" ];
 then
   if [ ! -s "$matrix_file4" ];
@@ -824,6 +843,8 @@ then
     mes_out
     mergeR
     rm "$dirres"/temp.csv
+    name=excitome
+    add_conditions
   else
     echo1=$(echo "ALREADY FOUND "$matrix_file4"")
     mes_out
@@ -832,32 +853,6 @@ else
   echo1=$(echo "CANT FIND "$matrix_file"") 
   mes_out
 fi # NOW HAVE EXCTIOME MATRIX
-  INPUT="$dir_path"/PHENO_DATA.csv
-  OLDIFS=$IFS
-  {
-  [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-  read
-  while IFS=, read -r samp_name run condition sample condition2 condition3
-  do
-    source config.shlib;
-    home_dir=$(config_get home_dir);
-    dir_path=$(config_get dir_path);
-    dirres=$(config_get dirres);
-    ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
-    count_matrix="$dirres"/excitome_count_matrix.csv
-    Rtool=finalmerge
-    Rtype=single2f
-    GOI_file="$dirres"/excitome_count_matrixrun.csv
-    file_out="$dirres"/excitome_count_matrixrun.csv
-    mergefile="$dirres"/excitome_count_matrix.csv
-    phenofile="$dir_path"/PHENO_DATA.csv
-    level_name=$(echo "samp_name")
-    echo1=$(echo "CREATING "$file_out"")
-    mes_out
-    mergeR
-  done 
-  } < $INPUT
-  IFS=$OLDIFS
 if [ -s "$matrix_file" ];
 then
   for level in gene transcript ;
@@ -943,6 +938,47 @@ else
   echo1=$(echo "CANT FIND "$matrix_file5" OR "$matrix_file4"") 
   mes_out
 fi # NOW HAVE GTEX MATRIX
+###############################################################################################################################################################
+# Create Pathway matrix for user input                                                                                            *TESTED
+############################################################################################################################################################### 
+if [ -s "$matrix_file" ];
+then
+  for level in gene transcript ;
+  do
+    user_GOI="$home_dir"/Desktop/insert_"$level"_lists_for_pathways
+    for files in "$user_GOI"/* ;
+    do
+      dir_name=$(echo "$files" | sed 's/\//./g' | cut -f 6 -d '.')
+      file_name=$(echo "$dir_name" | cut -f 1 -d '.')
+      echo "$file_name"
+      echo ""$file_name"" >> "$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_pathway_"$level"list.csv
+      matrix_file4a="$dirres"/"$file_name"_count_matrix.csv
+      if [ ! -s "$matrix_file4a" ];
+      then
+        cur_wkd="$dirres"
+        summaryfile=none
+        Rtool=transpose
+        Rtype=single2f
+        file_out="$dirres"/"$file_name"pathway_count_matrix.csv
+        mergefile="$user_GOI"/"$file_name".csv
+        phenofile="$dirres"/"$level"_count_matrixedited.csv
+        level_name=$(echo ""$level"_name")
+        summaryfile="$dir_path"/PHENO_DATA.csv
+        GOI_file="$dirres"/temp.csv
+        echo1=$(echo "CREATING "$file_out"")
+        mes_out
+        mergeR
+        rm "$dirres"/temp.csv
+      else
+        echo1=$(echo "ALREADY FOUND "$matrix_file4a"")
+        mes_out
+      fi
+    done
+  done
+else
+  echo1=$(echo "CANT FIND "$matrix_file"") 
+  mes_out
+fi # NOW HAVE USE SUPPLIED GENE OR TRANSCRIPT PATHWAY MATRIX
 ###############################################################################################################################################################
 # Global substitution variant matrix G_VEX matrix                                                                                            *TESTED
 ############################################################################################################################################################### 
@@ -1350,8 +1386,10 @@ then
     mes_out
     mergeR
     file_in="$file_out"
-    cat "$file_in" | sed '/Inf/d' | sed 's/gene_name/sampname/g' | sed 's/Var.1/sampname/g' | sed 's/_[0-9]*//g' >> "$dir_path"/temp.csv
+    cat "$file_in" | sed '/Inf/d' | sed 's/gene_name/sampname/g' | sed 's/Var.1/sampname/g' >> "$dir_path"/temp.csv
     temp_file
+    name=all
+    add_conditions
   else
     echo1=$(echo "CANT FIND "$matrix_file11"")
     mes_out
@@ -1360,289 +1398,8 @@ else
   echo1=$(echo "ALREADY FOUND "$matrix_filefinal"")
   mes_out
 fi
-
-######################################################################################
-# makes editing frequency count matrix pulling stacks from aligned and assembled bam file
-######################################################################################
-
-Matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
-if [ ! -s "$matrix_file_out" ];
-then
-
-  INPUT="$ExToolsetix"/index/excitome_loc.csv
-  {
-  [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
-  read
-  while IFS=, read -r excitome_gene gene_id snp_database chrome coord strand annotation AAsubstitution AAposition exon codon_position express_value edit_value
-  do
-    source config.shlib;
-    home_dir=$(config_get home_dir);
-    dir_path=$(config_get dir_path);
-    dirres=$(config_get dirres);
-    ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
-    ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
-    express_value=$(echo "$express_value")
-    #express_value=$(($num + 0))
-    edit_value=$(echo "$edit_value")
-   # edit_value=$(($num + 0))
-    allcm="$dirres"/all_count_matrix.csv
-    dirresRF="$dirres"/random_forest
-    new_dir="$dirresRF"
-    create_dir
-    dirresgutt="$dirres"/guttman
-    new_dir="$dirresgutt"
-    create_dir
-    AIDDtool="$home_dir"/AIDD/AIDD_tools
-    USCOUNTER="0"
-    for files in "$dir_path"/raw_data/bam_files/* ;
-    do
-      file_in="$files"
-      bamfiles=$(echo "${file_in##*/}")
-      bamfile=$(echo "${bamfiles%%.*}")
-      #extension=$(echo "${bamfiles##*.}")
-      echo "Now starting editing profiles in $bamfile for "$excitome_gene""
-      new_dir="$dirresRF"/"$bamfile"
-      create_dir
-      temp_file="$dirresRF"/"$bamfile"/"$excitome_gene".csv
-      if [ "$coord" != "0" ];
-      then
-        cat "$ExToolset"/basecount.R | sed 's/coord/'$coord'/g' | sed 's/chrome/'$chrome'/g' >> "$dir_path"/tempbasecount.R
-        bambai="$dir_path"/raw_data/bam_files/"$bamfile".bai
-        if [ "$file_in" != "$bambai" ];
-        then
-          if [ ! -f "$bambai" ];
-          then
-            java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$file_in"
-          fi
-          Rscript "$dir_path"/tempbasecount.R "$file_in" "$temp_file"
-          rm "$dir_path"/tempbasecount.R
-          nucA=$(awk -F',' 'NR==2{print $1}' "$temp_file")
-          nucC=$(awk -F',' 'NR==2{print $2}' "$temp_file")
-          nucG=$(awk -F',' 'NR==2{print $3}' "$temp_file")
-          nucT=$(awk -F',' 'NR==2{print $4}' "$temp_file")
-          nuctotal=$(expr "$nucA" + "$nucG" + "$nucC" + "$nucT")
-          if [ "$nucG" == "0" ];
-          then
-            percentG="0"
-          else
-            freqG=$(expr "$nucG" / "$nuctotal")
-            percentG=$(awk 'BEGIN{print '$nucG' / '$nuctotal' * 100}')
-          fi
-          if [ "$nucC" == "0" ];
-          then
-            percentC="0"
-          else
-            freqC=$(expr "$nucC" / "$nuctotal")
-            percentC=$(awk 'BEGIN{print '$nucC' / '$nuctotal' * 100}')
-          fi
-          RF_matrix_dir="$dirresRF"/mergesamples
-          new_dir="$RF_matrix_dir"
-          create_dir
-          gutt_matrix_dir1="$dirresgutt"/mergesamples1
-          new_dir="$gutt_matrix_dir1"
-          create_dir
-          gutt_matrix_dir2="$dirresgutt"/mergesamples2
-          new_dir="$gutt_matrix_dir2"
-          create_dir
-          RF_matrix="$RF_matrix_dir"/"$bamfile"editingfreq.csv
-          gutt_matrix1="$gutt_matrix_dir1"/"$bamfile"editing_gutt.csv
-          gutt_matrix2="$gutt_matrix_dir2"/"$bamfile"expression_gutt.csv
-          if [ ! -f "$RF_matrix" ];
-          then
-            echo "excitome_site,$bamfile" >> "$RF_matrix"
-          fi
-          if [ ! -f "$gutt_matrix1" ];
-          then
-            echo "excitome_site,"$bamfile"edited" >> "$gutt_matrix1"
-          fi
-          if [ ! -f "$gutt_matrix2" ];
-          then
-            echo "excitome_site,"$bamfile"edited" >> "$gutt_matrix2"
-          fi
-          if [ "$nuctotal" -gt "10" ];
-          then
-            if [[ "$percentC" != "0" && "$nucC" -gt "$nucG" ]];
-            then
-              echo ""$excitome_gene","$percentC"" >> "$RF_matrix"
-              #percentCint=$(echo "${percentC%%.*}")
-              #percentCint=$(echo "$percentCint")
-              percentCint=${percentC%.*}
-              if [ "$percentCint" -gt "$edit_value" ];
-              then 
-                answer="1"
-              fi 
-            fi
-            if [[ "$percentG" != "0" && "$nucG" -gt "$nucC" ]];
-            then
-              echo ""$excitome_gene","$percentG"" >> "$RF_matrix"
-              #percentGint=$(echo "${percentG%%.*}")
-              #percentGint=$(echo "$percentGint")
-              percentGint=${percentG%.*}
-              if [ "$percentGint" -gt "$edit_value" ];
-              then 
-                answer="1"
-              fi  
-            fi
-            if [[ "$percentG" == "0" && "$percentC" == "0" ]];
-            then
-              echo ""$excitome_gene",0" >> "$RF_matrix"
-              answer="0"
-            fi
-            echo ""$bamfile" has "$nucA" A's "$nucC" C's "$nucG" G's "$nucT" T's for a total of "$nuctotal" read depth which a "$percentG" % edited to a G or "$percentC" % edited to a C"
-          else
-            echo ""$excitome_gene",0" >> "$RF_matrix"
-            answer="0"
-            echo ""$bamfile" has "$nucA" A's "$nucC" C's "$nucG" G's "$nucT" T's for a total of "$nuctotal" read depth which a is too low to determine frequency"
-          fi
-          count_matrix="$dir_path"/Results/excitome_count_matrixrun.csv
-          excit_pres=$(cat "$file_in" | awk '{if ($1 ~ /'"$chrome"'/) print $2}' | awk '{if ($1 ~ /'"$coord"'/) print $0}')
-          excitome_gene_short=${excitome_gene%_*}
-          if [ "$excitome_gene" == "ADAR.1" ];
-          then
-            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
-          fi
-          if [ "$excitome_gene" == "ADAR.B1" ];
-          then
-            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
-          fi
-          if [ "$excitome_gene" == "ADAR.B2" ];
-          then
-            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
-          fi
-          express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
-          if [ "$express_col" == "" ];
-          then
-            excit_express=$(echo "0")
-            echo1=$(echo ""$bamfile".bam shows "$excitome_gene" with editing coordinate "$chrome":"$coord" was not found in "$count_matrix" so expression is labeled 0")
-            mes_out
-          else
-            express_row=$(cat "$count_matrix" | awk -F',' '{if (/'$bamfile'/) print NR}')
-            excit_express=$(cat "$count_matrix" | awk -F',' 'NR=='$express_row'{print $'$express_col'}')
-            echo1=$(echo ""$bamfile".bam "$excitome_gene" with editing coordinate "$chrome":"$coord" is located at "$express_col":"$express_row" in "$count_matrix" having a TPM of "$excit_express" Expression is marked 1 if it is above "$express_value"")
-            mes_out
-            if [ "$excit_express" -gt "$express_value" ];
-            then
-              ex_answer="1"
-            else
-              ex_answer="0" 
-            fi
-            in_file="$gutt_matrix1"
-            phrase=$(echo "$excitome_gene_short")
-            missing=$(grep -o "$phrase" "$in_file" | wc -l)
-            if [ ! "$missing" == "0" ];
-            then
-              echo1=$(echo "ALREADY FOUND "$excitome_gene_short" in "$gutt_matrix1"")
-              mes_out
-            else
-              echo ""$excitome_gene_short","$answer"" >> "$gutt_matrix1"
-            fi
-            in_file="$gutt_matrix2"
-            phrase=$(echo "$excitome_gene")
-            missing=$(grep -o "$phrase" "$in_file" | wc -l)
-            if [ ! "$missing" == "0" ];
-            then
-              echo1=$(echo "ALREADY FOUND "$excitome_gene" in "$gutt_matrix2"")
-              mes_out
-            else
-              echo ""$excitome_gene","$ex_answer"" >> "$gutt_matrix2"
-            fi
-          fi
-        fi
-      else
-        echo "Moving on to next sample"
-      fi
-    done
-  done
-  } < $INPUT
-  IFS=$OLDIFS
-  dirres="$dir_path"/Results
-  dirresRF="$dirres"/random_forest
-  RF_matrix_dir="$dirresRF"/mergesamples
-  dirresgutt="$dirres"/guttman
-  gutt_matrix_dir1="$dirresgutt"/mergesamples1
-  gutt_matrix_dir2="$dirresgutt"/mergesamples2
-  cd "$RF_matrix_dir"
-  cur_wkd="$RF_matrix_dir"
-  Rtool=$(echo "I_VEX")
-  Rtype=$(echo "multi")
-  GOI_file="$dirresRF"/temp.csv
-  summaryfile=none
-  tempfile3=transpose
-  names=$(echo "excitome_site")
-  file_out="$dirres"/excitomefreq_count_matrix.csv
-  echo1=$(echo "CREATING "$file_out"")
-  mes_out
-  mergeR
-  cd "$gutt_matrix_dir1"
-  cur_wkd="$RF_matrix_dir1"
-  Rtool=$(echo "I_VEX")
-  Rtype=$(echo "multi")
-  GOI_file="$dirresgutt"/temp.csv
-  summaryfile=none
-  tempfile3=transpose
-  names=$(echo "excitome_site")
-  file_out="$dirresgutt"/guttediting_count_matrix.csv
-  echo1=$(echo "CREATING "$file_out"")
-  mes_out
-  mergeR
-  cd "$gutt_matrix_dir2"
-  cur_wkd="$RF_matrix_dir2"
-  Rtool=$(echo "I_VEX")
-  Rtype=$(echo "multi")
-  GOI_file="$dirresgutt"/temp.csv
-  summaryfile=none
-  tempfile3=transpose
-  names=$(echo "excitome_site")
-  file_out="$dirresgutt"/guttexpression_count_matrix.csv
-  echo1=$(echo "CREATING "$file_out"")
-  mes_out
-  mergeR
-  filecheck="$dirqc"/filecheck
-  in_file="$filecheck"/filecheckgtf1.csv
-  missing=$(grep -o 'no' "$in_file" | wc -l)
-  #if [ ! "$missing" == "0" ];
-  #then
-     #echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
-     #mes_out
-  #else
-    #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
-    #mes_out
-    file_out="$dirres"/excitomefreq_count_matrixedited.csv
-    file_in="$dirres"/excitomefreq_count_matrix.csv
-    index_file="$ExToolsetix"/index/"$level"_names.csv
-    pheno_file="$dir_path"/PHENO_DATA.csv
-    Rtool=GTEX
-    level_id=$(echo ""$level"_id");
-    level_name=$(echo ""$level"_name");
-    filter_type=$(echo "protein_coding");
-    level="$level"
-    tempf1="$dir_path"/tempR1.csv
-    tempf2="$dir_path"/tempR2.csv
-    tempf3="$dir_path"/tempR3.csv
-    file_in="$index_file"
-    cat "$index_file" | sed 's/-/_/g' >> "$dir_path"/temp.csv
-    temp_file
-    file_in="$dirres"/excitomefreq_count_matrix.csv
-    echo1=$(echo "CREATING "$file_out"")
-    mes_out
-    matrixeditor
-    header=$(head -n 1 "$file_out")
-    cat "$file_out" | awk -F',' 'NR > 1{s=0; for (i=3;i<=NF;i++) s+=$i; if (s!=0)print}' | sort -u -k1 | sed '1i '$level'_name'$header'' >> "$dir_path"/temp.csv
-    file_in="$file_out"
-    temp_file
-  #fi
-fi
-# still need to add scripts to create guttman off this.
-#if nuctotal -gt editing frequency print a 1 in new matrix 
-#if expression -gt expression value print a 1 in new matrix
-#then merge two matrix with each other and pheno_data file
-#then run guttman
-#then run randomforest
-#
-
-
 ###############################################################################################################################################################
-# Moves and creates editing impact count matrices                                                                                          *TESTED
+# CREATES NUMBER OF EDITING SITES WITHIN EACH GENE THAT IMPACT PROTEIN FUNCTION                                                                 *TESTED
 ###############################################################################################################################################################
 for level in gene transcript ;
 do
@@ -1793,33 +1550,405 @@ do
     done
   done
 done
-
-## TO COMBINE ALL FILES IN EACH SNPTYPE SO HAVE EACH SAMPLE IS A COLUMN OF GENES FOR GENE ENRICHMENT INPUT
-#for level in gene transcript ;
-#do
-#  for impact in high_impact moderate_impact ;
-#  do
-#    for snptype in ADARediting APOBECediting All ;
-#    do
-#      for file in "$dirres"/variant_calling/impact/"$level"/"$impact"/"$snptype"/
-#      cat "$file" | awk -F',' {print $1} >> "$dirres"/variant_calling/impact/"$level""$impact""$snptype"GeneLists.csv
-#    done
-#  done
-#done
+###############################################################################################################################################################
+# COMBINE ALL FILES IN EACH SNPTYPE SO HAVE EACH SAMPLE IS A COLUMN OF GENES FOR GENE ENRICHMENT INPUT                                   *Working
+###############################################################################################################################################################
+for level in gene transcript ;
+do
+  for impact in high_impact moderate_impact ;
+  do
+    for snptype in ADARediting APOBECediting All ;
+    do
+      matrix_dir="$dirres"/variant_calling/impact/"$level"/"$impact"/"$snptype"
+      for file in "$matrix_dir" ;
+      do
+        new_dir="$matrix_dir"/merge
+        create_dir
+        file_in="$file"
+        namefiles=$(echo "${file_in##*/}")
+        name=$(echo "${bamfiles%%.*}")
+        #cat "$file" | awk -F',' {print $1} | sed 's/id/'$name'/g' >> "$matrix_dir"/merge/"$level""$impact""$snptype"GeneLists.csv
+      done
+    done
+  done
+done
 ##RUN TOPGO TO CREATE LIST OF GOTERMS WITH HOW MANY GENES ARE IN PATHWAY HOW MNAY OF THESE HAVE EDITING SITES
 #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetGEA.sh GOID,Term,annotated,sig,expected,rankinfisher,classicfisher,classicelim
 #maybe do annotated,sigincontrol,sigincondition1,expected
 ###############################################################################################################################################################
-# Statistical Analysis section                                                                                                         *WORKING ON IT
+# CREATE FREQUENCY MATRIX FROM BAM FILES FOR EXCTIOME EDITING SITES                                                                      *Working
 ###############################################################################################################################################################
 cd "$dir_path"/AIDD
-#if [ ! -f "$dir_path"/Results/guttman_count_matrix.csv ];
-#then
-#  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 2 #creates guttman_count_matrix.csv and runs guttman tests (need to add this part)
+source config.shlib;
+home_dir=$(config_get home_dir);
+dir_path=$(config_get dir_path);
+dirres=$(config_get dirres);
+ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
+matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
+  INPUT="$ExToolsetix"/index/excitome_loc.csv
+  {
+  [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+  read
+  while IFS=, read -r excitome_gene gene_id snp_database chrome coord strand annotation AAsubstitution AAposition exon codon_position express_value edit_value
+  do
+    source config.shlib;
+    home_dir=$(config_get home_dir);
+    dir_path=$(config_get dir_path);
+    dirres=$(config_get dirres);
+    ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
+    ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
+    express_value=$(echo "$express_value")
+    #express_value=$(($num + 0))
+    edit_value=$(echo "$edit_value")
+   # edit_value=$(($num + 0))
+    allcm="$dirres"/all_count_matrix.csv
+    dirresRF="$dirres"/random_forest
+    new_dir="$dirresRF"
+    create_dir
+    dirresgutt="$dirres"/guttman
+    new_dir="$dirresgutt"
+    create_dir
+    AIDDtool="$home_dir"/AIDD/AIDD_tools
+    USCOUNTER="0"
+    for files in "$dir_path"/raw_data/bam_files/* ;
+    do
+      file_in="$files"
+      bamfiles=$(echo "${file_in##*/}")
+      bamfile=$(echo "${bamfiles%%.*}")
+      #extension=$(echo "${bamfiles##*.}")
+      new_dir="$dirresRF"/"$bamfile"
+      create_dir
+      temp_file="$dirresRF"/"$bamfile"/"$excitome_gene".csv
+      if [ "$coord" != "0" ];
+      then
+        cat "$ExToolset"/basecount.R | sed 's/coord/'$coord'/g' | sed 's/chrome/'$chrome'/g' >> "$dir_path"/tempbasecount.R
+        bambai="$dir_path"/raw_data/bam_files/"$bamfile".bai
+        if [ "$file_in" != "$bambai" ];
+        then
+          echo "Now starting editing profiles in $bamfile for "$excitome_gene""
+          if [ ! -f "$bambai" ];
+          then
+            java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$file_in"
+          fi
+          file_out="$temp_file"
+          tool=basecount
+          run_tools
+          nucA=$(awk -F',' 'NR==2{print $1}' "$temp_file")
+          nucC=$(awk -F',' 'NR==2{print $2}' "$temp_file")
+          nucG=$(awk -F',' 'NR==2{print $3}' "$temp_file")
+          nucT=$(awk -F',' 'NR==2{print $4}' "$temp_file")
+          nuctotal=$(expr "$nucA" + "$nucG" + "$nucC" + "$nucT")
+          if [ "$nucG" == "0" ];
+          then
+            percentG="0"
+          else
+            freqG=$(expr "$nucG" / "$nuctotal")
+            percentG=$(awk 'BEGIN{print '$nucG' / '$nuctotal' * 100}')
+          fi
+          if [ "$nucC" == "0" ];
+          then
+            percentC="0"
+          else
+            freqC=$(expr "$nucC" / "$nuctotal")
+            percentC=$(awk 'BEGIN{print '$nucC' / '$nuctotal' * 100}')
+          fi
+          RF_matrix_dir="$dirresRF"/mergesamples
+          new_dir="$RF_matrix_dir"
+          create_dir
+          gutt_matrix_dir1="$dirresgutt"/mergesamples1
+          new_dir="$gutt_matrix_dir1"
+          create_dir
+          gutt_matrix_dir2="$dirresgutt"/mergesamples2
+          new_dir="$gutt_matrix_dir2"
+          create_dir
+          RF_matrix="$RF_matrix_dir"/"$bamfile"editingfreq.csv
+          gutt_matrix1="$gutt_matrix_dir1"/"$bamfile"editing_gutt.csv
+          gutt_matrix2="$gutt_matrix_dir2"/"$bamfile"expression_gutt.csv
+          if [ ! -f "$RF_matrix" ];
+          then
+            echo "excitome_site,$bamfile" >> "$RF_matrix"
+          fi
+          if [ ! -f "$gutt_matrix1" ];
+          then
+            echo "excitome_site,"$bamfile"edited" >> "$gutt_matrix1"
+          fi
+          if [ ! -f "$gutt_matrix2" ];
+          then
+            echo "excitome_site,"$bamfile"edited" >> "$gutt_matrix2"
+          fi
+          if [ "$nuctotal" -gt "10" ];
+          then
+            if [[ "$percentC" != "0" && "$nucC" -gt "$nucG" ]];
+            then
+              phrase=$(echo "$excitome_gene")
+              missing=$(grep -o "$phrase" "$in_file" | wc -l)
+              if [ ! "$missing" == "0" ];
+              then
+                echo1=$(echo "ALREADY FOUND "$excitome_gene" in "$RF_matrix"")
+                mes_out                
+              else
+                echo ""$excitome_gene","$percentC"" >> "$RF_matrix"
+              fi
+              percentCint=${percentC%.*}
+              if [ "$percentCint" -gt "0" ];
+              then 
+                answer="1"
+              fi 
+            fi
+            if [[ "$percentG" != "0" && "$nucG" -gt "$nucC" ]];
+            then
+              phrase=$(echo "$excitome_gene")
+              missing=$(grep -o "$phrase" "$in_file" | wc -l)
+              if [ ! "$missing" == "0" ];
+              then
+                echo1=$(echo "ALREADY FOUND "$excitome_gene" in "$RF_matrix"")
+                mes_out
+              else
+                echo ""$excitome_gene","$percentG"" >> "$RF_matrix"
+              fi
+              percentGint=${percentG%.*}
+              if [ "$percentGint" -gt "0" ];
+              then 
+                answer="1"
+              fi  
+            fi
+            if [[ "$percentG" == "0" && "$percentC" == "0" ]];
+            then
+              phrase=$(echo "$excitome_gene")
+              missing=$(grep -o "$phrase" "$in_file" | wc -l)
+              if [ ! "$missing" == "0" ];
+              then
+                echo1=$(echo "ALREADY FOUND "$excitome_gene" in "$RF_matrix"")
+                mes_out
+              else
+                echo ""$excitome_gene",0" >> "$RF_matrix"
+              fi
+              answer="0"
+            fi
+            echo ""$bamfile" has "$nucA" A's "$nucC" C's "$nucG" G's "$nucT" T's for a total of "$nuctotal" read depth which a "$percentG" % edited to a G or "$percentC" % edited to a C"
+          else
+            phrase=$(echo "$excitome_gene")
+            missing=$(grep -o "$phrase" "$in_file" | wc -l)
+            if [ ! "$missing" == "0" ];
+            then
+              echo1=$(echo "ALREADY FOUND "$excitome_gene" in "$RF_matrix"")
+              mes_out
+            else
+              echo ""$excitome_gene",0" >> "$RF_matrix"
+            fi
+            answer="0"
+            echo ""$bamfile" has "$nucA" A's "$nucC" C's "$nucG" G's "$nucT" T's for a total of "$nuctotal" read depth which a is too low to determine frequency"
+          fi
+          count_matrix="$dir_path"/Results/excitome_count_matrixrun.csv
+          excit_pres=$(cat "$file_in" | awk '{if ($1 ~ /'"$chrome"'/) print $2}' | awk '{if ($1 ~ /'"$coord"'/) print $0}')
+          excitome_gene_short=${excitome_gene%_*}
+          if [ "$excitome_gene" == "ADAR.1" ];
+          then
+            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
+          fi
+          if [ "$excitome_gene" == "ADAR.B1" ];
+          then
+            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
+          fi
+          if [ "$excitome_gene" == "ADAR.B2" ];
+          then
+            express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
+          fi
+          express_col=$(cat "$count_matrix" | head -n 1 | sed 's/,/\n/g' | awk '{if (/'$excitome_gene_short'/) print NR}')
+          if [ "$express_col" == "" ];
+          then
+            excit_express=$(echo "0")
+            echo1=$(echo ""$bamfile".bam shows "$excitome_gene" with editing coordinate "$chrome":"$coord" was not found in "$count_matrix" so expression is labeled 0")
+            mes_out
+          else
+            express_row=$(cat "$count_matrix" | awk -F',' '{if (/'$bamfile'/) print NR}')
+            excit_express=$(cat "$count_matrix" | awk -F',' 'NR=='$express_row'{print $'$express_col'}')
+            echo1=$(echo ""$bamfile".bam "$excitome_gene" with editing coordinate "$chrome":"$coord" is located at "$express_col":"$express_row" in "$count_matrix" having a TPM of "$excit_express" Expression is marked 1 if it is above "$express_value"")
+            mes_out
+            if [ "$excit_express" -gt "$express_value" ];
+            then
+              ex_answer="1"
+            else
+              ex_answer="0" 
+            fi
+            in_file="$gutt_matrix1"
+            phrase=$(echo "$excitome_gene_short")
+            missing=$(grep -o "$phrase" "$in_file" | wc -l)
+            if [ ! "$missing" == "0" ];
+            then
+              echo1=$(echo "ALREADY FOUND "$excitome_gene_short" in "$gutt_matrix1"")
+              mes_out
+            else
+              echo ""$excitome_gene","$answer"" >> "$gutt_matrix1"
+              cat "$gutt_matrix1" | sed 's/"//g' >> "$dir_path"/temp.csv
+              file_in="$gutt_matrix1"
+              temp_file
+            fi
+            in_file="$gutt_matrix2"
+            phrase=$(echo "$excitome_gene_short")
+            missing=$(grep -o "$phrase" "$in_file" | wc -l) #something going on here printing all 4 BLCAP fixed _short variable name
+            if [ ! "$missing" == "0" ];
+            then
+              echo1=$(echo "ALREADY FOUND "$excitome_gene_short" in "$gutt_matrix2"")
+              mes_out
+            else
+              echo ""$excitome_gene_short","$ex_answer"" >> "$gutt_matrix2"
+              cat "$gutt_matrix2" | sed 's/"//g' >> "$dir_path"/temp.csv
+              file_in="$gutt_matrix2"
+              temp_file
+            fi
+          fi
+        fi
+      else
+        echo "Moving on to next sample"
+      fi
+    done
+  done
+  } < $INPUT
+  IFS=$OLDIFS
+  dirres="$dir_path"/Results
+  dirresRF="$dirres"/random_forest
+  RF_matrix_dir="$dirresRF"/mergesamples
+  dirresgutt="$dirres"/guttman
+  gutt_matrix_dir1="$dirresgutt"/mergesamples1
+  gutt_matrix_dir2="$dirresgutt"/mergesamples2
+  cd "$RF_matrix_dir"
+  cur_wkd="$RF_matrix_dir"
+  Rtool=$(echo "I_VEX")
+  Rtype=$(echo "multi")
+  GOI_file="$dirresRF"/temp.csv
+  summaryfile=none
+  tempfile3=transpose
+  names=$(echo "excitome_site")
+  file_out="$dirres"/excitomefreq_count_matrix.csv
+  echo1=$(echo "CREATING "$file_out"")
+  mes_out
+  mergeR
+  file_in="$dirres"/excitomefreq_count_matrix.csv
+  file_out="$dirres"/excitomefreq_count_matrix2.csv
+  cat "$file_in" | cut -d, --complement -f2 | sed 's/.y//g' >> "$file_out"
+  file_in="$dirres"/excitomefreq_count_matrix2.csv
+  file_out="$dir_path"/temp.csv
+  csvtool transpose "$file_in" >> "$file_out" 
+  file_in="$dirres"/excitomefreq_count_matrix.csv
+  temp_file
+  name=excitomefreq
+  add_conditions
+  cd "$gutt_matrix_dir1"
+  cur_wkd="$RF_matrix_dir1"
+  Rtool=$(echo "I_VEX")
+  Rtype=$(echo "multi")
+  GOI_file="$dirresgutt"/temp.csv
+  summaryfile=none
+  tempfile3=transpose
+  names=$(echo "excitome_site")
+  file_out="$dirresgutt"/guttediting_count_matrix.csv
+  echo1=$(echo "CREATING "$file_out"")
+  mes_out
+  mergeR
+  name=guttediting
+  add_conditions
+  cd "$gutt_matrix_dir2"
+  cur_wkd="$RF_matrix_dir2"
+  Rtool=$(echo "I_VEX")
+  Rtype=$(echo "multi")
+  GOI_file="$dirresgutt"/temp.csv
+  summaryfile=none
+  tempfile3=transpose
+  names=$(echo "excitome_site")
+  file_out="$dirresgutt"/guttexpression_count_matrix.csv
+  echo1=$(echo "CREATING "$file_out"")
+  mes_out
+  mergeR
+  name=guttexpression
+  add_conditions
+  filecheck="$dirqc"/filecheck
+  in_file="$filecheck"/filecheckgtf1.csv
+  missing=$(grep -o 'no' "$in_file" | wc -l)
+  #if [ ! "$missing" == "0" ];
+  #then
+     #echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
+     #mes_out
+  #else
+    #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
+    #mes_out
+   # file_out="$dirres"/excitomefreq_count_matrixedited.csv
+   # file_in="$dirres"/excitomefreq_count_matrix.csv
+   # index_file="$ExToolsetix"/index/"$level"_names.csv
+   # pheno_file="$dir_path"/PHENO_DATA.csv
+   # Rtool=GTEX
+   # level_id=$(echo ""$level"_id");
+   # level_name=$(echo ""$level"_name");
+   # filter_type=$(echo "protein_coding");
+   # level="$level"
+   # tempf1="$dir_path"/tempR1.csv
+   # tempf2="$dir_path"/tempR2.csv
+   # tempf3="$dir_path"/tempR3.csv
+   # file_in="$index_file"
+   # cat "$index_file" | sed 's/-/_/g' >> "$dir_path"/temp.csv
+   # temp_file
+   # file_in="$dirres"/excitomefreq_count_matrix.csv
+   # echo1=$(echo "CREATING "$file_out"")
+   # mes_out
+   # matrixeditor
+   # header=$(head -n 1 "$file_out")
+   # cat "$file_out" | awk -F',' 'NR > 1{s=0; for (i=3;i<=NF;i++) s+=$i; if (s!=0)print}' | sort -u -k1 | sed '1i '$level'_name'$header'' >> "$dir_path"/temp.csv
+   # file_in="$file_out"
+   # temp_file
+  #fi
+###############################################################################################################################################################
+# Statistical Analysis section:DE                                                                                                         *WORKING ON IT
+###############################################################################################################################################################
+cd "$dir_path"/AIDD
+count_matrix="$dirres"/excitomefreq_count_matrix2.csv
+bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #run DE with DESEq2 for each gene and transcript count matrix for each condition
+for level in gene transcript ;
+do
+  count_matrix="$level"_count_matrixedited
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #run DE with DESEq2 for each gene and transcript count matrix for each condition
+done
+for level in transcript ;
+do
+  for impact in high_impact moderate_impact ;
+  do
+    for snptype in ADARediting APOBECediting All ;
+    do
+        count_matrix="$level"_"$impact"_"$snptype"edits_count_matrixedited
+        bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #runs DE with DESeq2 for each editing impact count matrix (these counts are how many edits are found in each gene
+        name="$level"_"$impact"_"$snptype"edits
+        add_conditions
+        bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix"run
+    done
+  done
+done
+for files in "$dirrespath";
+do
+  file_in="$file"
+  namefiles=$(echo "${file_in##*/}")
+  name=$(echo "${bamfiles%%.*}")
+  count_matrix="$name"
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #runs DE with DESeq2 for each editing impact count matrix (these counts are how many edits are found in each gene
+done
+###############################################################################################################################################################
+# Statistical Analysis section: Guttman and RF                                                                                                  *WORKING ON IT
+###############################################################################################################################################################
+
+#count_matrix="$dir_path"/Results/guttman_count_matrix.csv
+#if [ -f "$count_matrix ];
+ # echo1="NOW RUNNING STATISTICS FOR "$count_matrix""
+ # mes_out
+  #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetML.sh #this will 
+#else
+#  echo1="NOW RUNNING STATISTICS FOR "$count_matrix""
+#  mes_out
 #fi
-#bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetExcitome.sh 1
-count_matrix=all_count_matrix
-bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on each gene in the excitome, each nt and AA substitution, and impact of subs.
+###############################################################################################################################################################
+# Statistical Analysis section:ANOVA                                                                                                         *WORKING ON IT
+###############################################################################################################################################################
+for count_matrix in all_count_matrixrun excitomefreq_count_matrixrun ;
+do
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on each gene in the excitome, each nt and AA substitution, and impact of subs.
+done
 for level in gene transcript ;
 do
   for impact in high_impact moderate_impact ;
@@ -1831,7 +1960,6 @@ do
     done
   done
 done
-dir_path=/media/sf_AIDD/germ_layer
 for level in gene transcript ;
 do
   user_input=$(echo ""$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_"$level"list.csv")
@@ -1850,7 +1978,6 @@ do
       count_matrix="$GOI"_count_matrix
       new_dir="$dirres"/"$count_matrix"
       create_dir
-      tool=DEBUG
       echo1="NOW RUNNING STATISTICS FOR "$count_matrix""
       mes_out
       bash "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA for each gene list provided by the user
@@ -1860,29 +1987,27 @@ do
   fi
 done
 cd "$dir_path"/AIDD
+###############################################################################################################################################################
+# Statistical Analysis section: Correlaions                                                                                          *WORKING ON IT
+###############################################################################################################################################################
+
 count_matrix=all_count_matrix
   bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetcorr.sh "$count_matrix" #runs correlations
   cd "$dir_path"/AIDD
-for level in gene transcript ;
-do
-  count_matrix="$level"_count_matrixedited
-  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #run DE with DESEq2 for each gene and transcript count matrix for each condition
-done
-for level in transcript ;
-do
-  for impact in high_impact moderate_impact ;
-  do
-    for snptype in ADARediting APOBECediting All ;
-    do
-        count_matrix="$level"_"$impact"_"$snptype"edits_count_matrixedited
-        bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #runs DE with DESeq2 for each editing impact count matrix (these counts are how many edits are found in each gene
-    done
-  done
-done
+
+###############################################################################################################################################################
+# Statistical Analysis sectionL Random Forest                                                                                          *WORKING ON IT
+###############################################################################################################################################################
+
 if [ ! "$4" == "" ];
 then
     bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetsplit.sh "$count_matrix" "$4" # this will split the matrices by a certain condition and create new pheno-data files and matrices by condition supplied by the user.
 fi
+###############################################################################################################################################################
+# Statistical Analysis sectionL Random Forest                                                                                          *WORKING ON IT
+###############################################################################################################################################################
+#####ADD GENE ENRICHMENT ANALYSIS HERE AND
+######NEED TO CREATE HEATMAPS FOR PATHWAY OF INTEREST
 ####################################################################################################################
 # CLEAN UP AND EXIT
 ####################################################################################################################

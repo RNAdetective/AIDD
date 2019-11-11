@@ -409,6 +409,8 @@ data_summary_file5="$dirres"/amino_acid/amino_acidallsummaries.csv;
 data_summary_file6="$dirres"/impact/impactallsummaries.csv;
 data_summary_file6a="$dirres"/VEXallsummaries.csv;
 data_summary_filefinal="$dirres"/allsummaries.csv;
+new_dir="$dir_path"
+create_dir
 qc_dir="$dir_path"/quality_control
 new_dir="$qc_dir"
 create_dir

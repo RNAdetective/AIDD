@@ -22,10 +22,11 @@ if ( bartype == "ANOVA" ) {
   file_out2 <- paste0(args[8])
   sum_file2 <- paste0(args[9])
   data <- read.csv(file_in)
+  print(head(data))
   #data$suicide <- factor(data$suicide, levels = c("no","yes"), labels = c("no", "yes")) # suicide
   #data$Sex <- factor(data$Sex, levels = c("male","female"), labels = c("male","female")) # sex
   #data$MDD <- factor(data$MDD, levels = c("no","yes"), labels = c("no", "yes")) # MDD
-  cdata <- ddply(data, c("condition_name"), summarise, N = length(freq_name), mean=round(mean(freq_name),5), sd=round(sd(freq_name), 5))
+  cdata <- ddply(data, c("condition_name"), summarise, N = length("freq_name"), mean=round(mean("freq_name"),5), sd=round(sd("freq_name"), 5))
   cdata$substitution <- rep("freq_name",nrow(cdata)) # make new column 
   write.csv(cdata, sum_file, row.names=FALSE, quote=FALSE)
   tiff(file_out, units="in", width=10, height=10, res=600) #names the chart file

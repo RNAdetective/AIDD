@@ -111,14 +111,23 @@ mv "$wd"/$file_fastqpaired2pass "$wd"/$file_fastqpaired2
  }
 fastqdumpsingle() { fastq-dump "$wd"/$file_sra --read-filter pass -O "$wd"/ ; }
 movefastq() { mv $fastq_dir_path/$file_fastq "$wd"/ ; }
-fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
-fastqcsingle() { cd $dirqc/fastqc/ ; fastqc "$wd"/$file_fastq ; cd "$dir_path"/AIDD ; }
+fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd $dirqc/fastqc ; unzip "$run"_1_fastqc.zip ; unzip "$run"_2_fastqc.zip ; cd "$dir_path"/AIDD ; }
+fastqcsingle() { cd $dirqc/fastqc/ ; fastqc "$wd"/$file_fastq ; cd $dirqc/fastqc ; unzip "$run"_fastqc.zip ; cd "$dir_path"/AIDD ; }
+setreadlength() {
+length=$(echo "Sequence length");
+seq_length=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt | awk -v search=length '$0~search{print $0; exit}');
+seq_length_final=${seq_length##*-}
+seq_length_final=$(expr "$seq_length_final" - "5");
+start=12
+end="$seq_length_final" 
+}
 trimpaired() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired1 -o "$wd"/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired2 -o "$wd"/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/$file_fastqpaired1 ; rm -f "$wd"/$file_fastqpaired2 ; mv "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired1 ; mv "$wd"/$file_fastqpaired2trim "$wd"/$file_fastqpaired2 ; }
 trimsingle() { fastx_trimmer -f start -l end -i "$wd"/$file_fastq -o "$wd"/"$run"_trim.fastq ; cd $dirqc/fastqc ; fastqc "$run"_trim.fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f "$wd"/$file_fastq ; mv "$wd"/"$run"_trim.fastq "$wd"/$file_fastq ; }
 HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/"$file_fastqpaired1" -2 "$wd"/"$file_fastqpaired2" -t --summary-file $dirqc/alignment_metrics/"$run".txt -S "$wd"/"$file_sam" ; }
 HISAT2_single() { hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$wd"/"$file_fastq" -t --summary-file "$dir_path"/raw_data/counts/"$run".txt -S "$wd"/"$file_sam" ; }
-STAR_paired() { echo "STAR some text line on how to run" ; }
-STAR_single() { echo "STAR some text line on how to run" ; }
+STAR_paired() { echo "STAR some text line on how to run" ; } #STAR --genomeDir /n/groups/hbctraining/intro_rnaseq_hpc/reference_data_ensembl38/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn Mov10_oe_1.subset.fq --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard 
+ 
+STAR_single() { echo "STAR some text line on how to run" ; } #STAR --genomeDir /n/groups/hbctraining/intro_rnaseq_hpc/reference_data_ensembl38/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn Mov10_oe_1.subset.fq --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard
 BOWTIE2_paired() { echo "BOWTIE2 some text line on how to run" ; }
 BOWTIE2_single() { echo "BOWTIE2 some text line on how to run" ; }
 samtobam() { java -Djava.io.tmpdir="$dir_path"/tmp -jar "$AIDDtool"/picard.jar SortSam INPUT="$wd"/"$file_sam" OUTPUT="$rdbam"/$file_bam SORT_ORDER=coordinate ; }
@@ -581,7 +590,6 @@ then
     assembler="$(config_get assembler)"; # Strintie or cufflinks
     variant="$(config_get variant)"; # variant calling
     start=12;
-    end=97;
     file_sra="$run";
     file_fastq="$run".fastq;
     file_fastq="$run".fastq;
@@ -678,38 +686,58 @@ then
 ####################################################################################################################
     if [ "$library" == "paired" ];
     then
-      tool=trimpaired
-      file_in="$wd"/$file_fastqpaired1
-      file_in2="$wd"/$file_fastqpaired2
-      file_out=$dirqc/fastqc/"$run"_trim_1_fastqc.html 
-      file_out2=$dirqc/fastqc/"$run"_trim_2_fastqc.html
-      JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
-      version=11
-      setjavaversion 
-      start=12
-      end=97  
-      run_tools2i2o
-      JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/
-      version=8 
-      setjavaversion
+      check=$(echo ">>Per base sequence content")
+      pass=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt '{if (/'$check'/) print NR}');
+      missing=$(grep -o 'pass' "$pass" | wc -l)
+      if [ "$missing" == "0" ];
+      then
+        tool=trimpaired
+        file_in="$wd"/$file_fastqpaired1
+        file_in2="$wd"/$file_fastqpaired2
+        file_out=$dirqc/fastqc/"$run"_trim_1_fastqc.html 
+        file_out2=$dirqc/fastqc/"$run"_trim_2_fastqc.html
+        JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+        version=11
+        setjavaversion 
+        setreadlength
+        echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND "$end" OF THE END OF THE READS")
+        mes_out 
+        run_tools2i2o
+        JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/
+        version=8 
+        setjavaversion
+      else
+        echo1=$(echo "PASSED RAW SEQUENCE CHECK NO NEED TO TRIM FILES")
+        mes_out
+      fi
     fi
 ####################################################################################################################
 # TRIMMING SINGLE
 ####################################################################################################################
     if [ "$library" == "single" ];
     then
-      tool=trimsingle
-      file_in="$wd"/$file_fastq    
-      file_out=$dirqc/fastqc/"$run"_trim_fastqc.html
-      JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
-      version=11
-      setjavaversion
-      start=12
-      end=97
-      run_tools
-      JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
-      version=8
-      setjavaversion
+      check=$(echo ">>Per base sequence content")
+      pass=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt '{if (/'$check'/) print NR}');
+      missing=$(grep -o 'pass' "$pass" | wc -l)
+      if [ "$missing" == "0" ];
+      then
+        tool=trimsingle
+        file_in="$wd"/$file_fastq    
+        file_out=$dirqc/fastqc/"$run"_trim_fastqc.html
+        JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+        version=11
+        setjavaversion
+        setreadlength
+echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND "$end" OF THE END OF THE READS")
+        mes_out 
+        run_tools
+        JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
+        version=8
+        setjavaversion
+      else
+        echo1=$(echo "PASSED RAW SEQUENCE CHECK NO NEED TO TRIM FILES")
+        mes_out
+      fi
     fi
 ####################################################################################################################
 # ALIGNMENT HISAT2 PAIRED
