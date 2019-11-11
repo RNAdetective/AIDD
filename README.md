@@ -19,6 +19,7 @@
 * AIDD also has the ability to focus on just one gene isoform differential expression patterns.
 * AIDD uses variant calling and snp effect to predict RNA editings role on protein diversity.
 * AIDD uses gene enrichment analysis is to highlight pathways affected by variants.
+* AIDD uses guttman scale for time series analysis of ADAR editing landscapes.
 
 ___
 
