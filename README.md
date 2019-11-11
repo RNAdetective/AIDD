@@ -9,6 +9,7 @@
  # About AIDD
  [![DOI](https://zenodo.org/badge/119888778.svg)](https://zenodo.org/badge/latestdoi/119888778)
  
+ 
 * AIDD incorporates open source tools into a static virtualbox to ensure reproducability in RNA-seq analysis.  
 * AIDD includes a collection of scripts that completely automates the pipeline making it ease to use by simply double clicking the icon on the desktop.
 * AIDD also has easy to use customizable options for more advance RNAseq analysis.  
