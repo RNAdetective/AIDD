@@ -66,7 +66,7 @@ dds <- estimateSizeFactors(dds)
 #invisible(dev.off()) #save tiff
 sampleDists <- dist(t(assay(rld)))
 sampleDistMatrix <- as.matrix( sampleDists )
-rownames(sampleDistMatrix) <- paste( rld$set_design)
+rownames(sampleDistMatrix) <- paste( rld$suicide)
 colnames(sampleDistMatrix) <- NULL
 colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 poisd <- PoissonDistance(t(counts(dds)))
@@ -82,7 +82,7 @@ invisible(dev.off()) #save tiff
 pcaData <- plotPCA(rld, intgroup = c("set_design"), returnData = TRUE)
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 tiff(PCAplot2, units="in", width=10, height=10, res=600)
-ggplot(pcaData, aes(x = PC1, y = PC2, color = set_design, group = set_design, label=rownames(pcaData))) + geom_point(size = 3) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed() + geom_text_repel(aes(label=rownames(pcaData)),position = position_dodge(width=0.9),size=16) + theme(legend.position="bottom") + theme(text = element_text(size = 18))
+ggplot(pcaData, aes(x = PC1, y = PC2, color = set_design, group = set_design, label=rownames(pcaData))) + geom_point(size = 3) + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed() + geom_text_repel(aes(label=rownames(pcaData)),position = position_dodge(width=0.9),size=6) + theme(legend.position="bottom") + theme(text = element_text(size = 6))
 invisible(dev.off()) #save tiff
 mds <- as.data.frame(colData(rld))  %>% cbind(cmdscale(sampleDistMatrix))
 tiff(MDSplot, units="in", width=10, height=10, res=600)
@@ -144,6 +144,6 @@ res_tableOE_ordered$levellabels <- ""
 res_tableOE_ordered$levellabels[1:20] <- rownames(res_tableOE_ordered)[1:20]
 tiff(volcano, units="in", width=10, height=10, res=600)
 volc = ggplot(res_tableOE_ordered, aes(log2FoldChange, -log10(pvalue))) + geom_point(aes(x = log2FoldChange, y = -log10(pvalue), colour = threshold)) + ggtitle("Differential Expression Volcano Plot") + xlab("log2 fold change") + ylab("-log10 adjusted p-value") + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-volc + geom_text_repel(data=head(res_tableOE_ordered, 20), aes(label = levellabels), size = 14) + theme(text = element_text(size = 16))
+volc + geom_text_repel(data=head(res_tableOE_ordered, 10), aes(label = levellabels), size = 6) + theme(text = element_text(size = 6))
 invisible(dev.off())
 

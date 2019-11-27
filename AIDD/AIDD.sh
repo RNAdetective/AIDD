@@ -4,8 +4,8 @@
 ####################################################################################################################
 home_dir="$1" # home directory is second space
 dir_path="$2" # working directory is third space
-echo "Please see the manual for set up and instructions to run AIDD.  Make sure before you start you have created the auto mount shared folder called AIDD on your host computer and completed the directions on the desktop. Would you like to run AIDD with defaults? Please select from the following: (note default = runs AIDD with all default setting from start to finish; options = prompts user to select from various tool and dataset options; diretories = to run just the AIDD file setup and not run the rest of AIDD at this time."
-echo "default, options or directories"
+echo "Please see the manual for set up and instructions to run AIDD.  Make sure before you start you have created the auto mount shared folder called AIDD on your host computer and completed the directions on the desktop. Would you like to run AIDD with defaults? Please select from the following: (note default = runs AIDD with all default setting from start to finish; options = prompts user to select from various tool and dataset options; diretories = to run just the AIDD file setup and not run the rest of AIDD at this time; AIDDparts to run AIDD from a certain part of the pipeline."
+echo "default, options, directories or AIDDparts"
 read AIDD
 if [ "$AIDD" != "default" ]; #this allows for download of sequences or starting with your own .fastq files 
 then
@@ -539,8 +539,12 @@ fi
 ####################################################################################################################
 #  Run AIDD
 ####################################################################################################################
-if [ "$AIDD" != "directories" ];
+if [[ "$AIDD" != "directories" || "$AIDD" != "AIDDparts" ]];
 then
   cd "$dir_path"/AIDD
   bash "$dir_path"/AIDD/AIDDpipeline.sh # runs AIDD pipeline
 fi  
+if [ "$AIDD" == "AIDDparts" ];
+then
+  bash "$home_dir"/AIDD/AIDD/AIDDparts.sh
+fi

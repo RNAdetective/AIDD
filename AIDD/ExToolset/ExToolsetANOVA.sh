@@ -125,11 +125,11 @@ do
   con_name2=$(echo ""$con_name2"" | sed 's/_//g')
   con_name3=$(config_get con_name3);
   con_name3=$(echo ""$con_name3"" | sed 's/_//g')
-  con_name4=$(echo "sampname");
+  con_name4=$(echo "samp_name");
   con_name4=$(echo ""$con_name4"" | sed 's/_//g')
   echo1=$(echo "STARTING ANOVA FOR "$freq"")
   mes_out
-  for cond_name in "$con_name1" "$con_name2" "$con_name3" "$con_name4";
+  for cond_name in "$con_name1" "$con_name2" "$con_name3" sampname samp_name ;
   do
     cond_col=$(cat "$dir_path"/PHENO_DATA.csv | 
 awk -F',' '{for(i=1;i<=NF;i++){A[NR,i]=$i};if(NF>n){n=NF}}
@@ -144,7 +144,7 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
       dirrescon="$dirres"/"$count_matrix"/"$cond_name";
       new_dir="$dirrescon";
       create_dir
-      file_in="$dirres"/"$count_matrix"2.csv;
+      file_in="$dirres"/"$count_matrix".csv;
       cat "$file_in" | sed 's/'$cond_name'.x/'$cond_name'/g' >> "$dir_path"/temp.csv
       temp_file
       file_out="$dirrescon"/"$freq"summary.tiff;
@@ -179,7 +179,7 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
       dirrescon="$dirres"/"$count_matrix"/Ttest/"$cond_name";
       new_dir="$dirrescon";
       create_dir
-      file_in="$dirres"/"$count_matrix"2.csv;
+      file_in="$dirres"/"$count_matrix".csv;
       cat "$file_in" | sed 's/'$cond_name'.x/'$cond_name'/g' >> "$dir_path"/temp.csv
       temp_file
       file_out="$dirrescon"/"$freq"summary.tiff;

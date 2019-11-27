@@ -109,19 +109,17 @@ fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/
 mv "$wd"/$file_fastqpaired1pass "$wd"/$file_fastqpaired1 
 mv "$wd"/$file_fastqpaired2pass "$wd"/$file_fastqpaired2
  }
-fastqdumpsingle() { 
-fastq-dump "$wd"/$file_sra --read-filter pass -O "$wd"/ 
-}
+fastqdumpsingle() { fastq-dump "$wd"/$file_sra --read-filter pass -O "$wd"/ ; }
 movefastq() { mv $fastq_dir_path/$file_fastq "$wd"/ ; }
-fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd $dirqc/fastqc ; unzip "$run"_1_fastqc.zip ; unzip "$run"_2_fastqc.zip ; cd "$dir_path"/AIDD ; }
-fastqcsingle() { cd $dirqc/AIDD ; fastqc "$wd"/$file_fastq --outdir=$dirqc/fastqc ; cd $dirqc/fastqc ; unzip "$run"_fastqc.zip ; cd "$dir_path"/AIDD ; }
+fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd $dirqc/fastqc ; unzip -q "$run"_1_fastqc.zip ; unzip -q "$run"_2_fastqc.zip ; cd "$dir_path"/AIDD ; }
+fastqcsingle() { cd $dirqc/fastqc/ ; fastqc "$wd"/$file_fastq ; cd $dirqc/fastqc ; unzip -q "$run"_fastqc.zip ; cd "$dir_path"/AIDD ; }
 setreadlength() {
 length=$(echo "Sequence length");
-seq_length=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt | awk -v search=length '$0~search{print $0; exit}');
-seq_length_final=${seq_length##*-}
-seq_length_final=$(expr "$seq_length_final" - "5");
+seq_length=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt | awk -v search="sequence length" '$0~search{print $0; exit}');
+seq_length_final=${seq_length[3-1]}
+seq_length_final=$(expr "$seq_length_final" - "3");
 start=12
-end=47 
+end="$seq_length_final" 
 }
 trimpaired() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired1 -o "$wd"/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired2 -o "$wd"/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/$file_fastqpaired1 ; rm -f "$wd"/$file_fastqpaired2 ; mv "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired1 ; mv "$wd"/$file_fastqpaired2trim "$wd"/$file_fastqpaired2 ; }
 trimsingle() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastq -o "$wd"/"$run"_trim.fastq ; cd $dirqc/fastqc ; fastqc "$run"_trim.fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f "$wd"/$file_fastq ; mv "$wd"/"$run"_trim.fastq "$wd"/$file_fastq ; }
@@ -593,12 +591,13 @@ then
     variant="$(config_get variant)"; # variant calling
     start=12;
     file_sra="$run";
-    file_fastq="$run"_pass.fastq;
-    file_fastqtrim="$run"_trim.fastq;
+    file_fastq="$run".fastq;
     file_fastqpaired1="$run"_1.fastq;
     file_fastqpaired2="$run"_2.fastq;
+    file_fastqpass="$run"_pass.fastq;
     file_fastqpaired1pass="$run"_pass_1.fastq;
     file_fastqpaired2pass="$run"_pass_2.fastq;
+    file_fastqtrim="$run"_trim.fastq;
     file_fastqpaired1trim="$run"_trim_1.fastq;
     file_fastqpaired2trim="$run"_trim_2.fastq;
     file_sam="$run".sam;
