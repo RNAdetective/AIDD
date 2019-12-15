@@ -79,17 +79,18 @@ level=$(echo "$count_matrix" | cut -d'_' -f1)
 home_dir=$(config_get home_dir);
 dir_path=$(config_get dir_path); 
 dirres="$dir_path"/Results;
+dirresDE="$dirres"/DESeq2
 con_name1=$(config_get con_name1);
 con_name2=$(config_get con_name2);
 con_name3=$(config_get con_name3);
 for condition_name in "$con_name1" "$con_name2" "$con_name3" ;
 do
-  file_in="$dirres"/"$count_matrix".csv
+  file_in="$dirresDE"/"$count_matrix".csv
   #cat "$file_in" | sort -t',' -u -k1,1 | uniq >> "$dir_path"/temp.csv
   #temp_file
   echo1=$(echo "STARTING "$file_in"")
   mes_out
-  file_in="$dirres"/"$count_matrix".csv
+  file_in="$dirresDE"/"$count_matrix".csv
   pheno="$dir_path"/PHENO_DATA.csv
   if [ "$2" != "" ];
   then
@@ -98,9 +99,6 @@ do
     set_design="$condition_name"
   fi
   level_name="$level"_name
-  dirresDE="$dirres"/DESeq2
-  new_dir="$dirresDE"
-  create_dir
   dirresDElevel="$dirresDE"/"$count_matrix"
   new_dir="$dirresDElevel"
   create_dir

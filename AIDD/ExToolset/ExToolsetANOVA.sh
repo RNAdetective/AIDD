@@ -92,17 +92,14 @@ home_dir=$(config_get home_dir);
 dir_path=$(config_get dir_path);
 echo "$dir_path"
 dirres=$(config_get dirres);
-dirresall="$dirres"/"$count_matrix"
+dirresANOVA="$dirres"/ANOVA
+dirresall="$dirresANOVA"/"$count_matrix"
 new_dir="$dirresall"
 create_dir
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
-allcm="$dirres"/"$count_matrix".csv
+allcm="$dirresANOVA"/"$count_matrix"ANOVA.csv
 allindex="$dirresall"/"$count_matrix"_index.csv
-file_in="$allcm"
-cat "$file_in" | sed '/Inf/d' >> "$dir_path"/temp.csv
-temp_file
-cat "$allcm" | sed 's/samp_name/sampname/g' | sed 's/_[0-9]//g' >> "$dirres"/"$count_matrix"2.csv
 file_in="$allcm"
 file_out="$allindex"
 tool=createindex
@@ -119,6 +116,7 @@ do
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
   dirres=$(config_get dirres);
+  dirresANOVA="$dirres"/ANOVA
   con_name1=$(config_get con_name1);
   con_name1=$(echo ""$con_name1"" | sed 's/_//g')
   con_name2=$(config_get con_name2);
@@ -141,10 +139,10 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
     condcount=$(cat "$dir_path"/PHENO_DATA.csv | awk -F ',' '{print $'$cond_namecol'}' | sort | uniq -c | sort -n | sed '1d' | wc -l)
     if [ "$condcount" > "2" ];
     then # if the number of conditions is greater then 2 run ANOVA
-      dirrescon="$dirres"/"$count_matrix"/"$cond_name";
+      dirrescon="$dirresANOVA"/"$count_matrix"/"$cond_name";
       new_dir="$dirrescon";
       create_dir
-      file_in="$dirres"/"$count_matrix".csv;
+      file_in="$dirresANOVA"/"$count_matrix"ANOVA.csv;
       cat "$file_in" | sed 's/'$cond_name'.x/'$cond_name'/g' >> "$dir_path"/temp.csv
       temp_file
       file_out="$dirrescon"/"$freq"summary.tiff;
@@ -156,7 +154,7 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
       condition_name="$cond_name"
       sum_file2="$dirrescon"/"$freq"ANOVA.txt
       tool=Rbar
-      sum_file="$dirres"/"$count_matrix"/"$cond_name"/"$freq"summary.csv
+      sum_file="$dirresANOVA"/"$count_matrix"/"$cond_name"/"$freq"summary.csv
       cat "$ExToolset"/barchart.R | sed 's/freq_name/'$freq'/g' | sed 's/condition_name/'$cond_name'/g' >> "$dir_path"/temp.R
       run_tools
       rm "$dir_path"/temp.R
@@ -165,21 +163,21 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
         line=$(echo "11")
         pvalue=$(sed -n "$line p" "$dirrescon"/"$freq"ANOVA.txt)
         justp=${pvalue#*:}
-        if [ ! -s "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv ];
+        if [ ! -s "$dirresANOVA"/"$count_matrix"/"$cond_name"allANOVA.csv ];
         then
-          echo "variable,ANOVApvalue" >> "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv
+          echo "variable,ANOVApvalue" >> "$dirresANOVA"/"$count_matrix"/"$cond_name"allANOVA.csv
         fi
-        echo ""$freq","$justp"" >> "$dirres"/"$count_matrix"/"$cond_name"allANOVA.csv
+        echo ""$freq","$justp"" >> "$dirresANOVA"/"$count_matrix"/"$cond_name"allANOVA.csv
       fi
     fi
     if [ "$condcount" == "2" ];
     then # if the number of conditions is only 2 run t-test
-      new_dir="$dirres"/"$count_matrix"/Ttest
+      new_dir="$dirresANOVA"/"$count_matrix"/Ttest
       create_dir
-      dirrescon="$dirres"/"$count_matrix"/Ttest/"$cond_name";
+      dirrescon="$dirresANOVA"/"$count_matrix"/Ttest/"$cond_name";
       new_dir="$dirrescon";
       create_dir
-      file_in="$dirres"/"$count_matrix".csv;
+      file_in="$dirresANOVA"/"$count_matrix"ANOVA.csv;
       cat "$file_in" | sed 's/'$cond_name'.x/'$cond_name'/g' >> "$dir_path"/temp.csv
       temp_file
       file_out="$dirrescon"/"$freq"summary.tiff;
@@ -200,11 +198,11 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
         line=$(echo "11")
         pvalue=$(sed -n "$line p" "$dirrescon"/"$freq"Ttest.txt)
         justp=${pvalue#*:}
-        if [ ! -s "$dirres"/"$count_matrix"/"$cond_name"allTtest.csv ];
+        if [ ! -s "$dirresANOVA"/"$count_matrix"/"$cond_name"allTtest.csv ];
         then
-          echo "variable,Ttestpvalue" >> "$dirres"/"$count_matrix"/"$cond_name"allTtest.csv
+          echo "variable,Ttestpvalue" >> "$dirresANOVA"/"$count_matrix"/"$cond_name"allTtest.csv
         fi
-        echo ""$freq","$justp"" >> "$dirres"/"$count_matrix"/"$cond_name"allTtest.csv
+        echo ""$freq","$justp"" >> "$dirresANOVA"/"$count_matrix"/"$cond_name"allTtest.csv
       fi
     fi
     if [[ "$condcount" == "1" || "$condcount" == "" ]];
@@ -214,7 +212,7 @@ print s;s=""}}' | awk -F',' '{print $1}' | grep -n "$cond_name")
     fi
   done
 done 
-rm "$dirres"/"$count_matrix"2.csv
+rm "$dirresANOVA"/"$count_matrix"ANOVA.csv
 } < $INPUT
 IFS=$OLDIFS
 con_name1=$(config_get con_name1);

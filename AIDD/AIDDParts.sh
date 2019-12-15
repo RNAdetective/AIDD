@@ -519,7 +519,7 @@ do
     excitome_vcf
     AllsnpEff
   fi
-  if [ "$AIDDstep" == "prepbam" ];
+  if [ "$AIDDstep" == "prep_bam" ];
   then
     prep_bam_2 #runs bam file sorting for variant calling
     prep_bam_3 #runs bam file reordering by chromosome for variant calling
