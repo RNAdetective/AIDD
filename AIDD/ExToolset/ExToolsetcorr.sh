@@ -72,11 +72,12 @@ fi
 source config.shlib
 home_dir=$(config_get home_dir);
 dir_path=$(config_get dir_path); 
+human=$(config_get human);
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ####################################################################################################################
 # RUNS EXTOOLSET FOR CORRELATION SUMMARY         *TESTED
 ####################################################################################################################
-INPUT="$dir_path"/AIDD/ExToolset/indexes/index/scatterplots.csv
+INPUT="$dir_path"/AIDD/ExToolset/indexes/"$human"/scatterplots.csv
 OLDIFS=$IFS
 {
 [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
@@ -88,6 +89,7 @@ do
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
   dirres=$(config_get dirres);
+  human=$(config_get human);
   ExToolset="$dir_path"/AIDD/ExToolset/scripts
   file_in="$dirres"/"$count_matrix".csv;
   dirrescorr="$dirres"/correlations
@@ -114,7 +116,7 @@ done
 IFS=$OLDIFS
 echo1=$(echo "STARTING CORRELATION SUMMARIES")
 mes_out
-INPUT="$dir_path"/AIDD/ExToolset/indexes/index/scatterplots.csv
+INPUT="$dir_path"/AIDD/ExToolset/indexes/"$human"/scatterplots.csv
 OLDIFS=$IFS
 {
 [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
@@ -126,6 +128,7 @@ do
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
   dirres=$(config_get dirres);
+  human=$(config_get human);
   dirrescorr="$dirres"/correlations
   dirrescorr2="$dirres"/correlations/"$count_matrix"
   ExToolset="$dir_path"/AIDD/ExToolset/scripts

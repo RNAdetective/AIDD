@@ -104,7 +104,7 @@ dir_path=$(config_get dir_path);
 dirres=$(config_get dirres);
 ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
-  INPUT="$ExToolsetix"/index/excitome_loc.csv
+  INPUT="$ExToolsetix"/"$human"/excitome_loc.csv
   {
   [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
   read
@@ -292,6 +292,7 @@ then
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
   dirres=$(config_get dirres);
+  human=$(config_get human);
   ExToolset="$dir_path"/AIDD/ExToolset/scripts
   ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
   allcm="$dirres"/all_count_matrix.csv
@@ -306,6 +307,7 @@ then
     home_dir=$(config_get home_dir);
     dir_path=$(config_get dir_path);
     dirres=$(config_get dirres);
+    human=$(config_get human);
     ExToolset="$dir_path"/AIDD/ExToolset/scripts
     ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
     allcm="$dirres"/all_count_matrix.csv
@@ -323,7 +325,7 @@ then
   done
   } < $INPUT
   IFS=$OLDIFS
-  INPUT="$ExToolsetix"/index/excitome_loc.csv
+  INPUT="$ExToolsetix"/"$human"/excitome_loc.csv
   {
   [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
   read
@@ -333,6 +335,7 @@ then
     home_dir=$(config_get home_dir);
     dir_path=$(config_get dir_path);
     dirres=$(config_get dirres);
+    human=$(config_get human);
     ExToolset="$dir_path"/AIDD/ExToolset/scripts
     ExToolsetix="$dir_path"/AIDD/ExToolset/indexes
     allcm="$dirres"/all_count_matrix.csv

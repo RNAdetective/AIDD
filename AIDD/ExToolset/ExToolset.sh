@@ -74,6 +74,7 @@ DATE_WITH_TIME="$DATE_WITH_TIME"
 TIME_HOUR="$TIME_HOUR"
 TIME_MIN="$TIME_MIN"
 TIME_SEC="$TIME_SEC"
+human="$human"
 data_summary_file1="$data_summary_file1"
 data_summary_file2="$data_summary_file2"
 data_summary_file3="$data_summary_file3"
@@ -121,6 +122,7 @@ DATE_WITH_TIME=Default Value
 TIME_HOUR=Default Value
 TIME_MIN=Default Value
 TIME_SEC==Default Value
+human=Default Value
 data_summary_file1=Default Value
 data_summary_file2=Default Value
 data_summary_file3=Default Value
@@ -323,30 +325,58 @@ Rscript "$dir_path"/tempbasecount.R "$file_in" "$temp_file"
 rm "$dir_path"/tempbasecount.R
 }
 add_conditions() {
-  ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
-  count_matrix="$dirres"/"$name"_count_matrix.csv
-  Rtool=finalmerge
-  Rtype=single2f
-  GOI_file="$dirres"/"$name"_count_matrixANOVA.csv
-  file_out="$dirres"/"$name"_count_matrixANOVA.csv
-  mergefile="$dirres"/"$name"_count_matrix.csv
-  phenofile="$dir_path"/PHENO_DATA.csv
-  level_name=$(echo "samp_name")
-  echo1=$(echo "CREATING "$file_out"")
-  mes_out
-  mergeR
+ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
+count_matrix="$dirres"/"$name"_count_matrix.csv
+Rtool=finalmerge
+Rtype=single2f
+GOI_file="$dirres"/"$name"_count_matrixANOVA.csv
+file_out="$dirres"/"$name"_count_matrixANOVA.csv
+mergefile="$dirres"/"$name"_count_matrix.csv
+phenofile="$dir_path"/PHENO_DATA.csv
+level_name=$(echo "samp_name")
+echo1=$(echo "CREATING "$file_out"")
+mes_out
+mergeR
 }
-  makeDESeq2() {
-  file_in="$dirres"/"$name"_count_matrixDESeq2.csv
-  file_out="$dirres"/"$name"_count_matrix2.csv
-  cat "$file_in" | cut -d, --complement -f2 | sed 's/.y//g' >> "$file_out"
-  file_in="$dirres"/"$name"_count_matrix2.csv
-  file_out="$dir_path"/temp.csv
-  csvtool transpose "$file_in" >> "$file_out" 
-  file_in="$dirres"/"$name"_count_matrixDESeq2.csv
+makeDESeq2() {
+file_in="$resdir"/"$name"_count_matrixDESeq2.csv
+file_out="$dir_path"/temp.csv
+cat "$file_in" | cut -d, --complement -f2 | sed 's/.y//g' >> "$file_out" 
+file_in="$resdir"/"$name"_count_matrixDESeq2.csv
+temp_file
+cd "$dir_path"/AIDD
+INPUT="$dir_path"/PHENO_DATA.csv
+OLDIFS=$IFS
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+read
+while IFS=, read -r samp_name run condition sample condition2 condition3
+do
+  source config.shlib;
+  home_dir=$(config_get home_dir);
+  dir_path=$(config_get dir_path);
+  dirres=$(config_get dirres);
+  file_in="$resdir"/"$name"_count_matrixDESeq2.csv
+  cat "$file_in" | sed 's/'$run'/'$samp_name'/g' | sed 's/ /,/g' >> "$dir_path"/temp.csv
   temp_file
-
-  add_conditions
+done 
+} < $INPUT
+IFS=$OLDIFS
+header=$(head -n 1 "$file_in")
+cat "$file_in" | sed '1d' | sed '1i samp_name'$header'' | csvtool transpose >> "$dir_path"/temp.csv
+temp_file
+count_matrix="$resdir"/"$name"_count_matrixDESeq2.csv
+Rtool=finalmerge
+Rtype=single2f
+GOI_file="$dirres"/"$name"_count_matrixANOVA.csv
+file_out="$dirres"/"$name"_count_matrixANOVA.csv
+mergefile="$resdir"/"$name"_count_matrixDESeq2.csv
+phenofile="$dir_path"/PHENO_DATA.csv
+level_name=$(echo "samp_name")
+echo1=$(echo "CREATING "$file_out"")
+mes_out
+mergeR
+cp "$resdir"/"$name"_count_matrixDESeq2.csv "$dirres"/"$name"_count_matrixDESeq2.csv
 }
 end_check() {
 if [ "$var1" == "$varA" ];
@@ -410,7 +440,8 @@ TIME_MIN=$(date +%M)
 TIME_SEC=$(date +%S)
 default="$1"
 home_dir="$2" # home_dir=/home/user
-dir_path="$3" # dir_path=/home/user/testAIDD 
+dir_path="$3" # dir_path=/home/user/AIDD_data 
+human="$4" #human, mouse, fly
 ref_dir_path="$home_dir"/AIDD/references  # this is where references are stored
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
@@ -583,6 +614,7 @@ do
   dirraw=$(config_get dirraw);
   dirVC=$(config_get dirVC);
   dirVCsubs=$(config_get dirVCsubs);
+  human=$(config_get human);
   raw_input1="$dir_path"/raw_data/ballgown/"$sample"/"$sample".gtf
   raw_input2="$dirqc"/alignment_metrics/"$run"_alignment_metrics.txt
   new_dir="$dirqc"
@@ -676,6 +708,7 @@ then
     home_dir=$(config_get home_dir);
     dir_path=$(config_get dir_path);
     dirqc=$(config_get dirqc);
+    human=$(config_get human);
     filecheck="$dirqc"/filecheck
     in_file="$filecheck"/filechecksummary2.csv
     missing=$(grep -o 'no' "$in_file" | wc -l)
@@ -740,7 +773,7 @@ do
         #mes_out
         file_out="$dirres"/"$level"_count_matrixeditedDESeq2.csv
         file_in="$dirres"/"$level"_count_matrix.csv
-        index_file="$ExToolsetix"/index/"$level"_names.csv
+        index_file="$ExToolsetix"/"$human"/"$level"_names.csv
         pheno_file="$dir_path"/PHENO_DATA.csv
         Rtool=GTEX
         level_id=$(echo ""$level"_id");
@@ -789,6 +822,7 @@ else
     home_dir=$(config_get home_dir);
     dir_path=$(config_get dir_path);
     dirres=$(config_get dirres);
+    human=$(config_get human);
     for level in gene transcript ;
     do
       file_out="$dirres"/"$level"_count_matrixeditedDESeq2.csv
@@ -814,7 +848,7 @@ do
       Rtool=transpose
       Rtype=single2f
       file_out="$dirres"/"$level"ofinterest_count_matrix.csv #3
-      mergefile="$ExToolsetix"/"$level"_list/DESeq2/"$level"ofinterest.csv #7
+      mergefile="$ExToolsetix"/"$human"/"$level"ofinterest.csv #7
       phenofile="$dirres"/"$level"_count_matrixeditedDESeq2.csv #8
       GOI_file="$dirres"/temp.csv #10
       level_name=$(echo ""$level"_name")
@@ -850,7 +884,7 @@ then
     Rtype=single2f
     GOI_file="$dirres"/excitome_count_matrixDESeq2.csv
     file_out="$dirres"/excitome_count_matrix.csv
-    mergefile="$ExToolsetix"/gene_list/DESeq2/excitome.csv
+    mergefile="$ExToolsetix"/"$human"/excitome.csv
     phenofile="$dirres"/gene_count_matrixeditedDESeq2.csv
     level_name=$(echo "gene_name")
     echo1=$(echo "CREATING "$file_out"")
@@ -967,6 +1001,7 @@ then
       file_name=$(echo "$dir_name" | cut -f 1 -d '.')
       echo "$file_name"
       echo ""$file_name"" >> "$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_pathway_"$level"list.csv
+      #echo ""$file_name"" >> "$dir_path"/AIDD/ExToolset/indexes/user_input_pathway_"$level"list.csv
       matrix_file4a="$dirres"/"$file_name"_count_matrix.csv
       if [ ! -s "$matrix_file4a" ];
       then
@@ -1021,6 +1056,7 @@ then
     dirraw=$(config_get dirraw);
     dirVC=$(config_get dirVC);
     dirVCsubs=$(config_get dirVCsubs);
+    human=$(config_get human);
     echo1="STARTING G_VEX FOR "$run" VARIANTS"
     mes_out
     for snptype in ADARediting APOBECediting All ;
@@ -1090,21 +1126,7 @@ then
           new_dir="$new_wkd"
           create_dir
           cat "$file_in" | sed 's/  //g' | sed 's/ //g'  >> "$new_dir"/"$run""$name"
-          #temp_file
-          #first_col_name=$(awk -F',' 'NR=1{print $1}')
-          #cat "$file_in" | sed 's/'$first_col_name'/id/g' >> "$dir_path"/temp.csv
-          #temp_file
-         # file_out="$dirVC"/"$name"/"$name"_"$snptype"_count_matrix.csv
-         # Rtool=I_VEX
-         # Rtype=multi
-         # level_name=$(echo "id")
-         # names=$(echo "id")
-         # GOI_file="$dirVC"/"$name"/temp.csv
-         # mergefile=none
-         # phenofile=none
-         # echo1=$(echo "CREATING "$file_out"")
-         # mes_out
-          #mergeR
+
          # cat "$file_out" | cut -d',' -f1,2 | sed '1d' >> "$dir_path"/temp.csv
         done
       fi
@@ -1261,6 +1283,7 @@ then
       source config.shlib
       dir_path="$(config_get dir_path)"; # main directory
       home_dir="$(config_get home_dir)"; # home directory
+      human=$(config_get human);
       dirqc="$dir_path"/quality_control; # qc directory 
       wkd="$dirres";
       VC_dir="$dirres"/variant_calling/impact
@@ -1322,6 +1345,7 @@ then
     source config.shlib
     dir_path="$(config_get dir_path)"; # main directory
     home_dir="$(config_get home_dir)"; # home directory
+    human=$(config_get human);
     dirres="$dir_path"/Results
     VC_dir="$dirres"/variant_calling/impact
     for level in gene transcript ;
@@ -1416,6 +1440,7 @@ then
       home_dir=$(config_get home_dir);
       dir_path=$(config_get dir_path);
       dirres=$(config_get dirres);
+      human=$(config_get human);
       for level in gene transcript ;
       do
         file_out="$dirres"/VEX_count_matrix.csv
@@ -1499,7 +1524,7 @@ do
       then
         if [ ! -s "$file_out" ];
         then
-          index_file="$ExToolsetix"/index/"$level"_names.csv
+          index_file="$ExToolsetix"/"$human"/"$level"_names.csv
           pheno_file="$dir_path"/PHENO_DATAalign.csv
           Rtool=GTEX
           level_id=$(echo ""$level"_id");
@@ -1555,6 +1580,7 @@ do
   home_dir=$(config_get home_dir);
   dir_path=$(config_get dir_path);
   dirres=$(config_get dirres);
+  human=$(config_get human);
   for level in gene transcript ;
   do
     for snptype in ADARediting APOBECediting All ;
@@ -1635,7 +1661,7 @@ dir_path=$(config_get dir_path);
 dirres=$(config_get dirres);
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
 matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
-  INPUT="$ExToolsetix"/index/excitome_loc.csv
+  INPUT="$ExToolsetix"/"$human"/excitome_loc.csv
   {
   [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
   read
@@ -1645,6 +1671,7 @@ matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
     home_dir=$(config_get home_dir);
     dir_path=$(config_get dir_path);
     dirres=$(config_get dirres);
+    human=$(config_get human);
     ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
     ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
     express_value=$(echo "$express_value")
@@ -1688,7 +1715,10 @@ matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
           nucG=$(awk -F',' 'NR==2{print $3}' "$temp_file")
           nucT=$(awk -F',' 'NR==2{print $4}' "$temp_file")
           nuctotal=$(expr "$nucA" + "$nucG" + "$nucC" + "$nucT")
-          echo ""$excitome_gene","$nuctotal"" >> "$dirresgutt"/"$bamfile"stackdepth.csv
+          dirresguttSD="$dirresgutt"/stackdepth
+          new_dir="$dirresguttSD"
+          create_dir
+          echo ""$excitome_gene","$nuctotal"" >> "$dirresguttSD"/"$bamfile"stackdepth.csv
           if [ "$nucG" == "0" ];
           then
             percentG="0"
@@ -1869,6 +1899,7 @@ matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
   mes_out
   mergeR
   name=excitomefreq
+  resdir="$dirresRF"
   makeDESeq2
   cd "$gutt_matrix_dir1"
   cur_wkd="$RF_matrix_dir1"
@@ -1883,6 +1914,7 @@ matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
   mes_out
   mergeR
   name=guttediting
+  resdir="$dirresgutt"
   makeDESeq2
   cd "$gutt_matrix_dir2"
   cur_wkd="$RF_matrix_dir2"
@@ -1897,6 +1929,7 @@ matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
   mes_out
   mergeR
   name=guttexpression
+  resdir="$dirresgutt"
   makeDESeq2
 ###############################################################################################################################################################
 # Statistical Analysis section:DESeq2                                                                                                   *WORKING ON IT
@@ -1906,37 +1939,12 @@ dirresDE="$dirres"/DESeq2
 new_dir="$dirresDE"
 create_dir
 mv "$dirres"/*DESeq2* "$dirresDE"
-for count_matrix in excitome_count_matrixDESeq2 excitomefreq_count_matrixDESeq2 ;
+for files in "$dirresDE"/* ;
 do
+  file_in="$files"
+  namefiles=$(echo "${file_in##*/}")
+  count_matrix=$(echo "${namefiles%%.*}")
   bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #run DE with DESEq2 for each gene and transcript count matrix for each condition
-done
-for level in gene transcript ;
-do
-  count_matrix="$level"_count_matrixeditedDESeq2
-  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #run DE with DESEq2 for each gene and transcript count matrix for each condition
-done
-for level in gene transcript ;
-do
-  dirrespath="$dir_path"/AIDD/ExToolset/indexes/"$level"_list/pathway
-  for files in "$dirrespath";
-  do
-    file_in="$files"
-    namefiles=$(echo "${file_in##*/}")
-    name=$(echo "${namefiles%%.*}")
-    count_matrix="$name"pathway_count_matrixDESeq2
-    bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #runs DE with DESeq2 for each editing impact count matrix (these counts are how many edits are found in each gene
-  done
-done
-for level in gene transcript ;
-do
-  for impact in high_impact moderate_impact ;
-  do
-    for snptype in ADARediting APOBECediting All ;
-    do
-        count_matrix="$level"_"$impact"_"$snptype"edits_count_matrixDESeq2
-        bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #runs DE with DESeq2 for each editing impact count matrix (these counts are how many edits are found in each gene
-    done
-  done
 done
 ###############################################################################################################################################################
 # Statistical Analysis section:ANOVA                                                                                                         *WORKING ON IT
@@ -1946,58 +1954,20 @@ dirresANOVA="$dirres"/ANOVA
 new_dir="$dirresANOVA"
 create_dir
 mv "$dirres"/*ANOVA* "$dirresANOVA"
-file_in="$dirresANOVA"/"$count_matrix"ANOVA.csv
-cat "$file_in" | sed '/Inf/d' | sed 's/samp_name/sampname/g' | sed 's/_[0-9]//g' >> "$dir_path"/temp.csv
-temp_file
-for count_matrix in all_count_matrixANOVA excitome_count_matrixANOVA excitomefreq_count_matrixANOVA ;
+for files in "$dirresANOVA"/* ;
 do
+  file_in="$files"
+  namefiles=$(echo "${file_in##*/}")
+  count_matrix=$(echo "${namefiles%%.*}")
   bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on each gene in the excitome, each nt and AA substitution, and impact of subs.
 done
-for level in gene transcript ;
-do
-  for impact in high_impact moderate_impact ;
-  do
-    for snptype in ADARediting APOBECediting All ;
-    do
-      count_matrix="$level"_"$impact"_"$snptype"edits_count_matrixeditedANOVA
-      bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on number of edits found in each gene or transcript
-    done
-  done
-done
-for level in gene transcript ;
-do
-  user_input=$(echo ""$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_"$level"list.csv")
-  if [ -f "$user_input" ];
-  then
-    INPUT="$user_input"
-    OLDIFS=$IFS
-    {
-    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-    while IFS=, read -r GOI
-    do
-      source config.shlib;
-      home_dir=$(config_get home_dir);
-      dir_path=$(config_get dir_path);
-      dirres=$(config_get dirres);
-      dirresANOVA="$dirres"/ANOVA
-      count_matrix="$GOI"_count_matrix
-      new_dir="$dirresANOVA"/"$count_matrix"
-      create_dir
-      echo1="NOW RUNNING STATISTICS FOR "$count_matrix""
-      mes_out
-      bash "$dir_path"/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA for each gene list provided by the user
-    done
-    } < $INPUT
-    IFS=$OLDIFS # creates count matrix
-  fi
-done
-cd "$dir_path"/AIDD
 ###############################################################################################################################################################
 # Statistical Analysis section: Correlaions                                                                                          *WORKING ON IT
 ###############################################################################################################################################################
 count_matrix=all_count_matrix
   bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetcorr.sh "$count_matrix" #runs correlations
   cd "$dir_path"/AIDD
+  rm
 ###############################################################################################################################################################
 # Statistical Analysis section: Guttman and RF                                                                                                  *WORKING ON IT
 ###############################################################################################################################################################
