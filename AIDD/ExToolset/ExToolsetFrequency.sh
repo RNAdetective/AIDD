@@ -2,18 +2,18 @@
 # MAKES EDITING FREQUENCY COUNT MATRIX PULLING STACKS FROM ALIGN AND ASSEBMLED BAM FILES                                                    *Working
 ###############################################################################################################################################################
 add_conditions() {
-  ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
-  count_matrix="$dirres"/"$name"_count_matrix.csv
-  Rtool=finalmerge
-  Rtype=single2f
-  GOI_file="$dirres"/"$name"_count_matrixrun.csv
-  file_out="$dirres"/"$name"_count_matrixrun.csv
-  mergefile="$dirres"/"$name"_count_matrix.csv
-  phenofile="$dir_path"/PHENO_DATA.csv
-  level_name=$(echo "samp_name")
-  echo1=$(echo "CREATING "$file_out"")
-  mes_out
-  mergeR
+ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
+count_matrix="$dirres"/"$name"_count_matrix.csv
+Rtool=finalmerge
+Rtype=single2f
+GOI_file="$dirres"/"$name"_count_matrixANOVA.csv
+file_out="$dirres"/"$name"_count_matrixANOVA.csv
+mergefile="$dirres"/"$name"_count_matrix.csv
+phenofile="$dir_path"/PHENO_DATA.csv
+level_name=$(echo "samp_name")
+echo1=$(echo "CREATING "$file_out"")
+mes_out
+mergeR
 }
 makeDESeq2() {
 file_in="$resdir"/"$name"_count_matrixDESeq2.csv
@@ -56,7 +56,6 @@ mergeR
 cp "$resdir"/"$name"_count_matrixDESeq2.csv "$dirres"/"$name"_count_matrixDESeq2.csv
 }
 mergeR() {
-ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
 Rscript "$ExToolset"/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" "$GOI_file" "$temp_file1" "$temp_file2" "$temp_file3" "$rename" #creates level of interest files
 } # Runs multimerge R
 basecount() {
@@ -107,6 +106,7 @@ matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
     home_dir=$(config_get home_dir);
     dir_path=$(config_get dir_path);
     dirres=$(config_get dirres);
+    human=$(config_get human);
     ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
     ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
     express_value=$(echo "$express_value")

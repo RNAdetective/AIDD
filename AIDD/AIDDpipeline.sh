@@ -36,6 +36,7 @@ Gmatrix_name=gene_count_matrix.csv;
 Tmatrix_name=transcript_count_matrix.csv;
 file_sra="$run";
 file_fastq="$run".fastq;
+file_fastqpass="$run"_pass.fastq;
 file_fastqpaired1="$run"_1.fastq;
 file_fastqpaired2="$run"_2.fastq;
 file_fastqpaired1pass="$run"_pass_1.fastq;
@@ -109,7 +110,9 @@ fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/
 mv "$wd"/$file_fastqpaired1pass "$wd"/$file_fastqpaired1 
 mv "$wd"/$file_fastqpaired2pass "$wd"/$file_fastqpaired2
  }
-fastqdumpsingle() { fastq-dump "$wd"/$file_sra --read-filter pass -O "$wd"/ ; }
+fastqdumpsingle() { fastq-dump "$wd"/$file_sra --read-filter pass -O "$wd"/
+mv "$wd"/$file_fastqpass "$wd"/$file_fastq
+ }
 movefastq() { mv $fastq_dir_path/$file_fastq "$wd"/ ; }
 fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd $dirqc/fastqc ; unzip -q "$run"_1_fastqc.zip ; unzip -q "$run"_2_fastqc.zip ; cd "$dir_path"/AIDD ; }
 fastqcsingle() { cd $dirqc/fastqc/ ; fastqc "$wd"/$file_fastq ; cd $dirqc/fastqc ; unzip -q "$run"_fastqc.zip ; cd "$dir_path"/AIDD ; }
