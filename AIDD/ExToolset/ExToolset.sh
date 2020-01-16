@@ -774,6 +774,9 @@ do
         file_out="$dirres"/"$level"_count_matrixeditedDESeq2.csv
         file_in="$dirres"/"$level"_count_matrix.csv
         index_file="$ExToolsetix"/"$human"/"$level"_names.csv
+        file_in="$index_file"
+        cat "$file_in" | awk -F',' '!a[$1]++' >> "$dir_path"/temp.csv
+        temp_file
         pheno_file="$dir_path"/PHENO_DATA.csv
         Rtool=GTEX
         level_id=$(echo ""$level"_id");
@@ -793,6 +796,8 @@ do
         header=$(head -n 1 "$file_out")
         cat "$file_out" | awk -F',' 'NR > 1{s=0; for (i=3;i<=NF;i++) s+=$i; if (s!=0)print}' | sort -u -k1 | sed '1i '$level'_name'$header'' >> "$dir_path"/temp.csv
         file_in="$file_out"
+        temp_file
+        cat "$file_in" | awk -F',' '!a[$1]++' >> "$dir_path"/temp.csv
         temp_file
       fi
     else
