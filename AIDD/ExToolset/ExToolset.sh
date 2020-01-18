@@ -385,7 +385,9 @@ then
   cd "$home_dir"/scripts
 fi
 }
-
+varfilter() {
+Rscript "$ExToolset"/varfiltering.R "$file_in" "$file_out" "$image_out1" "$image_out2" "$image_out3" "$image_out4"
+}
 temp_file() {
 if [ -s "$dir_path"/temp.csv ];
 then
@@ -635,7 +637,7 @@ do
   type3=none
   snptype=summary
   create_filecheck
-  for snptype in ADARediting APOBECediting All ;
+  for snptype in ADARediting APOBECediting AllNoSnpsediting ;
   do
     filecheckVC="$dirqc"/filecheckVC
     raw_input3="$dirraw"/snpEff/snpEff"$run""$snptype".csv
@@ -665,7 +667,7 @@ for in_file in "$raw_check1" "$raw_check2" ;
 do
   checkfile
 done
-for snptype in ADARediting APOBECediting All ;
+for snptype in ADARediting APOBECediting AllNoSnpsediting ;
 do
   raw_check3="$dirqc"/filecheckVC/filecheck"$snptype"1.csv #snpeff.csv
   for in_file in "$raw_check3" ;
@@ -673,7 +675,7 @@ do
     checkfile
   done
 done
-for snptype in ADARediting APOBECediting All ;
+for snptype in ADARediting APOBECediting AllNoSnpsediting ;
 do
   raw_check4="$dirqc"/filecheckVC/filecheck"$snptype"2.csv #snpeff.txt
   for in_file in "$raw_check4" ;
@@ -681,7 +683,7 @@ do
     checkfile
   done
 done
-for snptype in ADARediting APOBECediting All ;
+for snptype in ADARediting APOBECediting AllNoSnpsediting ;
 do
   raw_check5="$dirqc"/filecheckVC/filecheck"$snptype"3.csv #Ann.vcf
   for in_file in "$raw_check5" ;
@@ -774,9 +776,6 @@ do
         file_out="$dirres"/"$level"_count_matrixeditedDESeq2.csv
         file_in="$dirres"/"$level"_count_matrix.csv
         index_file="$ExToolsetix"/"$human"/"$level"_names.csv
-        file_in="$index_file"
-        cat "$file_in" | awk -F',' '!a[$1]++' >> "$dir_path"/temp.csv
-        temp_file
         pheno_file="$dir_path"/PHENO_DATA.csv
         Rtool=GTEX
         level_id=$(echo ""$level"_id");
@@ -1036,8 +1035,111 @@ else
   mes_out
 fi # NOW HAVE USE SUPPLIED GENE OR TRANSCRIPT PATHWAY MATRIX
 ###############################################################################################################################################################
+# Creates graphs showing vcf filtering results and removal of known snps                                                                     *TESTED
+###############################################################################################################################################################
+VarQC="$dir_path"/quality_control/variant_filtering
+new_dir="$VarQC"
+create_dir 
+INPUT="$dir_path"/PHENO_DATA.csv
+OLDIFS=$IFS
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+read
+while IFS=, read -r samp_name run condition sample condition2 condition3
+do
+  VarQC="$dir_path"/quality_control/variant_filtering
+  for name in filtered_snps_finalAll raw_snps filtered_snps raw_snps_recal ;
+  do
+    if [ "$name" == "filtered_snps_finalAll" ];
+    then
+      rdvcf="$dir_path"/raw_data/vcf_files/final
+    fi
+    if [ "$name" == "filtered_snps" ];
+    then
+      rdvcf="$dir_path"/raw_data/vcf_files/filtered
+    fi
+    if [[ "$name" == "raw_snps" || "$name" == "raw_snps_recal" ]];
+    then
+      rdvcf="$dir_path"/raw_data/vcf_files/raw
+    fi
+    file_vcf_finalAll="$rdvcf"/"$run""$name".vcf
+    echo "Running analysis for visualizing variant filtration for "$run" and variant filtering type "$name""
+    ACcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "C")) { print } }' | wc -l)
+    ATcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "T")) { print } }' | wc -l)
+    AGcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "G")) { print } }' | wc -l)
+    CAcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "A")) { print } }' | wc -l)
+    CGcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "G")) { print } }' | wc -l)
+    CTcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "T")) { print } }' | wc -l)
+    GAcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "A")) { print } }' | wc -l)
+    GCcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "C")) { print } }' | wc -l)
+    GTcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "T")) { print } }' | wc -l)
+    TAcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "A")) { print } }' | wc -l)
+    TGcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "G")) { print } }' | wc -l)
+    TCcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "C")) { print } }' | wc -l)
+    ACcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "C") && ($3 == ".")) { print } }' | wc -l)
+    ATcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "T") && ($3 == ".")) { print } }' | wc -l)
+    AGcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "G") && ($3 == ".")) { print } }' | wc -l)
+    CAcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "A") && ($3 == ".")) { print } }' | wc -l)
+    CGcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "G") && ($3 == ".")) { print } }' | wc -l)
+    CTcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "T") && ($3 == ".")) { print } }' | wc -l)
+    GAcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "A") && ($3 == ".")) { print } }' | wc -l)
+    GCcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "C") && ($3 == ".")) { print } }' | wc -l)
+    GTcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "T") && ($3 == ".")) { print } }' | wc -l)
+    TAcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "A") && ($3 == ".")) { print } }' | wc -l)
+    TGcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "G") && ($3 == ".")) { print } }' | wc -l)
+    TCcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "C") && ($3 == ".")) { print } }' | wc -l)
+    final_file="$VarQC"/VariantFilteringVisual.csv
+    if [ ! -s "$final_file" ];
+    then
+      echo "samp_name,condition,condition2,name,type,ACcount,AGcount,ATcount,CAcount,CGcount,CTcount,GAcount,GCcount,GTcount,TAcount,TCcount,TGcount" >> "$final_file"
+    fi
+    echo ""$samp_name","$condition","$condition2","$name",total,"$ACcount","$AGcount","$ATcount","$CAcount","$CGcount","$CTcount","$GAcount","$GCcount","$GTcount","$TAcount","$TCcount","$TGcount"" >> "$final_file"
+    echo ""$samp_name","$condition","$condition2","$name",nonsnps,"$ACcountsnps","$AGcountsnps","$ATcountsnps","$CAcountsnps","$CGcountsnps","$CTcountsnps","$GAcountsnps","$GCcountsnps","$GTcountsnps","$TAcountsnps","$TCcountsnps","$TGcountsnps"" >> "$final_file"
+    ACsnp=$(expr "$ACcount" - "$ACcountsnps")
+    ATsnp=$(expr "$ATcount" - "$ATcountsnps")
+    AGsnp=$(expr "$AGcount" - "$AGcountsnps")
+    CAsnp=$(expr "$CAcount" - "$CAcountsnps")
+    CGsnp=$(expr "$CGcount" - "$CGcountsnps")
+    CTsnp=$(expr "$CTcount" - "$CTcountsnps")
+    GAsnp=$(expr "$GAcount" - "$GAcountsnps")
+    GCsnp=$(expr "$GCcount" - "$GCcountsnps")
+    GTsnp=$(expr "$GTcount" - "$GTcountsnps")
+    TAsnp=$(expr "$TAcount" - "$TAcountsnps")
+    TGsnp=$(expr "$TGcount" - "$TGcountsnps")
+    TCsnp=$(expr "$TCcount" - "$TCcountsnps")
+    echo ""$samp_name","$condition","$condition2","$name",withsnps,"$ACsnp","$AGsnp","$ATsnp","$CAsnp","$CGsnp","$CTsnp","$GAsnp","$GCsnp","$GTsnp","$TAsnp","$TCsnp","$TGsnp"" >> "$final_file"
+    ACsnps=$(echo "scale=4 ; "$ACcountsnps"/"$ACcount"" | bc)
+    ATsnps=$(echo "scale=4 ; "$ATcountsnps"/"$ATcount"" | bc)
+    AGsnps=$(echo "scale=4 ; "$AGcountsnps"/"$AGcount"" | bc)
+    CAsnps=$(echo "scale=4 ; "$CAcountsnps"/"$CAcount"" | bc)
+    CGsnps=$(echo "scale=4 ; "$CGcountsnps"/"$CGcount"" | bc)
+    CTsnps=$(echo "scale=4 ; "$CTcountsnps"/"$CTcount"" | bc)
+    GAsnps=$(echo "scale=4 ; "$GAcountsnps"/"$GAcount"" | bc)
+    GCsnps=$(echo "scale=4 ; "$GCcountsnps"/"$GCcount"" | bc)
+    GTsnps=$(echo "scale=4 ; "$GTcountsnps"/"$GTcount"" | bc)
+    TAsnps=$(echo "scale=4 ; "$TAcountsnps"/"$TAcount"" | bc)
+    TGsnps=$(echo "scale=4 ; "$TGcountsnps"/"$TGcount"" | bc)
+    TCsnps=$(echo "scale=4 ; "$TCcountsnps"/"$TCcount"" | bc)
+    echo ""$samp_name","$condition","$condition2","$name",percent,"$ACsnps","$AGsnps","$ATsnps","$CAsnps","$CGsnps","$CTsnps","$GAsnps","$GCsnps","$GTsnps","$TAsnps","$TCsnps","$TGsnps"" >> "$final_file"
+  done
+done
+} < $INPUT
+IFS=$OLDIFS
+file_in <- "$VarQC"/VariantFilteringVisual.csv
+file_out <- "$VarQC"/VariantFilteringVisualSummary.csv
+image_out1 <- "$VarQC"/VariantFilteringVisualfiltered_snps_finalAllTotal.tiff
+image_out2 <- "$VarQC"/VariantFilteringVisualfiltered_snps_finalAllNoSnps.tiff
+image_out3 <- "$VarQC"/VariantFilteringVisualNoSnps.tiff
+image_out4 <- "$VarQC"/VariantFilteringVisualTotal.tiff
+image_out5 <- "$VarQC"/VariantFilteringVisualfiltered_snps_finalTotalNoSnps.tiff
+image_out6 <- "$VarQC"/VariantFilteringVisualraw_snpsTotalNoSnps.tiff
+image_out7 <- "$VarQC"/VariantFilteringVisualAll.tiff
+image_out8 <- "$VarQC"/VariantFilteringVisualAll2.tiff
+tool=varfilter
+run_tools
+###############################################################################################################################################################
 # Global substitution variant matrix G_VEX matrix                                                                                            *TESTED
-############################################################################################################################################################### 
+###############################################################################################################################################################
 echo1=$(echo "CREATING G_VEX MATRIX")
 mes_out
 new_dir="$dirVC"
@@ -1064,7 +1166,7 @@ then
     human=$(config_get human);
     echo1="STARTING G_VEX FOR "$run" VARIANTS"
     mes_out
-    for snptype in ADARediting APOBECediting All ;
+    for snptype in ADARediting APOBECediting AllNoSnpsediting ;
     do
       filecheck="$dirqc"/filecheckVC
       in_file="$filecheck"/filecheck"$snptype"1.csv
@@ -1146,7 +1248,7 @@ then
   temp_file
   if [ -s "$summaryfile" ];
   then
-    for snptype in ADARediting APOBECediting All ;
+    for snptype in ADARediting APOBECediting AllNoSnpsediting ;
     do
       for level in nucleotide amino_acid ;
       do
@@ -1190,7 +1292,7 @@ then
   cd "$dir_path"/AIDD/ 
   for level in nucleotide amino_acid ;
   do
-    snptype=All
+    snptype=AllNoSnpsediting
     final_file="$dirVC"/"$level"/"$level""$snptype"_count_matrix.csv
     if [ -s "$final_file" ];
     then
@@ -1307,7 +1409,7 @@ then
         do
           new_dir="$VC_dir"/"$level"/"$impact"
           create_dir      
-          for snptype in ADARediting APOBECediting All ;
+          for snptype in ADARediting APOBECediting AllNoSnpsediting ;
           do
             filecheck="$dirqc"/filecheckVC
             in_file="$filecheck"/filecheck"$snptype"2.csv
@@ -1357,7 +1459,7 @@ then
     do
       for impact in high_impact moderate_impact ;
       do
-        for snptype in ADARediting APOBECediting All ;
+        for snptype in ADARediting APOBECediting AllNoSnpsediting ;
         do
           file_in="$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv
           if [ -s "$file_in" ];
@@ -1487,7 +1589,7 @@ for level in gene transcript ;
 do
   for impact in high_impact moderate_impact ;
   do
-    for snptype in ADARediting APOBECediting All ;
+    for snptype in ADARediting APOBECediting AllNoSnpsediting ;
     do
       new_dir="$dirres"/variant_calling/impact/"$level"/"$impact"/"$snptype"
       create_dir
@@ -1500,7 +1602,7 @@ for level in gene transcript ;
 do
   for impact in high_impact moderate_impact ;
   do
-    for snptype in ADARediting APOBECediting All ;
+    for snptype in ADARediting APOBECediting AllNoSnpsediting ;
     do
       #impact="$VC_dir"/"$level"/"$impact"/"$snptype"
       #cat "$impact"/* | awk -vORS=, '{ print $1 }' | sed 's/,$//' | awk -vORS=, '{ print $0 }' >> "$VC_dir"/"$level"/"$impact"/"$snptype"GListallsamp.csv
@@ -1564,7 +1666,7 @@ done
 cd "$dir_path"/AIDD
 for level in gene transcript ;
 do
-  for snptype in ADARediting APOBECediting All ;
+  for snptype in ADARediting APOBECediting AllNoSnpsediting ;
   do
     for impact in high_impact moderate_impact ;
     do
@@ -1588,7 +1690,7 @@ do
   human=$(config_get human);
   for level in gene transcript ;
   do
-    for snptype in ADARediting APOBECediting All ;
+    for snptype in ADARediting APOBECediting AllNoSnpsediting ;
     do
       for impact in high_impact moderate_impact ;
       do
@@ -1603,7 +1705,7 @@ done
 IFS=$OLDIFS
 for level in gene transcript ;
 do
-  for snptype in ADARediting APOBECediting All ;
+  for snptype in ADARediting APOBECediting AllNoSnpsediting ;
   do
     for impact in high_impact moderate_impact ;
     do
@@ -1638,7 +1740,7 @@ for level in gene transcript ;
 do
   for impact in high_impact moderate_impact ;
   do
-    for snptype in ADARediting APOBECediting All ;
+    for snptype in ADARediting APOBECediting AllNoSnpsediting ;
     do
       matrix_dir="$dirres"/variant_calling/impact/"$level"/"$impact"/"$snptype"
       for file in "$matrix_dir" ;
@@ -1757,11 +1859,11 @@ matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
           fi
           if [ ! -f "$gutt_matrix1" ];
           then
-            echo "excitome_site,"$bamfile"edited" >> "$gutt_matrix1"
+            echo "excitome_site,"$bamfile"" >> "$gutt_matrix1"
           fi
           if [ ! -f "$gutt_matrix2" ];
           then
-            echo "excitome_site,"$bamfile"edited" >> "$gutt_matrix2"
+            echo "excitome_site,"$bamfile"" >> "$gutt_matrix2"
           fi
           if [ "$nuctotal" -gt "10" ];
           then

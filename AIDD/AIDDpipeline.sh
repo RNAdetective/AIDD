@@ -340,6 +340,7 @@ mv "$wd"/"$file_vcf_finalAll" "$rdvcf"/
 excitome_vcf() { 
 ## filter out everything that is not ADAR mediated editing
 awk -F "\t" '/^#/' "$rdvcf"/"$run"filtered_snps_finalAll.vcf > "$rdvcf"/"$run"filtered_snps_finalinfo.vcf #
+cat "$rdvcf"/"$run"filtered_snps_finalAll.vcf | awk -F "\t" ' { if ($3 == ".") { print } }' > "$rdvcf"/"$run"filtered_snps_finalAllNoSnpsediting.vcf
 awk -F "\t" ' { if (($4 == "A") && ($5 == "G")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalAG.vcf
 awk -F "\t" '{ if (($4 == "T") && ($5 == "C")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalTC.vcf
 cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalAG.vcf "$rdvcf"/"$run"filtered_snps_finalTC.vcf > "$rdvcf"/"$file_vcf_finalADAR"
@@ -1169,7 +1170,7 @@ then
 ####################################################################################################################
 #  IMPACT PREDICTION
 ####################################################################################################################
-    for snptype in All AG TC CT GA ADARediting APOBECediting ; # DO ALL VARIANTS, ADAR VARIANTS, AND APOBEC VARIANTS
+    for snptype in All AllNoSnpsediting AG TC CT GA ADARediting APOBECediting ; # DO ALL VARIANTS, ADAR VARIANTS, AND APOBEC VARIANTS
     do
       tool=snpEff
       file_in="$rdvcf"/"$snpEff_in""$snptype".vcf    

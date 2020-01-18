@@ -94,6 +94,9 @@ then
   mv "$dir_path"/temp.csv "$file_in"
 fi
 }
+prob_gutt() {
+Rscript "$ExToolset"/guttman.R "$file_in" "$file_out1" "$file_out2" "$file_out3" "$file_out"
+}
 #grep '^#' "$file_in" > "$file_out" && grep -v '^#' "$file_in" | LC_ALL=C sort -t $'\t' -k1,1 -k2,2n >> "$file_out
 ######################################################################################
 # makes editing frequency count matrix pulling stacks from aligned and assembled bam file
@@ -104,6 +107,90 @@ dir_path=$(config_get dir_path);
 dirres=$(config_get dirres);
 ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
+con_name1=$(config_get con_name1);
+con_name1=$(echo ""$con_name1"" | sed 's/_//g')
+con_name2=$(config_get con_name2);
+con_name2=$(echo ""$con_name2"" | sed 's/_//g')
+con_name3=$(config_get con_name3);
+con_name3=$(echo ""$con_name3"" | sed 's/_//g')
+con_name4=$(echo "samp_name");
+con_name4=$(echo ""$con_name4"" | sed 's/_//g')
+guttcond="$dir_path"/Results/guttman/all
+new_dir="$guttcond"
+create_dir
+gutt_scores="$guttcond"/scores
+new_dir="$gutt_scores"
+create_dir
+gutt_items="$guttcond"/items
+new_dir="$gutt_items"
+create_dir
+gutt_traits="$guttcond"/traits
+new_dir="$gutt_traits"
+create_dir
+file_in=/media/sf_AIDD/Results/guttman/guttediting_count_matrixDESeq2.csv
+file_out1=/media/sf_AIDD/Results/guttman/scores/guttediting_regionscores.csv
+file_out2=/media/sf_AIDD/Results/guttman/items/guttediting_regionitems.csv
+file_out3=/media/sf_AIDD/Results/guttman/traits/guttediting_regiontrait.csv
+prob_gutt 
+#then merge scores with PHENO_DATA.csv then save
+#run Rscript for bargraph of scores 
+for cond_name in "$con_name1" "$con_name2" "$con_name3" sampname samp_name ;
+do
+  guttcond="$dir_path"/Results/guttman/"$cond_name"
+  new_dir="$guttcond"
+  create_dir
+  gutt_scores="$guttcond"/scores
+  new_dir="$gutt_scores"
+  create_dir
+  gutt_items="$guttcond"/items
+  new_dir="$gutt_items"
+  create_dir
+  gutt_traits="$guttcond"/traits
+  new_dir="$gutt_traits"
+  create_dir
+  cd "$guttcond"
+  awk -F',' '{print > "guttediting_count_matrix'$cond_name'"$1".csv"}' "$dir_path"/Results/guttman/guttediting_count_matrixDESeq2.csv #split by condition
+  for files in "$guttcond"/* ;
+  do
+    file_in="$files"
+    namefiles=$(echo "${file_in##*/}")
+    count_matrix=$(echo "${namefiles%%.*}")
+    file_out1="$guttcond"/scores/"$count_matrix"scores.csv
+    file_out2="$guttcond"/items/"$count_matrix"items.csv
+    file_out3="$guttcond"/traits/"$count_matrix"traits.csv
+    prob_gutt
+    #rename p and level in items for condition_name
+    #INPUT "$dir_path"/"$cond_name".csv
+    # num name
+    guttcond="$dir_path"/Results/guttman/"$cond_name"/"$name"
+    new_dir="$guttcond"
+    create_dir
+    gutt_scores="$guttcond"/scores
+    new_dir="$gutt_scores"
+    create_dir
+    gutt_items="$guttcond"/items
+    new_dir="$gutt_items"
+    create_dir
+    gutt_traits="$guttcond"/traits
+    new_dir="$gutt_traits"
+    create_dir
+    awk -F',' '{print > "guttediting_count_matrix'$cond_name'"$1".csv}' "$guttcond"/guttediting_count_matrix$cond_name$1.csv
+  done
+  #combine all items in one 
+  #sort by the first condition_name
+  #put all p in one column and all level in another with condition as a column
+  #then run R script for line graph
+done
+
+  
+
+
+
+
+
+
+
+
   INPUT="$ExToolsetix"/"$human"/excitome_loc.csv
   {
   [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
