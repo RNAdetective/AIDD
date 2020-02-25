@@ -19,13 +19,15 @@ image_out3 <- paste0(args[5]);
 image_out4 <- paste0(args[6]);
 image_out5 <- paste0(args[7]);
 image_out6 <- paste0(args[8]);
+image_out7 <- paste0(args[9]);
+image_out8 <- paste0(args[10]);
 data <- read.csv(file_in)
 
 data_summary1 <- data %>% 
 group_by(condition, condition2, name, type) %>%
 summarize(average = mean (ACcount)) %>%
 mutate(nucleotide = "ACcount")
-write.csv(data_summary, file_out, row.names=FALSE, quote=FALSE)
+#write.csv(data_summary, file_out, row.names=FALSE, quote=FALSE)
 data_summary2 <- data %>% 
 group_by(condition, condition2, name, type) %>%
 summarize(average = mean (AGcount)) %>%
@@ -72,15 +74,6 @@ summarize(average = mean (TGcount)) %>%
 mutate(nucleotide = "TGcount")
 final_data <- rbind(data_summary1, data_summary2, data_summary3, data_summary4, data_summary5, data_summary6, data_summary7, data_summary8, data_summary9, data_summary10, data_summary11, data_summary12)
 write.csv(final_data, file_out, row.names=FALSE, quote=FALSE)
-
-image_out1 <- "/media/sf_AIDD/MDD/vcf_files/VariantFilteringVisualfiltered_snps_finalAllTotal.tiff"
-image_out2 <- "/media/sf_AIDD/MDD/vcf_files/VariantFilteringVisualfiltered_snps_finalAllNoSnps.tiff"
-image_out3 <- "/media/sf_AIDD/MDD/vcf_files/VariantFilteringVisualNoSnps.tiff"
-image_out4 <- "/media/sf_AIDD/MDD/vcf_files/VariantFilteringVisualTotal.tiff"
-image_out5 <- "/media/sf_AIDD/MDD/vcf_files/VariantFilteringVisualfiltered_snps_finalTotalNoSnps.tiff"
-image_out6 <- "/media/sf_AIDD/MDD/vcf_files/VariantFilteringVisualraw_snpsTotalNoSnps.tiff"
-image_out7 <- "/media/sf_AIDD/MDD/vcf_files/VariantFilteringVisualAll.tiff"
-image_out8 <- "/media/sf_AIDD/MDD/vcf_files/VariantFilteringVisualAll2.tiff"
 
 tiff(image_out1, units="in", width=10, height=5, res=300)
 data_plot1 <- final_data %>%

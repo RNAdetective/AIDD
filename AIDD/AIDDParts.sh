@@ -267,13 +267,14 @@ mv "$wd"/"$file_vcf_finalAll" "$rdvcf"/
 }
 excitome_vcf() { 
 ## filter out everything that is not ADAR mediated editing
-awk -F "\t" '/^#/' "$rdvcf"/"$run"filtered_snps_finalAll.vcf > "$rdvcf"/"$run"filtered_snps_finalinfo.vcf #
-awk -F "\t" ' { if (($4 == "A") && ($5 == "G")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalAG.vcf
-awk -F "\t" '{ if (($4 == "T") && ($5 == "C")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalTC.vcf
-cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalAG.vcf "$rdvcf"/"$run"filtered_snps_finalTC.vcf > "$rdvcf"/"$file_vcf_finalADAR"
-awk -F "\t" ' { if (($4 == "C") && ($5 == "T")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalCT.vcf
-awk -F "\t" '{ if (($4 == "G") && ($5 == "A")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalGA.vcf
-cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalCT.vcf "$rdvcf"/"$run"filtered_snps_finalGA.vcf > "$rdvcf"/"$file_vcf_finalAPOBEC"
+awk -F "\t" '/^#/' "$rdvcf_final"/"$run"filtered_snps_finalAll.vcf > "$rdvcf_final"/"$run"filtered_snps_finalinfo.vcf #
+cat "$rdvcf_final"/"$run"filtered_snps_finalAll.vcf | awk -F "\t" ' { if ($3 == ".") { print } }' > "$rdvcf_final"/"$run"filtered_snps_finalAllNoSnpsediting.vcf
+awk -F "\t" ' { if (($4 == "A") && ($5 == "G") && ($3 == ".")) { print } }' "$rdvcf_final"/"$file_vcf_finalAll" > "$rdvcf_final"/"$run"filtered_snps_finalAG.vcf
+awk -F "\t" '{ if (($4 == "T") && ($5 == "C") && ($3 == ".")) { print } }' "$rdvcf_final"/"$file_vcf_finalAll" > "$rdvcf_final"/"$run"filtered_snps_finalTC.vcf
+cat "$rdvcf_final"/"$run"filtered_snps_finalinfo.vcf "$rdvcf_final"/"$run"filtered_snps_finalAG.vcf "$rdvcf_final"/"$run"filtered_snps_finalTC.vcf > "$rdvcf_final"/"$file_vcf_finalADAR"
+awk -F "\t" ' { if (($4 == "C") && ($5 == "T") && ($3 == ".")) { print } }' "$rdvcf_final"/"$file_vcf_finalAll" > "$rdvcf_final"/"$run"filtered_snps_finalCT.vcf
+awk -F "\t" '{ if (($4 == "G") && ($5 == "A") && ($3 == ".")) { print } }' "$rdvcf_final"/"$file_vcf_finalAll" > "$rdvcf_final"/"$run"filtered_snps_finalGA.vcf
+cat "$rdvcf_final"/"$run"filtered_snps_finalinfo.vcf "$rdvcf_final"/"$run"filtered_snps_finalCT.vcf "$rdvcf_final"/"$run"filtered_snps_finalGA.vcf > "$rdvcf_final"/"$file_vcf_finalAPOBEC"
 }
 move_vcf3() {
 for i in raw final filtered; do
@@ -283,11 +284,11 @@ for i in raw final filtered; do
 done
 }
 snpEff() {
-java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf"/"$file_vcf_final""$snptype".vcf -stats "$dir_path"/raw_data/snpEff/"$snp_stats""$snptype" -csvStats "$dir_path"/raw_data/snpEff/"$snp_csv""$snptype".csv > "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf     ##converts final annotationed vcf to table for easier processing
-java "$javaset"  -jar "$AIDDtool"/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf -F CHROM -F POS -F ID -F REF -F ALT -F QUAL -F AC -F ANN -o "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".table
+java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf"/final/"$file_vcf_final""$snptype".vcf -stats "$dir_path"/raw_data/snpEff/"$snp_stats""$snptype" -csvStats "$dir_path"/raw_data/snpEff/"$snp_csv""$snptype".csv > "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf     ##converts final annotationed vcf to table for easier processing
+java -jar "$AIDDtool"/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf -F CHROM -F POS -F ID -F REF -F ALT -F QUAL -F AC -F ANN -o "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".table
 }
 AllsnpEff() {
-  for snptype in All ADARediting APOBECediting AG GA CT TC ; # DO ALL VARIANTS, ADAR VARIANTS, AND APOBEC VARIANTS
+  for snptype in All AllNoSnpsediting ADARediting APOBECediting AG GA CT TC ; # DO ALL VARIANTS, ADAR VARIANTS, AND APOBEC VARIANTS
   do
     snpEff #runs snp effect prediction
     echo ""$run" is done." 
@@ -406,6 +407,7 @@ while IFS=, read -r samp_name run condition sample condition2 condition3
 do
   dir_path="$1"
   rdvcf="$dir_path"/raw_data/vcf_files
+  rdvcf_final="$rdvcf"/final
   rdsnp="$dir_path"/raw_data/snpEff
   rdbam="$dir_path"/raw_data/bam_files # directory for bam files
   dirqc="$dir_path"/quality_control

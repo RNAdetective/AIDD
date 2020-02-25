@@ -124,13 +124,13 @@ seq_length_final=$(expr "$seq_length_final" - "3");
 start=12
 end=97
 }
-trimpaired() { fastx_trimmer -f 12 -l "$end" -i "$wd"/$file_fastqpaired1 -o "$wd"/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired2 -o "$wd"/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/$file_fastqpaired1 ; rm -f "$wd"/$file_fastqpaired2 ; mv "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired1 ; mv "$wd"/$file_fastqpaired2trim "$wd"/$file_fastqpaired2 ; }
+trimpaired() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired1 -o "$wd"/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired2 -o "$wd"/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/$file_fastqpaired1 ; rm -f "$wd"/$file_fastqpaired2 ; mv "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired1 ; mv "$wd"/$file_fastqpaired2trim "$wd"/$file_fastqpaired2 ; }
 trimsingle() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastq -o "$wd"/"$run"_trim.fastq ; cd $dirqc/fastqc ; fastqc "$run"_trim.fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f "$wd"/$file_fastq ; mv "$wd"/"$run"_trim.fastq "$wd"/$file_fastq ; }
 HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/"$file_fastqpaired1" -2 "$wd"/"$file_fastqpaired2" -t --summary-file $dirqc/alignment_metrics/"$run".txt -S "$wd"/"$file_sam" ; }
 HISAT2_single() { hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$wd"/"$file_fastq" -t --summary-file "$dir_path"/raw_data/counts/"$run".txt -S "$wd"/"$file_sam" ; }
-STAR_paired() { echo "STAR some text line on how to run" ; } #STAR --genomeDir /n/groups/hbctraining/intro_rnaseq_hpc/reference_data_ensembl38/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn Mov10_oe_1.subset.fq --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard 
+STAR_paired() { STAR --genomeDir "$home_dir"/AIDD/references/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn 1 "$wd"/"$file_fastqpaired1" -2 "$wd"/"$file_fastqpaired2"  --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard ; } # 
  
-STAR_single() { echo "STAR some text line on how to run" ; } #STAR --genomeDir /n/groups/hbctraining/intro_rnaseq_hpc/reference_data_ensembl38/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn Mov10_oe_1.subset.fq --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard
+STAR_single() { STAR --genomeDir "$home_dir"/AIDD/references/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn -"$wd"/$file_fastq --outFileNamePrefix "$rdbam"/$file_bam --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard ; } #
 BOWTIE2_paired() { echo "BOWTIE2 some text line on how to run" ; }
 BOWTIE2_single() { echo "BOWTIE2 some text line on how to run" ; }
 samtobam() { java -Djava.io.tmpdir="$dir_path"/tmp -jar "$AIDDtool"/picard.jar SortSam INPUT="$wd"/"$file_sam" OUTPUT="$rdbam"/$file_bam SORT_ORDER=coordinate ; }
@@ -339,24 +339,25 @@ mv "$wd"/"$file_vcf_finalAll" "$rdvcf"/
 }
 excitome_vcf() { 
 ## filter out everything that is not ADAR mediated editing
-awk -F "\t" '/^#/' "$rdvcf"/"$run"filtered_snps_finalAll.vcf > "$rdvcf"/"$run"filtered_snps_finalinfo.vcf #
-cat "$rdvcf"/"$run"filtered_snps_finalAll.vcf | awk -F "\t" ' { if ($3 == ".") { print } }' > "$rdvcf"/"$run"filtered_snps_finalAllNoSnpsediting.vcf
-awk -F "\t" ' { if (($4 == "A") && ($5 == "G") && ($3 == ".")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalAG.vcf
-awk -F "\t" '{ if (($4 == "T") && ($5 == "C") && ($3 == ".")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalTC.vcf
-cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalAG.vcf "$rdvcf"/"$run"filtered_snps_finalTC.vcf > "$rdvcf"/"$file_vcf_finalADAR"
-awk -F "\t" ' { if (($4 == "C") && ($5 == "T") && ($3 == ".")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalCT.vcf
-awk -F "\t" '{ if (($4 == "G") && ($5 == "A") && ($3 == ".")) { print } }' "$rdvcf"/"$file_vcf_finalAll" > "$rdvcf"/"$run"filtered_snps_finalGA.vcf
-cat "$rdvcf"/"$run"filtered_snps_finalinfo.vcf "$rdvcf"/"$run"filtered_snps_finalCT.vcf "$rdvcf"/"$run"filtered_snps_finalGA.vcf > "$rdvcf"/"$file_vcf_finalAPOBEC"
+awk -F "\t" '/^#/' "$rdvcf_final"/"$run"filtered_snps_finalAll.vcf > "$rdvcf_final"/"$run"filtered_snps_finalinfo.vcf #
+cat "$rdvcf_final"/"$run"filtered_snps_finalAll.vcf | awk -F "\t" ' { if ($3 == ".") { print } }' > "$rdvcf_final"/"$run"filtered_snps_finalAllNoSnpsediting.vcf
+awk -F "\t" ' { if (($4 == "A") && ($5 == "G") && ($3 == ".")) { print } }' "$rdvcf_final"/"$file_vcf_finalAll" > "$rdvcf_final"/"$run"filtered_snps_finalAG.vcf
+awk -F "\t" '{ if (($4 == "T") && ($5 == "C") && ($3 == ".")) { print } }' "$rdvcf_final"/"$file_vcf_finalAll" > "$rdvcf_final"/"$run"filtered_snps_finalTC.vcf
+cat "$rdvcf_final"/"$run"filtered_snps_finalinfo.vcf "$rdvcf_final"/"$run"filtered_snps_finalAG.vcf "$rdvcf_final"/"$run"filtered_snps_finalTC.vcf > "$rdvcf_final"/"$file_vcf_finalADAR"
+awk -F "\t" ' { if (($4 == "C") && ($5 == "T") && ($3 == ".")) { print } }' "$rdvcf_final"/"$file_vcf_finalAll" > "$rdvcf_final"/"$run"filtered_snps_finalCT.vcf
+awk -F "\t" '{ if (($4 == "G") && ($5 == "A") && ($3 == ".")) { print } }' "$rdvcf_final"/"$file_vcf_finalAll" > "$rdvcf_final"/"$run"filtered_snps_finalGA.vcf
+cat "$rdvcf_final"/"$run"filtered_snps_finalinfo.vcf "$rdvcf_final"/"$run"filtered_snps_finalCT.vcf "$rdvcf_final"/"$run"filtered_snps_finalGA.vcf > "$rdvcf_final"/"$file_vcf_finalAPOBEC"
 }
 move_vcf3() {
-for i in raw final filtered; do
+for i in raw final filtered ;
+do
   new_dir=$dir_path/raw_data/vcf_files/"$i"/
   create_dir
   mv $dir_path/raw_data/vcf_files/*"$i"* $dir_path/raw_data/vcf_files/"$i"/
 done
 }
 snpEff() {
-java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf"/"$file_vcf_final""$snptype".vcf -stats "$dir_path"/raw_data/snpEff/"$snp_stats""$snptype" -csvStats "$dir_path"/raw_data/snpEff/"$snp_csv""$snptype".csv > "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf     ##converts final annotationed vcf to table for easier processing
+java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf"/final/"$file_vcf_final""$snptype".vcf -stats "$dir_path"/raw_data/snpEff/"$snp_stats""$snptype" -csvStats "$dir_path"/raw_data/snpEff/"$snp_csv""$snptype".csv > "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf     ##converts final annotationed vcf to table for easier processing
 java "$javaset"  -jar "$AIDDtool"/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf -F CHROM -F POS -F ID -F REF -F ALT -F QUAL -F AC -F ANN -o "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".table
 }
 run_tools() {
@@ -1114,7 +1115,7 @@ then
     file_out="$wd"/"$run"filtered_indels_recal.vcf
     run_tools
     move_vcf2
-    #move_vcf3
+    move_vcf3
 ####################################################################################################################
 # DISPLAY MESSAGES
 ####################################################################################################################
@@ -1146,7 +1147,7 @@ then
     dirqc="$dir_path"/quality_control; # qc directory
     AIDDtool="$home_dir"/AIDD/AIDD_tools; # AIDD tool directory
     rdvcf="$dir_path"/raw_data/vcf_files # directory for vcf files
-    rdvcf_final="$dir_path"/raw_data/vcf_files # directory for final vcf files
+    rdvcf_final="$dir_path"/raw_data/vcf_files/final # directory for final vcf files
     rdsnp="$dir_path"/raw_data/snpEff # directory for snpEff files
     rdbam="$dir_path"/raw_data/bam_files # directory for bam files
     javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
@@ -1164,8 +1165,8 @@ then
 #  EXCITOME FILTERING
 ####################################################################################################################
     tool=excitome_vcf
-    file_in="$rdvcf"/"$file_vcf_final"All.vcf
-    file_out="$rdvcf"/$file_vcf_finalADAR
+    file_in="$rdvcf_final"/"$file_vcf_final"All.vcf
+    file_out="$rdvcf_final"/$file_vcf_finalADAR
     run_tools
 ####################################################################################################################
 #  IMPACT PREDICTION
@@ -1173,7 +1174,7 @@ then
     for snptype in All AllNoSnpsediting AG TC CT GA ADARediting APOBECediting ; # DO ALL VARIANTS, ADAR VARIANTS, AND APOBEC VARIANTS
     do
       tool=snpEff
-      file_in="$rdvcf"/"$snpEff_in""$snptype".vcf    
+      file_in="$rdvcf_final"/"$snpEff_in""$snptype".vcf    
       file_out="$rdsnp"/"$snpEff_out""$snptype".vcf
       run_tools 
     done  
