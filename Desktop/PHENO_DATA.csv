@@ -1,5 +1,5 @@
-sampname,run,condition,sample,cell,reads
-K048Mock_1,SRR5164629,Mock,sample01,K048,MockK048
-K048Mock_2,SRR5164630,Mock,sample02,K048,MockK048
-K048Zika_1,SRR5164632,ZIKV,sample03,K048,ZIKVK048
-K048Zika_2,SRR5164633,ZIKV,sample04,K048,ZIKVK048
+﻿sampname,run,condition,sample,geneotype,celltype
+ZIKV_1,SRR3191542,ZIKV,sample01,A2,NPC
+ZIKV_2,SRR3191543,ZIKV,sample02,A2,NPC
+mock_1,SRR3191544,mock,sample03,WT,NPC
+mock_2,SRR3191545,mock,sample04,WT,NPC
