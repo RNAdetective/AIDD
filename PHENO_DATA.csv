@@ -1,6 +1,11 @@
-﻿sampname,Run,diagnosis,sample,Sex,age_at_death,braak_score
-ADF_11,SRR5305503,Alzheimer''s disease,sample27,female,103,IV
-ADF_12,SRR5305507,Alzheimer''s disease,sample31,female,91,V
-ADF_13,SRR5305510,Alzheimer''s disease,sample34,female,86,V
-ADF_14,SRR5305512,Alzheimer''s disease,sample36,female,88,IV
-ADF_15,SRR5305514,Alzheimer''s disease,sample38,female,98,IV
+﻿Cause_of_death,Run,alcool,sample,drug_type,drugs,gender,medication,medication_type,Organism,ph,phenotype,pmi,rin,smoking,tissue
+Accident,SRR5961846,no,sample51,no,no,male,no,no,Homo sapiens,6.67,CTRL,29.5,6.9,yes (heavy),Dorsolateral prefrontal cortex (dlPFC; BA8/9)
+Suicide,SRR5961847,NA,sample52,NA,NA,male,no,no,Homo sapiens,6.74,CTRL,27.75,7.7,NA,Dorsolateral prefrontal cortex (dlPFC; BA8/9)
+Natural,SRR5961848,no,sample53,no,no,male,no,no,Homo sapiens,6.42,CTRL,19.5,7.7,yes (heavy),Dorsolateral prefrontal cortex (dlPFC; BA8/9)
+Suicide,SRR5961849,NA,sample54,NA,NA,male,no,no,Homo sapiens,6.26,CTRL,29.75,6.5,NA,Dorsolateral prefrontal cortex (dlPFC; BA8/9)
+Suicide,SRR5961850,yes,sample55,no,no,male,NA,NA,Homo sapiens,6.57,MDD,32,7.8,NA,Dorsolateral prefrontal cortex (dlPFC; BA8/9)
+Suicide,SRR5961851,no,sample56,cannabis,yes,male,NA,NA,Homo sapiens,6.68,CTRL,18,7.2,NA,Dorsolateral prefrontal cortex (dlPFC; BA8/9)
+Suicide,SRR5961852,NA,sample57,NA,NA,male,NA,NA,Homo sapiens,6.84,CTRL,44.5,7.2,NA,Dorsolateral prefrontal cortex (dlPFC; BA8/9)
+Suicide,SRR5961853,no,sample58,no,no,male,NA,NA,Homo sapiens,6.91,MDD,33.5,7.7,NA,Dorsolateral prefrontal cortex (dlPFC; BA8/9)
+Suicide,SRR5961854,no,sample59,no,no,male,yes,AD,Homo sapiens,6,MDD,19,6.6,yes (heavy),Dorsolateral prefrontal cortex (dlPFC; BA8/9)
+Accident,SRR5961855,yes,sample60,no,no,male,no,no,Homo sapiens,6.75,CTRL,24,7.2,NA,Dorsolateral prefrontal cortex (dlPFC; BA8/9)
