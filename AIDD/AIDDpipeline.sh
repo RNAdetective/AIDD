@@ -82,11 +82,26 @@ Rscript "$ExToolset"/barchart.R "$file_in" "$file_out" "$bartype" "$pheno" "$fre
 mes_out() {
 dirqc="$dir_path"/quality_control
 DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
-echo "'$DATE_WITH_TIME' $echo1
-___________________________________________________________________________"
 new_dir="$dirqc"/time_check
 create_dir
 echo "'$DATE_WITH_TIME',"$run","$file_in","$tool"" >> "$dirqc"/time_check/"$run"time_check.csv
+file_size
+echo "'$DATE_WITH_TIME' $echo1 $file_name $file_ext $file_size_kb
+___________________________________________________________________________"
+}
+file_size() {
+file_size_kb=`du -k "$file_in" | cut -f1`
+dir_name=$(echo "$file_in" | sed 's/\//./g' | cut -f 6 -d '.')
+file_name=$(echo "$dir_name" | cut -f 1 -d '.')
+file_ext=$(echo "$file_in" | sed 's/\//./g' | cut -f 7 -d '.')
+new_dir="$dirqc"/file_size
+create_dir
+sizefile="$dirqc"/file_size/"$file_ext"sizefile.csv
+if [ ! -f "$sizefile" ];
+then
+  echo "run,"$file_name""$file_ext"" >> "$sizefile"
+fi
+echo ""$run","$file_size_kb"" >> "$sizefile"
 }
 download() {
 runfoldernameup=${run:0:3}
@@ -100,13 +115,19 @@ then
 else
   finallastnum=$(echo "0"$lastnum"")
 fi
+if [ "$countrun" == "12" ];
+then
+  finallastnum=$(echo ""$lastnum"")
+else
+  finallastnum=$(echo "00"$lastnum"")
+fi
 cd "$wd"/
 wget -q --tries=5 ftp://ftp.sra.ebi.ac.uk/vol1/"$runfoldername"/"$runfolder"/0"$finallastnum"/"$run"
 # wget ftp://ftp-trace.ncbi.nih.gov/sra/sra-instant/reads/ByRun/sra/"$runfoldername"/"$runfolder"/"$run"/"$run".sra # this was for ncbi but ebi works better
 cd "$dir_path"/AIDD
 }
 fastqdumppaired() { 
-fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/ 
+fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/
 mv "$wd"/$file_fastqpaired1pass "$wd"/$file_fastqpaired1 
 mv "$wd"/$file_fastqpaired2pass "$wd"/$file_fastqpaired2
  }
@@ -115,14 +136,14 @@ mv "$wd"/$file_fastqpass "$wd"/$file_fastq
  }
 movefastq() { mv $fastq_dir_path/$file_fastq "$wd"/ ; }
 fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd $dirqc/fastqc ; unzip -q "$run"_1_fastqc.zip ; unzip -q "$run"_2_fastqc.zip ; cd "$dir_path"/AIDD ; }
-fastqcsingle() { cd $dirqc/fastqc/ ; fastqc "$wd"/$file_fastq ; cd $dirqc/fastqc ; unzip -q "$run"_fastqc.zip ; cd "$dir_path"/AIDD ; }
+fastqcsingle() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastq --outdir=$dirqc/fastqc ; cd $dirqc/fastqc ; unzip -q "$run"_fastqc.zip ; cd "$dir_path"/AIDD ; }
 setreadlength() {
 length=$(echo "Sequence length");
 seq_length=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt | awk -v search="sequence length" '$0~search{print $0; exit}');
 seq_length_final=${seq_length[3-1]}
 seq_length_final=$(expr "$seq_length_final" - "3");
 start=12
-end=97
+end=300
 }
 trimpaired() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired1 -o "$wd"/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired2 -o "$wd"/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/$file_fastqpaired1 ; rm -f "$wd"/$file_fastqpaired2 ; mv "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired1 ; mv "$wd"/$file_fastqpaired2trim "$wd"/$file_fastqpaired2 ; }
 trimsingle() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastq -o "$wd"/"$run"_trim.fastq ; cd $dirqc/fastqc ; fastqc "$run"_trim.fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f "$wd"/$file_fastq ; mv "$wd"/"$run"_trim.fastq "$wd"/$file_fastq ; }
@@ -706,7 +727,7 @@ then
         version=11
         setjavaversion 
         setreadlength
-        echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND "$end" OF THE END OF THE READS")
+        echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND ENDING AT "$end"")
         mes_out 
         run_tools2i2o
         JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/
@@ -1191,7 +1212,7 @@ then
 ####################################################################################################################
 # RUN EXTOOLSET
 ####################################################################################################################
-  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh 1 "$home_dir" "$dir_path"
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh 1 "$home_dir" "$dir_path" human
 ####################################################################################################################
 # CLEANING UP AND COMPRESSING FILES AFTER VARIANT CALLING
 ####################################################################################################################

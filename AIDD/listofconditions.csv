@@ -1,13 +1,3 @@
-alcool,1,3
-drug_type,2,4
-drugs,3,5
-gender,4,6
-medication,5,7
-medication_type,6,8
-ph,7,9
-phenotype,8,10
-pmi,9,11
-rin,10,12
-smoking,11,13
-source_name,12,14
-tissue,13,15
+condition,1,3
+cell,2,4
+reads,3,5
