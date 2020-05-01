@@ -31,7 +31,7 @@ human="$(config_get human)"; # human or mouse
 ref_set="$(config_get ref_set)"; # GRCh37 or GRCH38
 miRNA="$(config_get miRNA)"; # mRNA or miRNA
 start=12;
-end=97;
+end=400;
 Gmatrix_name=gene_count_matrix.csv; 
 Tmatrix_name=transcript_count_matrix.csv;
 file_sra="$run";
@@ -91,17 +91,17 @@ ___________________________________________________________________________"
 }
 file_size() {
 file_size_kb=`du -k "$file_in" | cut -f1`
-dir_name=$(echo "$file_in" | sed 's/\//./g' | cut -f 6 -d '.')
-file_name=$(echo "$dir_name" | cut -f 1 -d '.')
-file_ext=$(echo "$file_in" | sed 's/\//./g' | cut -f 7 -d '.')
+#dir_name=$(echo "$file_in" | sed 's/\//./g' | cut -f 6 -d '.')
+#file_name=$(echo "$dir_name" | cut -f 1 -d '.')
+#file_ext=$(echo "$file_in" | sed 's/\//./g' | cut -f 7 -d '.')
 new_dir="$dirqc"/file_size
 create_dir
-sizefile="$dirqc"/file_size/"$file_ext"sizefile.csv
+sizefile="$dirqc"/file_size/sizefile.csv
 if [ ! -f "$sizefile" ];
 then
-  echo "run,"$file_name""$file_ext"" >> "$sizefile"
+  echo "run,file" >> "$sizefile"
 fi
-echo ""$run","$file_size_kb"" >> "$sizefile"
+echo ""$run","$file_size_kb","$file_in"" >> "$sizefile"
 }
 download() {
 runfoldernameup=${run:0:3}
@@ -114,12 +114,6 @@ then
   finallastnum=$(echo ""$lastnum"")
 else
   finallastnum=$(echo "0"$lastnum"")
-fi
-if [ "$countrun" == "12" ];
-then
-  finallastnum=$(echo ""$lastnum"")
-else
-  finallastnum=$(echo "00"$lastnum"")
 fi
 cd "$wd"/
 wget -q --tries=5 ftp://ftp.sra.ebi.ac.uk/vol1/"$runfoldername"/"$runfolder"/0"$finallastnum"/"$run"
@@ -135,15 +129,15 @@ fastqdumpsingle() { fastq-dump "$wd"/$file_sra --read-filter pass -O "$wd"/
 mv "$wd"/$file_fastqpass "$wd"/$file_fastq
  }
 movefastq() { mv $fastq_dir_path/$file_fastq "$wd"/ ; }
-fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd $dirqc/fastqc ; unzip -q "$run"_1_fastqc.zip ; unzip -q "$run"_2_fastqc.zip ; cd "$dir_path"/AIDD ; }
-fastqcsingle() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastq --outdir=$dirqc/fastqc ; cd $dirqc/fastqc ; unzip -q "$run"_fastqc.zip ; cd "$dir_path"/AIDD ; }
+fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
+fastqcsingle() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
 setreadlength() {
-length=$(echo "Sequence length");
-seq_length=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt | awk -v search="sequence length" '$0~search{print $0; exit}');
-seq_length_final=${seq_length[3-1]}
-seq_length_final=$(expr "$seq_length_final" - "3");
+#length=$(echo "Sequence length");
+#seq_length=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt | awk -v search="sequence length" '$0~search{print $0; exit}');
+#seq_length_final=${seq_length[3-1]}
+#seq_length_final=$(expr "$seq_length_final" - "3");
 start=12
-end=300
+end=400
 }
 trimpaired() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired1 -o "$wd"/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired2 -o "$wd"/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/$file_fastqpaired1 ; rm -f "$wd"/$file_fastqpaired2 ; mv "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired1 ; mv "$wd"/$file_fastqpaired2trim "$wd"/$file_fastqpaired2 ; }
 trimsingle() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastq -o "$wd"/"$run"_trim.fastq ; cd $dirqc/fastqc ; fastqc "$run"_trim.fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f "$wd"/$file_fastq ; mv "$wd"/"$run"_trim.fastq "$wd"/$file_fastq ; }
@@ -755,7 +749,7 @@ then
         version=11
         setjavaversion
         setreadlength
-echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND "$end" OF THE END OF THE READS")
+        echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND "$end" OF THE END OF THE READS")
         mes_out 
         run_tools
         JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/ 
@@ -775,7 +769,7 @@ echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND "$end" OF T
       file_in="$wd"/$file_fastqpaired1
       file_in2="$wd"/$file_fastqpaired2    
       file_out="$wd"/$file_sam
-      rm -f "$wd"/"$file_sra"
+      rm -f "$wd"/"$file_sra" ##add option here donot remove files
       run_tools2i
     fi
 ####################################################################################################################
@@ -836,7 +830,7 @@ echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND "$end" OF T
     tool=samtobam
     file_in="$wd"/$file_sam    
     file_out="$rdbam"/$file_bam
-    rm -f "$wd"/*.fastq
+    rm -f "$wd"/*.fastq ##add option here donot remove files
     run_tools
 ####################################################################################################################
 #  ASSEMBLY STRINGTIE
@@ -847,7 +841,7 @@ echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND "$end" OF T
       file_in="$rdbam"/"$file_bam"    
       file_out="$dir_path"/raw_data/counts/"$file_tab" 
       run_tools
-      rm -f "$wd"/"$file_sam"
+      rm -f "$wd"/"$file_sam" ##add option here donot remove files
     fi
 ####################################################################################################################
 #  ASSEMBLY CUFFLINKS
@@ -937,7 +931,7 @@ then
     tool=prep_align_sum3
     file_in="$wd"/$file_bam_3
     file_out="$wd"/"$run"depth_out.txt
-    rm -f "$wd"/"$file_bam_2"
+    rm -f "$wd"/"$file_bam_2" ##add option here donot remove files
     run_tools
 ####################################################################################################################
 #  markduplicates
@@ -999,7 +993,7 @@ then
     tool=haplotype1
     file_in="$wd"/$file_bam_dup    
     file_out="$wd"/"$file_bam_dupix"
-    rm -f "$wd"/"$file_bam_3"
+    rm -f "$wd"/"$file_bam_3" ##add option here donot remove files
     run_tools
     tool=haplotype1B
     file_in="$wd"/$file_bam_dup    
@@ -1212,7 +1206,7 @@ then
 ####################################################################################################################
 # RUN EXTOOLSET
 ####################################################################################################################
-  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh 1 "$home_dir" "$dir_path" human
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolset.sh 2 "$home_dir" "$dir_path" human
 ####################################################################################################################
 # CLEANING UP AND COMPRESSING FILES AFTER VARIANT CALLING
 ####################################################################################################################

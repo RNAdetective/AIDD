@@ -775,6 +775,7 @@ do
         #mes_out
         file_out="$dirres"/"$level"_count_matrixeditedDESeq2.csv
         file_in="$dirres"/"$level"_count_matrix.csv
+        ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
         index_file="$ExToolsetix"/"$human"/"$level"_names.csv
         pheno_file="$dir_path"/PHENO_DATA.csv
         Rtool=GTEX
@@ -789,15 +790,16 @@ do
         cat "$index_file" | sed 's/-/_/g' >> "$dir_path"/temp.csv
         temp_file
         file_in="$dirres"/"$level"_count_matrix.csv
+        file_out="$dirres"/"$level"_count_matrixeditedDESeq2.csv
         echo1=$(echo "CREATING "$file_out"")
         mes_out
         matrixeditor
         header=$(head -n 1 "$file_out")
         cat "$file_out" | awk -F',' 'NR > 1{s=0; for (i=3;i<=NF;i++) s+=$i; if (s!=0)print}' | sort -u -k1 | sed '1i '$level'_name'$header'' >> "$dir_path"/temp.csv
-        file_in="$file_out"
+        file_in="$dirres"/"$level"_count_matrixeditedDESeq2.csv
         temp_file
-        cat "$file_in" | awk -F',' '!a[$1]++' >> "$dir_path"/temp.csv
-        temp_file
+        #cat "$file_in" | awk -F',' '!a[$1]++' >> "$dir_path"/temp.csv
+        #Stemp_file
       fi
     else
       echo1=$(echo "ALREADY FOUND "$matrix_fileedit" OR "$matrix_fileedit2"")
@@ -831,7 +833,7 @@ else
     do
       file_out="$dirres"/"$level"_count_matrixeditedDESeq2.csv
       header=$(head -n 1 "$file_out")
-      cat "$file_out" | sed '1d' | sed 's/'$sample'/'$samp_name'/g' | sed '1i '$header'' >> "$dir_path"/temp.csv
+      cat "$file_out" | sed '1d' | sed 's/'$sample'/'$samp_name'/g' | sed '1i '$level'_name,'$header'' >> "$dir_path"/temp.csv
       file_in="$file_out"
       temp_file
     done
@@ -852,6 +854,7 @@ do
       Rtool=transpose
       Rtype=single2f
       file_out="$dirres"/"$level"ofinterest_count_matrix.csv #3
+      ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
       mergefile="$ExToolsetix"/"$human"/"$level"ofinterest.csv #7
       phenofile="$dirres"/"$level"_count_matrixeditedDESeq2.csv #8
       GOI_file="$dirres"/temp.csv #10
