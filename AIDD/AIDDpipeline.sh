@@ -30,6 +30,8 @@ scRNA="$(config_get scRNA)"; # bulk or single cell
 human="$(config_get human)"; # human or mouse
 ref_set="$(config_get ref_set)"; # GRCh37 or GRCH38
 miRNA="$(config_get miRNA)"; # mRNA or miRNA
+savesra="$(config_get savesra)"; # to save sra files
+savefastq="$(config_get savefastq)"; # to save fastq files
 start=12;
 end=400;
 Gmatrix_name=gene_count_matrix.csv; 
@@ -769,7 +771,14 @@ then
       file_in="$wd"/$file_fastqpaired1
       file_in2="$wd"/$file_fastqpaired2    
       file_out="$wd"/$file_sam
-      rm -f "$wd"/"$file_sra" ##add option here donot remove files
+      if [ "$savesra" == "no" ];
+      then
+        rm -f "$wd"/"$file_sra" ##add option here donot remove files
+      else
+        new_dir="$dir_path"/raw_data/sra_files
+        create_dir
+        mv "$wd"/"$file_sra" "$dir_path"/raw_data/sra_files/"$file_sra"
+      fi
       run_tools2i
     fi
 ####################################################################################################################
@@ -830,7 +839,14 @@ then
     tool=samtobam
     file_in="$wd"/$file_sam    
     file_out="$rdbam"/$file_bam
-    rm -f "$wd"/*.fastq ##add option here donot remove files
+    if [ "$savefastq" == "no" ];
+    then
+      rm -f "$wd"/*.fastq ##add option here donot remove files
+    else
+      new_dir="$dir_path"/raw_data/fastq_files
+      create_dir
+      mv "$wd"/*.fastq "$dir_path"/raw_data/fastq_files
+    fi
     run_tools
 ####################################################################################################################
 #  ASSEMBLY STRINGTIE
