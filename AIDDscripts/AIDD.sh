@@ -25,6 +25,12 @@ then
     echo "Please enter the directory where the fastq files are located. Please make sure these are files have the correct naming format SRRXXXXXXX_1.fastq more details can be found in the manual"
     read fastq_dir_path # where to find fastq files
   fi  
+  echo "Would you like to save intermediate sra files? Please choose from the following:"
+  echo "yes or no" # save sra files
+  read savesra
+  echo "Would you like to save intermediate fastq files? Please choose from the following:"
+  echo "yes or no" # save fastq files
+  read savefastq
   echo "Do you have bulk RNAseq data or single cell RNAseq data? Please choose from the following:"
   echo "bulk single" # do you have bulk or single reads
   read scRNA 
@@ -68,6 +74,8 @@ else
   assembler=$"stringtie";
   variant=$"yes";
   bamfile=$"beginning";
+  savesra=$"no";
+  savefastq=$"no";
 fi
 ####################################################################################################################
 #THIS DEFINES FUNCTIONS 
@@ -211,6 +219,8 @@ indexes=$indexes
 indexes_url=$indexes_url
 sra=$sra
 fastq_dir_path=$fastq_dir_path
+savesra=$savesra
+savefastq=$savefastq
 scRNA=$scRNA
 miRNA=$miRNA
 miRNAtype=$miRNAtype
@@ -276,6 +286,8 @@ indexes=Default Value
 indexes_url=Default Value
 sra=Default Value
 fastq_dir_path=Default Value
+savesra=Default Value
+savefastq=Default Value
 scRNA=Default Value
 miRNA=Default Value
 miRNAtype=Default Value
