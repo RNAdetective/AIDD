@@ -34,6 +34,7 @@ DATE_WITH_TIME=Default Value
 TIME_HOUR=Default Value
 TIME_MIN=Default Value
 TIME_SEC==Default Value
+human=Default Value
 data_summary_file1=Default Value
 data_summary_file2=Default Value
 data_summary_file3=Default Value
@@ -44,5 +45,5 @@ data_summary_file6=Default Value
 data_summary_file6a=Default Value
 data_summary_filefinal=Default Value
 con_name1=condition
-con_name2=cell
-con_name3=reads
+con_name2=t_name2
+con_name3=

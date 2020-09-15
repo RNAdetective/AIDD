@@ -18,6 +18,8 @@ file_out3 <- paste0(args[4]);
 data <- read.csv(file_in)
 numcol <- ncol(data)
 gutt <- prob.guttman(data[,c(7:numcol)], guess.equal=TRUE, slip.equal=TRUE)
+gutt
+summary(gutt)
 guttscores <- gutt$person
 guttitems <- gutt$item
 gutttrait <- gutt$trait

@@ -277,6 +277,9 @@ haplotype1() {
 java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$wd"/$file_bam_dup
 }
 haplotype1B() {
+AIDDtool=/home/user/AIDD/AIDD_tools
+version=8
+setjavaversion
 java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_dup --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/$file_vcf_raw
 }
 haplotype1C() {
@@ -326,6 +329,9 @@ then
 fi
 }
 haplotype2() {
+AIDDtool=/home/user/AIDD/AIDD_tools
+version=8
+setjavaversion
 java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_recal --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/"$file_vcf_raw_recal"
 }
 haplotype2B() {
