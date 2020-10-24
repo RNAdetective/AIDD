@@ -1,9 +1,0 @@
-[Desktop Entry]
-Version=1.0
-Exec=/home/user/AIDD/AIDD/AIDD.sh 1 /home/user /media/sf_AIDD/AIDD_data
-Name=AIDDdirectories
-GenericName=AIDDdirectories
-Comment=AIDDdirectories
-Icon=/home/user/AIDD/directories.gif
-Terminal=true
-Type=Application
