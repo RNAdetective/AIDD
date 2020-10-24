@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=1.0
-Exec=/home/user/AIDD/updateAIDDscripts.sh /home/user
+Exec=bash /home/user/AIDD/AIDD/updateAIDDscripts.sh /home/user
 Name=updateAIDDscripts
 GenericName=updateAIDDscripts
 Comment=Run updateAIDDscripts

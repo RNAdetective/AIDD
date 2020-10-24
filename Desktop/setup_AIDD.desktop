@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=1.0
-Exec=/home/user/AIDD/Instancesetup/set_up.sh
+Exec=bash /home/user/AIDD/AIDD/Instancesetup/set_up.sh
 Name=Setup_AIDD
 GenericName=Setup_AIDD
 Comment=Run setup_AIDD

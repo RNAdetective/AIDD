@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=1.0
-Exec=/home/user/AIDD/AIDD/ExToolset/ExToolset.sh 2 /home/user /media/sf_AIDD/McGrath2
+Exec=bash /home/user/AIDD/AIDD/ExToolset/ExToolset.sh 2 /home/user /media/sf_AIDD/MDDall human
 Name=ExToolset
 GenericName=ExToolset
 Comment=Run ExToolset
