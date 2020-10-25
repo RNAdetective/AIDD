@@ -9,14 +9,6 @@ echo "default, options, directories or AIDDparts"
 read AIDD
 if [ "$AIDD" != "default" ]; #this allows for download of sequences or starting with your own .fastq files 
 then
-  #echo "Are you running a batch instance? Please choose from the following:"
-  #echo "1=(default)no 2=yes" # do you want to download your pheno_data file
-  #read pheno
-  #if [ "$pheno" == "2" ];
-  #then
-  #  echo "How many samples do you want in each batch?"
-  #  read splitnum
-  #fi
   echo "Do you need to download sequences from NCBI? Please choose from the following:"
   echo "yes or no" # download sequences
   read sra
@@ -52,19 +44,7 @@ echo "HISAT2, STAR or BOWTIE2" # which alignment tool
   echo "Which assembler would you like to use? Please choose one of the following: (note that if you are using HISAT2 stringtie is suggested and with STAR and BOWTIE2 cufflinks is recommended)"
   echo "stringtie or cufflinks" # which assembly tool
   read assembler 
-  echo "Would you like to do variant calling for RNAediting prediction at this time? Please choose one of the following:" 
-  echo "yes or no" # run variant calling
-  read variant
-  echo "Do you want to start at the beginning or do you want to start with variant calling? Please choose one of the following:"
-  echo "beginning variantcalling" # do you need to download bam files
-  read bamfile
- ## if [ "$bamfile" == "variantcalling" ];
- ##   echo "Please enter the directory?"
- ##   read bamfile_dir
- ## fi
 else
-  #pheno=$"1";
-  #instancebatch=$"1";
   sra=$"yes";
   scRNA=$"bulk";
   miRNA=$"mRNA";
@@ -72,8 +52,6 @@ else
   library=$"paired";
   aligner=$"HISAT2";
   assembler=$"stringtie";
-  variant=$"yes";
-  bamfile=$"beginning";
   savesra=$"no";
   savefastq=$"no";
 fi
@@ -166,186 +144,44 @@ run_tools
 make_cdef2() {
 echo "con_name1=$con_name1
 con_name2=$con_name2
-con_name3=$con_name3" >> "$dir_path"/AIDD/config.cfg.defaults
+con_name3=$con_name3
+con_name4="$con_name4"" >> "$dir_path"/AIDD/config.cfg.defaults
 } # adds conditions to config files
-split_PHENO() {
-mkdir "$dir_path"/splitfile/
-PHENO="$dir_path"/PHENO_DATAwhole.csv
-csvheader=`head -n 1 "$PHENO"`
-split -d -l"$splitnum" "$PHENO" "$dir_path"/splitfile/PHENO_DATAbatch
-for f in "$dir_path"/splitfile/* ;
-do
-  cat $f | sed 1i"$csvheader" >> $f.csv
-  rm -f $f
-done
-sed -i '1d' "$dir_path"/splitfile/PHENO_DATAbatch00.csv
-mv $dir_path/splitfile/PHENO_DATA"$batch".csv "$dir_path"/PHENO_DATA.csv
-} # to be used for spliting PHENO DATA into batch files to save space for processing hundreds of samples
 copy_file() {
 cp "$home_dir"/Desktop/"$j"/* "$dir_path"/indexes/"$i"_list/"$dp"/ # moves experimental gene/transcript list from the desktop to the correct index folder to be used for building own on the fly indexes for GEX and TEX tools
 }
-moveindexes() {
-for i in gene transcript ; 
-do
-  for j in insert_"$i"_of_interest insert_"$i"_lists_for_pathways ;
-  do
-    file_dir=$(ls -A "$home_dir"/Desktop/$j/)
-    if [ ! -z "$file_dir" ];
-    then
-      if [ "$j" == insert_"$i"_of_interest ];
-      then
-        dp=DESeq2
-        copy_file
-      else
-        dp=pathway
-        copy_file
-      fi
-    else
-      echo "No indexes to move"
-    fi
-  done
-done
-}
-
 config_text() {
 echo "home_dir=$home_dir
 dir_path=$dir_path
-ref_dir_path=$ref_dir_path
-pheno=$pheno
-pheno_url=$pheno_url
-instancebatch=$batch
-batch=$batchnumber
-indexes=$indexes
-indexes_url=$indexes_url
-sra=$sra
-fastq_dir_path=$fastq_dir_path
-savesra=$savesra
-savefastq=$savefastq
-scRNA=$scRNA
-miRNA=$miRNA
-miRNAtype=$miRNAtype
-library=$library
-aligner=$aligner
-assembler=$assembler
-variant=$variant
-bamfile=$bamfile
-ref=$ref
-human=$human
-ref_set=$ref_set
-ExToolset="$ExToolset"
-dirqc="$dirqc"
-dirqcalign="$dirqcalign"
-dirres="$dirres"
-dirraw="$dirraw"
-dirVC="$dirVC"
-dirVCsubs="$dirVCsubs"
-ExToolsetix="$ExToolsetix"
-summaryfile="$summaryfile"
-matrix_file="$matrix_file" 
-matrix_file2="$matrix_file2"
-matrix_fileedit="$matrix_fileedit"
-matrix_fileedit2="$matrix_fileedit2"
-matrix_file3a="$matrix_file3a"
-matrix_file3b="$matrix_file3b"
-matrix_file3="$matrix_file3"
-matrix_file4="$matrix_file4"
-matrix_file5="$matrix_file5"
-matrix_file6="$matrix_file6"
-matrix_file7="$matrix_file7"
-matrix_file8="$matrix_file8"
-matrix_file9="$matrix_file9"
-matrix_file10="$matrix_file10"
-matrix_file11="$matrix_file11"
-matrix_filefinal="$matrix_filefinal"
-raw_input1="$raw_input1"
-raw_input2="$raw_input2"
-raw_input3="$raw_input3"
-raw_input4="$raw_input4"
+sra="yes"
+scRNA="bulk"
+miRNA="mRNA"
+miRNAtype="whole"
+library="paired"
+aligner="HISAT2"
+assembler="stringtie"
+savesra="yes"
+savefastq="no"
+human="human"
 DATE_WITH_TIME="$DATE_WITH_TIME"
 TIME_HOUR="$TIME_HOUR"
 TIME_MIN="$TIME_MIN"
-TIME_SEC="$TIME_SEC"
-data_summary_file1="$data_summary_file1"
-data_summary_file2="$data_summary_file2"
-data_summary_file3="$data_summary_file3"
-data_summary_file3a="$data_summary_file3a"
-data_summary_file4="$data_summary_file4"
-data_summary_file5="$data_summary_file5"
-data_summary_file6="$data_summary_file6"
-data_summary_file6a="$data_summary_file6a"
-data_summary_filefinal="$data_summary_filefinal"" >> "$dir_path"/AIDD/config.cfg
+TIME_SEC="$TIME_SEC"" >> "$dir_path"/AIDD/config.cfg
 }
 config_defaults() {
 echo "home_dir=Default Value
 dir_path=Default Value
-ref_dir_path=Default Value
-pheno=Default Value
-instancebatch=Default Value
-batch=Default Value
-indexes=Default Value
-indexes_url=Default Value
-sra=Default Value
-fastq_dir_path=Default Value
-savesra=Default Value
-savefastq=Default Value
-scRNA=Default Value
-miRNA=Default Value
-miRNAtype=Default Value
-library=Default Value
-aligner=Default Value
-assembler=Default Value
-variant=Default Value 
-bamfile=Default Value
-ref=Default Value
-human=Default Value
-ref_set=Default Value
-ExToolset=Default Value
-dirqc=Default Value 
-dirqcalign=Default Value
-dirres=Default Value
-dirraw=Default Value
-dirVC=Default Value
-dirVCsubs=Default Value
-ExToolsetix=Default Value
-summaryfile=Default Value
-matrix_file=Default Value
-matrix_file2=Default Value
-matrix_fileedit=Default Value
-matrix_fileedit2=Default Value
-matrix_file3a=Default Value
-matrix_file3b=Default Value
-matrix_file3=Default Value
-matrix_file4=Default Value
-matrix_file5=Default Value
-matrix_file6=Default Value
-matrix_file7=Default Value
-matrix_file8=Default Value
-matrix_file9=Default Value
-matrix_file10=Default Value
-matrix_file11=Default Value
-matrix_filefinal=Default Value
-raw_input1=Default Value
-raw_input2=Default Value
-raw_input3=Default Value
-raw_input4=Default Value
-DATE_WITH_TIME=Default Value
-TIME_HOUR=Default Value
-TIME_MIN=Default Value
-TIME_SEC==Default Value
-data_summary_file1=Default Value
-data_summary_file2=Default Value
-data_summary_file3=Default Value
-data_summary_file3a=Default Value
-data_summary_file4=Default Value
-data_summary_file5=Default Value
-data_summary_file6=Default Value
-data_summary_file6a=Default Value
-data_summary_filefinal=Default Value" >> "$dir_path"/AIDD/config.cfg.defaults
+sra=Default Value;
+scRNA=Default Value;
+miRNA=Default Value;
+miRNAtype=Default Value;
+library=Default Value;
+aligner=Default Value;
+assembler=Default Value;
+savesra=Default Value;
+savefastq=Default Value;
+human=Default Value" >> "$dir_path"/AIDD/config.cfg.defaults
 } 
-get_fastq() {
-cp "$fastq_dir_path"/* "$dir_path"/working_directory
-}
-
 downloaded_ref() {
 wget "$ftpsite" -O "$ref_name".gz
 gunzip "$ref_name".gz
@@ -389,38 +225,10 @@ dir_path="$2" # dir_path=/home/user/testAIDD
 ref_dir_path="$home_dir"/AIDD/references  # this is where references are stored
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
-dirqc="$dir_path"/quality_control; # qc directory 
-dirqcalign="$dirqc"/alignment_metrics
 dirres="$dir_path"/Results; #
 dirraw="$dir_path"/raw_data;
 dirVC="$dirres"/variant_calling;
 dirVCsubs="$dirVC"/substitutions;
-summaryfile="$dir_path"/quality_control/alignment_metrics/all_summaryPF_READS_ALIGNED.csv
-matrix_file="$dirres"/gene_count_matrix.csv; 
-matrix_file2="$dirres"/transcript_count_matrix.csv; 
-matrix_fileedit="$dirres"/gene_count_matrixedited.csv;
-matrix_fileedit2="$dirres"/transcript_count_matrixedited.csv;
-matrix_file3="$dirres"/"$level"ofinterest_count_matrix.csv;
-matrix_file3a="$dirres"/geneofinterest_count_matrix.csv;
-matrix_file3b="$dirres"/transcriptofinterest_count_matrix.csv;
-matrix_file4="$dirres"/excitome_count_matrix.csv;
-matrix_file5="$dirres"/genetrans_count_matrix.csv;
-matrix_file6="$dirres"/GTEX_count_matrix.csv;
-matrix_file7="$dirres"/nucleotide_count_matrix.csv; 
-matrix_file8="$dirres"/amino_acid_count_matrix.csv;
-matrix_file9="$dirres"/subs_count_matrix.csv;
-matrix_file10="$dirres"/impact_count_matrix.csv;
-matrix_file11="$dirres"/VEX_count_matrix.csv;
-matrix_filefinal="$dirres"/all_count_matrix.csv;
-data_summary_file1="$dirres"/geneofinterest/geneofinterestallsummaries.csv;
-data_summary_file2="$dirres"/transcriptofinterest/transcriptofinterest.csv;
-data_summary_file3="$dirres"/excitome/excitomeallsummaries.csv;
-data_summary_file3a="$dirres"/GTEXallsummaries.csv;
-data_summary_file4="$dirres"/nucleotide/nucleotideallsummaries.csv;
-data_summary_file5="$dirres"/amino_acid/amino_acidallsummaries.csv;
-data_summary_file6="$dirres"/impact/impactallsummaries.csv;
-data_summary_file6a="$dirres"/VEXallsummaries.csv;
-data_summary_filefinal="$dirres"/allsummaries.csv;
 new_dir="$dir_path"
 create_dir
 qc_dir="$dir_path"/quality_control
@@ -447,15 +255,6 @@ then
   get_file
   #sed -i 's/\r//g' "$dir_path"/PHENO_DATA.csv
 fi
-#if [[ "$pheno" == "2" && "$batchinstance" == "1" ]];
-#then
-#  get_PHENO
-#fi
-#if [[ "$pheno" == "2" && "$batchinstance" == "2" ]];
-#then
-#  get_PHENO
-#  split_PHENO
-#fi
 for ndir in quality_control raw_data Results temp tmp working_directory ;
 do
   new_dir="$dir_path"/"$ndir"
@@ -472,11 +271,11 @@ for ndir2 in ballgown ballgown_in bam_files counts snpEff vcf_files;
 do
   new_dir="$dir_path"/raw_data/"$ndir2"
   create_dir
-  if [[ "$ndir2" == ballgown || "$ndir2" == ballgown_in ]];
-  then
-    ball="$ndir2"
-    assembly_dir_create
-  fi
+  #if [[ "$ndir2" == ballgown || "$ndir2" == ballgown_in ]];
+  #then
+  #  ball="$ndir2"
+  #  assembly_dir_create
+  #fi
   if [ "$nd3" == vcf_files ];
   then
     for nd3 in final filtered raw ; 
@@ -536,18 +335,8 @@ nam="$con_name2"
 cond_file
 con_name3=$(awk -F, 'NR==1{print $6}' "$dir_path"/PHENO_DATA.csv)
 coln=6
-nam="$con_name3"
 cond_file
 make_cdef2
-####################################################################################################################
-#  GET FASTQ IF NOT DOWNLOADING FROM NCBI
-####################################################################################################################
-if [ "$sra" == 2 ]; # using local fastq files
-then
-  echo "dir_path="$home_dir"/$batch
-fastq_dir_path="$home_dir"" >> "$dir_path"/AIDD/config.cfg # add special directory path to config file
-  get_fastq
-fi
 ####################################################################################################################
 #  Run AIDD
 ####################################################################################################################

@@ -34,7 +34,7 @@ wget -q --tries=5 ftp://ftp.sra.ebi.ac.uk/vol1/"$runfoldername"/"$runfolder"/0"$
 cd "$dir_path"/AIDD
 }
 fastqdumppaired() { 
-fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/ 
+fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/
 mv "$wd"/$file_fastqpaired1pass "$wd"/$file_fastqpaired1 
 mv "$wd"/$file_fastqpaired2pass "$wd"/$file_fastqpaired2
  }
@@ -42,18 +42,19 @@ fastqdumpsingle() { fastq-dump "$wd"/$file_sra --read-filter pass -O "$wd"/
 mv "$wd"/$file_fastqpass "$wd"/$file_fastq
  }
 movefastq() { mv $fastq_dir_path/$file_fastq "$wd"/ ; }
-fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd $dirqc/fastqc ; unzip -q "$run"_1_fastqc.zip ; unzip -q "$run"_2_fastqc.zip ; cd "$dir_path"/AIDD ; }
-fastqcsingle() { cd $dirqc/fastqc/ ; fastqc "$wd"/$file_fastq ; cd $dirqc/fastqc ; unzip -q "$run"_fastqc.zip ; cd "$dir_path"/AIDD ; }
+fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
+fastqcsingle() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
 setreadlength() {
-length=$(echo "Sequence length");
-seq_length=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt | awk -v search="sequence length" '$0~search{print $0; exit}');
-seq_length_final=${seq_length[3-1]}
-seq_length_final=$(expr "$seq_length_final" - "3");
+#length=$(echo "Sequence length");
+#seq_length=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt | awk -v search="sequence length" '$0~search{print $0; exit}');
+#seq_length_final=${seq_length[3-1]}
+#seq_length_final=$(expr "$seq_length_final" - "3");
 start=12
-end=97
+end=400
 }
-trimpaired() { fastx_trimmer -f 12 -l "$end" -i "$wd"/$file_fastqpaired1 -o "$wd"/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired2 -o "$wd"/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/$file_fastqpaired1 ; rm -f "$wd"/$file_fastqpaired2 ; mv "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired1 ; mv "$wd"/$file_fastqpaired2trim "$wd"/$file_fastqpaired2 ; }
+trimpaired() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired1 -o "$wd"/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired2 -o "$wd"/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/$file_fastqpaired1 ; rm -f "$wd"/$file_fastqpaired2 ; mv "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired1 ; mv "$wd"/$file_fastqpaired2trim "$wd"/$file_fastqpaired2 ; }
 trimsingle() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastq -o "$wd"/"$run"_trim.fastq ; cd $dirqc/fastqc ; fastqc "$run"_trim.fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f "$wd"/$file_fastq ; mv "$wd"/"$run"_trim.fastq "$wd"/$file_fastq ; }
+HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/"$file_fastqpaired1" -2 "$wd"/"$file_fastqpaired2" -t --summary-file $dirqc/alignment_metrics/"$run".txt -S "$wd"/"$file_sam" ; }
 HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/"$file_fastqpaired1" -2 "$wd"/"$file_fastqpaired2" -t --summary-file $dirqc/alignment_metrics/"$run".txt -S "$wd"/"$file_sam" ; }
 HISAT2_single() { hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$wd"/"$file_fastq" -t --summary-file "$dir_path"/raw_data/counts/"$run".txt -S "$wd"/"$file_sam" ; }
 STAR_paired() { echo "STAR some text line on how to run" ; } #STAR --genomeDir /n/groups/hbctraining/intro_rnaseq_hpc/reference_data_ensembl38/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn Mov10_oe_1.subset.fq --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard 
@@ -477,12 +478,20 @@ do
   fastq_dir_path=/home/user; # directory for local fastq files
   file_tab="$run".tab;
   file_name_gtf="$sample".gtf;
+LOG_LOCATION="$dir_path"/quality_control/logs
+new_dir="$LOG_LOCATION"
+create_dir
+exec > >(tee -i $LOG_LOCATION/AIDDParts.log)
+exec 2>&1
+
+echo "Log Location will be: [ $LOG_LOCATION ]"
   export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
   if [ "$AIDDstep" == "fastqdumpsingle" ];
   then
     fastqdumpsingle
     movefastq
     fastqcsingle
+    setreadlength
     trimsingle
     HISAT2_single
     samtobam
@@ -525,6 +534,7 @@ do
     fastqdumppaired
     movefastq
     fastqcpaired
+    setreadlength
     trimpaired
     HISAT2_paired
     samtobam
@@ -564,6 +574,7 @@ do
   fi
   if [ "$AIDDstep" == "trimsingle" ];
   then
+    setreadlength
     trimsingle
     HISAT2_single
     samtobam
@@ -603,6 +614,7 @@ do
   fi
   if [ "$AIDDstep" == "trimpaired" ];
   then
+    setreadlength
     trimpaired
     HISAT2_paired
     samtobam
