@@ -19,7 +19,7 @@ if ( Rtool == "GTEX" ) {
     index <- index2[grep(filter_type, index2$type), ]
     index[3] <- NULL # REMOVES EXTRA COLUMN IN TRANSCRIPT
    }
-  rename <- merge(index, matrix, by=level_id) # COMBINES INDEX WITH MARTIX
+  rename <- merge(index, matrix, by=level_name) # COMBINES INDEX WITH MARTIX
   rename[1] <- NULL # GETS RID OF OLD ID NUMBER
   colnames(rename)[1] <- level_name # RENAMES INDEX COLUMN
   newdata <- rename[order( rename[,1] ),] # sort them
