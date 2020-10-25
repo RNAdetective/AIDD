@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Exec=bash /home/user/AIDD/AIDD/ExToolset/ExToolsetbasecountsfrombam.sh /home/user /media/sf_AIDD/AIDD_data
+Name=ExToolsetBaseCounts
+GenericName=ExToolsetBaseCounts
+Comment=Run ExToolestBaseCounts
+Icon=/home/user/AIDD/ExToolset.gif
+Terminal=true
+Type=Application
+Name[en_US]=ExToolsetBaseCounts.desktop
