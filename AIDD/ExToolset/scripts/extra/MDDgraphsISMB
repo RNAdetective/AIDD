@@ -1,0 +1,196 @@
+data <- read.csv("/media/sf_AIDD/all_variantfiltering/VariantFilteringVisualFinal.csv")
+file_out <- "/media/sf_AIDD/all_variantfiltering/VariantFilteringVisualFinaltypename.tiff"
+tiff(file_out, units="in", width=15, height=15, res=300)
+data_plot <- data %>%
+filter (type != "percent" & type != "total") %>%
+group_by(name, type, sub) %>%
+summarize(average = mean (variants), sd=sd(variants))
+my_plot <- ggplot(data_plot, aes(x=sub, y=average, fill=sub)) + geom_bar(colour="black", stat="identity", position=position_dodge()) + facet_grid(vars(type), vars(name)) + scale_fill_brewer(palette="Spectral") + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9))
+my_plot2 <- my_plot + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text=element_text(size=20)) + theme(legend.position="bottom") + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+my_plot2
+dev.off()
+
+
+data <- read.csv("/media/sf_AIDD/all_globalEditing/CombinedCounts.csv")
+data2 <- data %>%
+gather(location, percent, -type, -COD, -gender, -MDD, -tissue, -run)
+write.csv(data2, "/media/sf_AIDD/all_globalEditing/CombinedCountsFinal.csv", row.names=FALSE)
+
+data <- read.csv("/media/sf_AIDD/all_globalEditing/CombinedCountsFinal.csv")
+file_out <- "/media/sf_AIDD/all_globalEditing/CombinedCounts2COD.tiff"
+tiff(file_out, units="in", width=15, height=10, res=300)
+data_plot <- data %>%
+filter (type == "ADAR") %>%
+filter (COD != "Accident") %>%
+group_by(tissue,COD,gender,location) %>%
+summarize(average = mean (percent), sd=sd(percent))
+my_plot <- ggplot(data_plot, aes(x=location, y=average, fill=COD)) + geom_bar(colour="black", stat="identity", position=position_dodge()) + facet_grid(vars(gender), vars(tissue)) + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9)) + scale_fill_manual(values=c('blue','red')) 
+my_plot2 <- my_plot + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text=element_text(size=20)) + theme(legend.position="bottom") + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+my_plot2
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/all_variantfiltering/variantFilteringVisualAll.csv")
+data2 <- data %>%
+gather(sub, variants, -samp_name, -tissue, -MDD, -COD, -gender, -name, -type)
+write.csv(data2, "/media/sf_AIDD/all_variantfiltering/variantFilteringVisualFinal2.csv", row.names=FALSE)
+
+data <- read.csv("/media/sf_AIDD/all_variantfiltering/VariantFilteringVisualFinal2.csv")
+file_out <- "/media/sf_AIDD/all_variantfiltering/VariantFilteringVisualFinalADAR.tiff"
+tiff(file_out, units="in", width=15, height=15, res=300)
+data_plot <- data %>%
+filter (sub == "ADAR") %>%
+filter (name == "filtered_snps_finalAll") %>%
+filter (type == "nonsnps") %>%
+group_by(COD, tissue, gender) %>%
+summarize(average = mean (variants), sd=sd(variants))
+my_plot <- ggplot(data_plot, aes(x=COD, y=average, fill=COD)) + geom_bar(colour="black", stat="identity", position=position_dodge()) + facet_grid(vars(gender), vars(tissue)) + scale_fill_brewer(palette="Spectral")  + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9))
+my_plot2 <- my_plot + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text=element_text(size=20)) + theme(legend.position="bottom") + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+my_plot2
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/all_variantfiltering/VariantFilteringVisualAll.csv")
+fit <- aov( ~ 
+
+
+
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+file_out <- "/media/sf_AIDD/all_guttman/scores/allscoresMAP.tiff"
+tiff(file_out, units="in", width=15, height=15, res=300)
+data_plot <- data %>%
+group_by(Suicide, Sex, tissue) %>%
+summarize(average = mean (MAP), sd=sd(MAP))
+my_plot <- ggplot(data_plot, aes(x=Suicide, y=average, fill=Suicide)) + geom_bar(colour="black", stat="identity", position=position_dodge()) + facet_grid(vars(Sex), vars(tissue)) + scale_fill_brewer(palette="Spectral") + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9))
+my_plot2 <- my_plot + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text=element_text(size=20)) + theme(legend.position="bottom") + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+my_plot2
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+file_out <- "/media/sf_AIDD/all_guttman/scores/allscoresSuicidegender.tiff"
+tiff(file_out, units="in", width=15, height=15, res=300)
+data_plot <- data %>%
+group_by(Suicide, Sex) %>%
+summarize(average = mean (score), sd=sd(score))
+my_plot <- ggplot(data_plot, aes(x=Suicide, y=average, fill=Suicide)) + geom_bar(colour="black", stat="identity", position=position_dodge()) + facet_grid(vars(Sex)) + scale_fill_brewer(palette="Spectral") + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9))
+my_plot2 <- my_plot + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text=element_text(size=20)) + theme(legend.position="bottom") + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+my_plot2
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+file_out <- "/media/sf_AIDD/all_guttman/scores/allscoresSuicidetissue.tiff"
+tiff(file_out, units="in", width=15, height=15, res=300)
+data_plot <- data %>%
+group_by(Suicide, tissue) %>%
+summarize(average = mean (score), sd=sd(score))
+my_plot <- ggplot(data_plot, aes(x=Suicide, y=average, fill=Suicide)) + geom_bar(colour="black", stat="identity", position=position_dodge()) + facet_grid(vars(tissue)) + scale_fill_brewer(palette="Spectral") + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9))
+my_plot2 <- my_plot + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text=element_text(size=20)) + theme(legend.position="bottom") + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+my_plot2
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+file_out <- "/media/sf_AIDD/all_guttman/scores/allscoresSuicide.tiff"
+tiff(file_out, units="in", width=15, height=15, res=300)
+data_plot <- data %>%
+group_by(Suicide) %>%
+summarize(average = mean (score), sd=sd(score))
+my_plot <- ggplot(data_plot, aes(x=Suicide, y=average, fill=Suicide)) + geom_bar(colour="black", stat="identity", position=position_dodge()) + scale_fill_brewer(palette="Spectral") + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9))
+my_plot2 <- my_plot + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text=element_text(size=20)) + theme(legend.position="bottom") + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+my_plot2
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(score ~ Suicide*Sex*tissue, data=data_plot)
+summary(fit)
+TukeyHSD(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MAP ~ Suicide*tissue, data=data_plot)
+summary(fit)
+TukeyHSD(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MAP ~ Sex*tissue, data=data_plot)
+summary(fit)
+TukeyHSD(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MAP ~ Suicide*Sex, data=data_plot)
+summary(fit)
+TukeyHSD(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MAP ~ Suicide, data=data_plot)
+summary(fit)
+TukeyHSD(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MAP ~ Sex, data=data_plot)
+summary(fit)
+TukeyHSD(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MAP ~ tissue, data=data_plot)
+summary(fit)
+TukeyHSD(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+file_out <- "/media/sf_AIDD/all_guttman/scores/allscoresMLE.tiff"
+tiff(file_out, units="in", width=15, height=15, res=300)
+data_plot <- data %>%
+filter ( Suicide != "Accident" ) %>%
+group_by(Suicide, Sex, tissue) %>%
+summarize(average = mean (MLE), sd=sd(MLE))
+my_plot <- ggplot(data_plot, aes(x=Suicide, y=average, fill=Suicide)) + geom_bar(colour="black", stat="identity", position=position_dodge()) + facet_grid(vars(Sex), vars(tissue)) + scale_fill_brewer(palette="Spectral") + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9))
+my_plot2 <- my_plot + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.text=element_text(size=20)) + theme(legend.position="bottom") + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+my_plot2
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MLE ~ Suicide, data=data_plot)
+summary(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MLE ~ Sex, data=data_plot)
+summary(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MLE ~ tissue, data=data_plot)
+summary(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MLE ~ Suicide*Sex, data=data_plot)
+summary(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MLE ~ Sex*tissue, data=data_plot)
+summary(fit)
+
+data <- read.csv("/media/sf_AIDD/all_guttman/scores/allscores.csv")
+data_plot <- data %>%
+filter ( Suicide != "Accident" )
+fit <- aov(MLE ~ Suicide*tissue, data=data_plot)
+summary(fit)

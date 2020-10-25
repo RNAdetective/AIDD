@@ -1,0 +1,83 @@
+data <- read.csv("/media/sf_AIDD/COVID19single/Results/ADARgene_count_matrix.csv")
+data2 <- data %>%
+gather(gene_name, count, -infection, -Cell_Line, -Time_point)
+data_plot <- data2 %>%
+filter(gene_name == "ADAR.1") %>%
+group_by(gene_name,infection,Cell_Line,Time_point) %>%
+summarize(average = mean(count), sd=sd(count))
+file_out <- "/media/sf_AIDD/COVID19single/Results/ADAR.B1.tiff"
+tiff(file_out, units="in", width=25, height=15, res=300)
+my_plot <- ggplot(data_plot, aes(x=Time_point,y=average,fill=infection)) + geom_bar(colour="black",stat="identity", position=position_dodge()) + facet_grid(vars(as.factor(Cell_Line))) + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9)) + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme(legend.position="none")
+my_plot
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/COVID19single/Results/ADARgene_count_matrix.csv")
+data2 <- data %>%
+gather(gene_name, count, -infection, -Cell_Line, -Time_point)
+data_plot <- data2 %>%
+filter(gene_name == "ADAR.B1") %>%
+group_by(gene_name,infection,Cell_Line,Time_point) %>%
+summarize(average = mean(count), sd=sd(count))
+file_out <- "/media/sf_AIDD/COVID19single/Results/ADAR.B1.tiff"
+tiff(file_out, units="in", width=25, height=15, res=300)
+my_plot <- ggplot(data_plot, aes(x=infection,y=average,fill=infection)) + geom_bar(colour="black",stat="identity", position=position_dodge()) + facet_grid(vars(as.factor(Cell_Line)), vars(as.factor(Time_point))) + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9)) + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme(legend.position="none")
+my_plot
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/COVID19single/Results/transcriptofinterest_count_matrix.csv")
+data2 <- data %>%
+gather(gene_name, count, -infection, -Cell_Line, -Time_point)
+data_plot <- data2 %>%
+filter(gene_name == "ADAR1p150") %>%
+group_by(gene_name,infection,Cell_Line,Time_point) %>%
+summarize(average = mean(count), sd=sd(count))
+file_out <- "/media/sf_AIDD/COVID19single/Results/ADAR1p150.tiff"
+tiff(file_out, units="in", width=25, height=15, res=300)
+my_plot <- ggplot(data_plot, aes(x=Time_point,y=average,fill=infection)) + geom_bar(colour="black",stat="identity", position=position_dodge()) + facet_grid(vars(as.factor(Cell_Line))) + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9)) + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme(legend.position="none") + scale_fill_brewer(palette="Spectral")
+my_plot
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/COVID19single/Results/IFNpathway_count_matrix.csv")
+data2 <- data %>%
+gather(gene_name, count, -infection, -Cell_Line, -Time_point)
+data_plot <- data2 %>%
+filter(gene_name == "IFNAR1") %>%
+group_by(gene_name,infection,Cell_Line,Time_point) %>%
+summarize(average = mean(count), sd=sd(count))
+file_out <- "/media/sf_AIDD/COVID19single/Results/IFNAR1.tiff"
+tiff(file_out, units="in", width=25, height=15, res=300)
+my_plot <- ggplot(data_plot, aes(x=Time_point,y=average,fill=infection)) + geom_bar(colour="black",stat="identity", position=position_dodge()) + facet_grid(vars(as.factor(Cell_Line))) + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9)) + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme(legend.position="none") + scale_fill_brewer(palette="Spectral")
+my_plot
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/COVID19single/Results/IFNpathway_count_matrix.csv")
+data2 <- data %>%
+gather(gene_name, count, -infection, -Cell_Line, -Time_point)
+data_plot <- data2 %>%
+filter(gene_name == "IFNAR2") %>%
+group_by(gene_name,infection,Cell_Line,Time_point) %>%
+summarize(average = mean(count), sd=sd(count))
+file_out <- "/media/sf_AIDD/COVID19single/Results/IFNAR2.tiff"
+tiff(file_out, units="in", width=25, height=15, res=300)
+my_plot <- ggplot(data_plot, aes(x=Time_point,y=average,fill=infection)) + geom_bar(colour="black",stat="identity", position=position_dodge()) + facet_grid(vars(as.factor(Cell_Line))) + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9)) + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme(legend.position="none") + scale_fill_brewer(palette="Spectral")
+my_plot
+dev.off()
+
+data <- read.csv("/media/sf_AIDD/COVID19single/Results/IFNpathway_count_matrix.csv")
+data2 <- data %>%
+gather(gene_name, count, -infection, -Cell_Line, -Time_point)
+data_plot <- data2 %>%
+filter(gene_name == "CXCL10") %>%
+group_by(gene_name,infection,Cell_Line,Time_point) %>%
+summarize(average = mean(count), sd=sd(count))
+file_out <- "/media/sf_AIDD/COVID19single/Results/CXCL10.tiff"
+tiff(file_out, units="in", width=25, height=15, res=300)
+my_plot <- ggplot(data_plot, aes(x=Time_point,y=average,fill=infection)) + geom_bar(colour="black",stat="identity", position=position_dodge()) + facet_grid(vars(as.factor(Cell_Line))) + geom_errorbar(aes(ymin=average, ymax=average+sd), width=.2, position=position_dodge(.9)) + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + guides(colour = guide_legend(override.aes = list(size=12))) + theme(strip.text.x = element_text(size = 20)) + theme(text = element_text(size=20)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme(legend.position="none") + scale_fill_brewer(palette="Spectral")
+my_plot
+dev.off()
+
+
+out <- capture.output(res)
+write.csv(out, "/media/sf_AIDD/COVID19single/Results/ANOVACXCL10", row.names=FALSE, quote=FALSE)
+cat("CXCL10", out, file="/media/sf_AIDD/COVID19single/Results/ANOVACXCL10", sep="n", append=TRUE)
+
