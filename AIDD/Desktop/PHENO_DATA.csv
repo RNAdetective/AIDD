@@ -1,0 +1,5 @@
+sampname,run,condition,sample,genotype,celltype
+ZIKV_1,SRR3191542,ZIKV,sample01,A2,NPC
+ZIKV_2,SRR3191543,ZIKV,sample02,A2,NPC
+mock_1,SRR3191544,mock,sample03,A2,NPC
+mock_2,SRR3191545,mock,sample04,A2,NPC
