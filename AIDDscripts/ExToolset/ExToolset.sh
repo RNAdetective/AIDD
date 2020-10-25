@@ -164,68 +164,40 @@ else
   mes_out
 fi
 } # moves a directory dir_move to a new directory final_dir
-create_filecheck() {
-if [ ! "$type1" == "none" ];
-then
-  if [ -s "$type1" ];
+name_files() {
+  temp=$(echo "$dir_count" | sed 's/\//,/g')
+  dirnum=$(echo "$temp" | grep -o "," | wc -l)
+  filenum=$(expr "$dirnum" + 2)
+  extnum=$(expr "$dirnum" + 3) 
+  dir_name=$(echo "$files" | sed 's/\//./g' | cut -f "$filenum" -d '.')
+  res="${dir_name//[^_]}"
+  if [ "$res" == "" ];
   then
-    echo ""$run""$snptype"1,yes" >> "$filecheckVC"/filecheck"$snptype"1.csv
+    file_name=$(echo "$dir_name" | cut -f 1 -d '.') 
+    #sample=$(echo "$file_name" | cut -f 1 -d ':')
   else
-    echo ""$run""$snptype"1,no" >> "$filecheckVC"/filecheck"$snptype"1.csv
+    file_name=$(echo "$dir_name" | cut -f 1 -d '.' | cut -f 1-"${#res}" -d '_' )
+    #sample=$(echo "$file_name" | cut -f 1 -d ':')
   fi
-fi
-if [ ! "$type2" == "none" ];
+  file_ext=$(echo "$files" | sed 's/\//./g' | cut -f "$extnum" -d '.') 
+}
+file_check() {
+if [ ! -s "$out_put" ];
 then
-  if [ -s "$type2" ];
-  then
-    echo ""$run""$snptype"2,yes" >> "$filecheckVC"/filecheck"$snptype"2.csv
-  else
-    echo ""$run""$snptype"2,no" >> "$filecheckVC"/filecheck"$snptype"2.csv
-  fi
+  echo "sample,$checktype" >> "$out_put"
 fi
-if [ ! "$type3" == "none" ];
+if [ -f "$raw_input" ];
 then
-  if [ -s "$type3" ];
-  then
-    echo ""$run""$snptype"2,yes" >> "$filecheckVC"/filecheck"$snptype"3.csv
-  else
-    echo ""$run""$snptype"2,no" >> "$filecheckVC"/filecheck"$snptype"3.csv
-  fi
-fi
+  echo ""$run",yes" >> "$out_put"
+else
+  echo ""$run",no" >> "$out_put"
+fi 
 } # creates file check matrix each sample creates row in the new csv yes means files is there no means it is not
-checkfile() {
-  missing=$(grep -o 'no' "$in_file" | wc -l)
-  if [ ! "$missing" == "0" ];
-  then
-    echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
-    mes_out
-  else
-    echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
-    mes_out
-  fi
-}
 summary_split() {
-subname=$(cat "$dir_path"/PHENO_DATA.csv | awk -F',' '$2 == '$run' { print $1 }')
-echo "$subname"
-#if [ "$subname" == "single" ];
-#then 
-#  cat "$dirqcalign"/"$run"_alignment_metrics.txt | sed '/^#/d' | sed 's/UNPAIRED/'$run'/g' | sed '/^FIR/d' | sed '/^SEC/d' | sed 's/\t/,/g' | sed '1d' >> "$dirqcalign"/"$run"_alignment_metrics.csv
-#else
-  cat "$dirqcalign"/"$run"_alignment_metrics.txt | sed '/^#/d' | sed 's/PAIR/'$run'/g' | sed 's/UN//g' | sed 's/ED//g' | sed '/^FIR/d' | sed '/^SEC/d' | sed 's/\t/,/g' | sed '1d' >> "$dirqcalign"/"$run"_alignment_metrics.csv
-#fi
+#subname=$(cat "$dir_path"/PHENO_DATA.csv | awk -F',' '$2 == '$file_name' { print $1 }')
+#echo "$subname"
+  cat "$dirqcalign"/"$file_name"_alignment_metrics.txt | sed '/^#/d' | sed 's/PAIR/'$file_name'/g' | sed 's/UN//g' | sed 's/ED//g' | sed '/^FIR/d' | sed '/^SEC/d' | sed 's/\t/,/g' | sed '1d' >> "$dirqcalign"/"$file_name"_alignment_metrics.csv
 } #creates alignment matrix from txt file
-combine_file() {
-cat "$file_in" | sed '1!{/^CAT/d;}' | cut -d',' -f"$col_num" | sed '/^$/d' | awk -F',' '!x[$1]++' >> "$file_out"
-} # cuts each column out of matrix and makes its own file
-editmatrix() {
-cat "$allcm" | sed 's/ADAR_001/ADARp150/g' | sed 's/ADAR_002/ADARp110/g' | sed 's/ADAR_007/ADARp80/g' | sed 's/ADARB1_/ADARB1./g' | sed 's/_[0-9]*//g' >> "$allcmedit"
-}
-createindex() {
-cat "$allcmedit" | cut -d, --complement -f2-6 | sed 's/genename/sampname/g' | head -n 1 | tr ',' '\n' >> "$allindex"
-}
-Rbar() {
-Rscript "$ExToolset"/barchart.R "$file_in" "$file_out" "$bartype" "$pheno" "$freq" "$sum_file" "$sampname" "$file_out2" "$sum_file2"
-} # runs bargraph R script
 sum_combine() {
 cat "$dirqcalign"/*.csv | sed '/^$/d' | awk -F',' '!x[$1]++' >> "$dirqcalign"/all_summary.csv
 file_in="$dirqcalign"/all_summary.csv
@@ -264,136 +236,35 @@ tool=Rbar
 run_tools
 done
 } # separates big summary into each category and creates bar graph
+combine_file() {
+cat "$file_in" | sed '1!{/^CAT/d;}' | cut -d',' -f"$col_num" | sed '/^$/d' | awk -F',' '!x[$1]++' >> "$file_out"
+} # cuts each column out of matrix and makes its own file
+creatematrix() {
+cd "$dirraw"
+python "$ExToolset"/prepDE.py -g "$dirres"/gene_count_matrix.csv -t "$dirres"/transcript_count_matrix.csv
+cd "$dir_path"/AIDD/
+} # runs python script to summarize gtf files in count matrix
+basecount() {
+Rscript "$dir_path"/tempbasecount.R "$file_in" "$temp_file"
+rm "$dir_path"/tempbasecount.R
+}
+Rbar() {
+Rscript "$ExToolset"/barchart.R "$file_in" "$file_out" "$bartype" "$pheno" "$freq" "$sum_file" "$sampname" "$file_out2" "$sum_file2"
+} # runs bargraph R script
 matrixeditor() {
 Rscript "$ExToolset"/matrixedit.R "$file_out" "$file_in" "$index_file" "$pheno_file" "$Rtool" "$level_id" "$level_name" "$filter_type" "$level" "$tempf1" "$tempf2" "$tempf3"
 } # creates matrix counts with names instead of ids and checks to make sure they are there
 mergeR() {
 Rscript "$ExToolset"/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" "$GOI_file" "$temp_file1" "$temp_file2" "$temp_file3" "$rename" #creates level of interest files
 } # Runs multimerge R
-creatematrix() {
-cd "$dir_path"/raw_data/
-python "$ExToolset"/prepDE.py -g "$dirres"/gene_count_matrix.csv -t "$dirres"/transcript_count_matrix.csv
-cd "$dir_path"/AIDD/
-} # runs python script to summarize gtf files in count matrix
-filter_impact() {
-#any_no= # count how many lines contain no "$filecheckVC"/filecheck"$snptype"2.csv
-#if [ "$any_no" == "0" ];
-#then
-addcondition=$(echo ""$con_name1"_"$condition"_"$con_name2"_"$condition2"_"$con_name3"_"$condition3"_"$con_name4"_"$condition4"")
-  cat "$raw_input4" | sed '1,2d' | sed 's/	/,/g' | sed 's/    /,/g' | sed 's/  /,/g' | sed 's/ /,/g' | cut -d',' -f"$col_num" | sed '/,0$/d'  | sed 's/ /,/g' | awk '{a[$1]+=$2}END{for(k in a)print k,a[k]}' FS=, OFS=, | sort | sed '1i id,'$run'' >> "$VC_dir"/"$level"/"$impact"/"$run""$snptype""$addcondition".csv
-count=$(cat "$VC_dir"/"$level"/"$impact"/"$run""$snptype""$addcondition".csv | wc -l)
-  new_dir="$VC_dir"/final
-  create_dir
-  if [ ! -s "$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv ];
-  then
-    echo "run,"$level""$impact""$snptype",readdepth" >> "$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv
-  fi
-  echo ""$run","$count","$readdepth"" >> "$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv
-#else
-  #echo "Can't find files for GVEX" ; exit ;
-#fi
-} # this will create impact files for each sample
-splitallmatrix() {
-var=$(head -n 1 "$olddirres"/all_count_matrix.csv)
-grep -n -w -F  "$name" "$olddirres"/all_count_matrix.csv | sed '1i '$var'' | sed 's/[0-9]://g' >> "$dirres"/all/all_count_matrixedit.csv
-}
-PDsplit() {
-header=$(head -n 1 "$dir_path"/PHENO_DATA.csv)
-grep -n -w -F "$name" "$dir_path"/PHENO_DATA.csv | sed '1i '$header'' | sed 's/[0-9]://g' | sed 's/_[0-9]//g' >> "$dirres"/PHENO_DATA.csv
-}
-DE_R() {
-rlog="$dirresDEcal"/rlogandvariance.tiff
-log="$dirresDEcal"/logtranscounts.tiff
-transcounts="$dirresDEcal"/transcounts2sam.tiff
-PoisHeatmap="$dirresDEcal"/PoisHeatmap.tiff
-PCA="$dirresDEPCA"/PCAplot.tiff
-PCA2="$dirresDEPCA"/PCAplot2.tiff
-MDSplot="$dirresDEPCA"/MDSplot.tiff
-MDSpois="$dirresDEPCA"/MDSpois.tiff
-resultsall="$dirresDELDE"/resultsall.csv
-upreg="$dirresDELDE"/upreg.csv
-upreg100="$dirresDELDEvd"/upregGListtop100.csv
-upregGlist="$dirresDELDEvd"/upregGList.csv
-downreg="$dirresDELDE"/downreg.csv
-downreg100="$dirresDELDEvd"/downregGListtop100.csv
-downregGlist="$dirresDELDEvd"/downregGList.csv
-heatmap="$dirresDELDE"/top60heatmap.tiff
-volcano="$dirresDELDE"/VolcanoPlot.tiff
-file_in="$ExToolset"/DE.R
-cat "$file_in" | sed 's/set_design/'$condition_name'/g' >> "$dir_path"/temp.R
-Rscript "$dir_path"/temp.R "$file_in" "$pheno" "$set_design" "$level_name" "$rlog" "$log" "$transcounts" "$PoisHeatmap" "$PCA" "$PCA2" "$MDSplot" "$MDSpois" "$resultsall" "$upreg" "$upreg100" "$upregGlist" "$downreg" "$downreg100" "$downregGlist" "$heatmap" "$volcano"
-rm "$dir_path"/temp.R
-}
-GvennR() {
-Rscript "$ExToolset"/Gvenn.R "$file_in" "$file_out" "$image_out"
-}
-basecount() {
-Rscript "$dir_path"/tempbasecount.R "$file_in" "$temp_file"
-rm "$dir_path"/tempbasecount.R
-}
-add_conditions() {
-ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
-count_matrix="$dirres"/"$name"_count_matrix.csv
-Rtool=finalmerge
-Rtype=single2f
-GOI_file="$dirres"/"$name"_count_matrixANOVA.csv
-file_out="$dirres"/"$name"_count_matrixANOVA.csv
-mergefile="$dirres"/"$name"_count_matrix.csv
-phenofile="$dir_path"/PHENO_DATA.csv
-level_name=$(echo "samp_name")
-echo1=$(echo "CREATING "$file_out"")
-mes_out
-mergeR
-}
-makeDESeq2() {
-file_in="$resdir"/"$name"_count_matrixDESeq2.csv
-file_out="$dir_path"/temp.csv
-cat "$file_in" | cut -d, --complement -f2 | sed 's/.y//g' >> "$file_out" 
-file_in="$resdir"/"$name"_count_matrixDESeq2.csv
-temp_file
-cd "$dir_path"/AIDD
-INPUT="$dir_path"/PHENO_DATA.csv
-OLDIFS=$IFS
-{
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-read
-while IFS=, read -r samp_name run condition sample condition2 condition3
-do
-  source config.shlib;
-  home_dir=$(config_get home_dir);
-  dir_path=$(config_get dir_path);
-  dirres=$(config_get dirres);
-  file_in="$resdir"/"$name"_count_matrixDESeq2.csv
-  cat "$file_in" | sed 's/'$run'/'$samp_name'/g' | sed 's/ /,/g' >> "$dir_path"/temp.csv
-  temp_file
-done 
-} < $INPUT
-IFS=$OLDIFS
-header=$(head -n 1 "$file_in")
-cat "$file_in" | sed '1d' | sed '1i samp_name'$header'' | csvtool transpose >> "$dir_path"/temp.csv
-temp_file
-count_matrix="$resdir"/"$name"_count_matrixDESeq2.csv
-Rtool=finalmerge
-Rtype=single2f
-GOI_file="$dirres"/"$name"_count_matrixANOVA.csv
-file_out="$dirres"/"$name"_count_matrixANOVA.csv
-mergefile="$resdir"/"$name"_count_matrixDESeq2.csv
-phenofile="$dir_path"/PHENO_DATA.csv
-level_name=$(echo "samp_name")
-echo1=$(echo "CREATING "$file_out"")
-mes_out
-mergeR
-cp "$resdir"/"$name"_count_matrixDESeq2.csv "$dirres"/"$name"_count_matrixDESeq2.csv
-}
-end_check() {
-if [ "$var1" == "$varA" ];
-then
-  "$tool"
-  cd "$home_dir"/scripts
-fi
-}
 varfilter() {
 Rscript "$ExToolset"/varfiltering.R "$file_in" "$file_out" "$image_out1" "$image_out2" "$image_out3" "$image_out4"
+}
+editmatrix() {
+cat "$allcm" | sed 's/ADAR_001/ADARp150/g' | sed 's/ADAR_002/ADARp110/g' | sed 's/ADAR_007/ADARp80/g' | sed 's/ADARB1_/ADARB1./g' | sed 's/_[0-9]*//g' >> "$allcmedit"
+}
+createindex() {
+cat "$allcmedit" | cut -d, --complement -f2-6 | sed 's/genename/sampname/g' | head -n 1 | tr ',' '\n' >> "$allindex"
 }
 temp_file() {
 if [ -s "$dir_path"/temp.csv ];
@@ -403,11 +274,11 @@ then
 fi
 }
 temp_dir() {
-if [ -d "$dir_path"/raw_data/ballgown/"$sample"/tmp.XX*/ ]; # IF TEMP_DIR IN SAMPLE FOLDER
+if [ -d "$dirraw"/ballgown/"$sample"/tmp.XX*/ ]; # IF TEMP_DIR IN SAMPLE FOLDER
 then
   echo1=$(echo "FOUND TEMP DIRECTORY IN FOLDER FOR "$sample"")
   mes_out
-  rm -f -R "$dir_path"/raw_data/ballgown/"$sample"/tmp.XX*/ #DELETE TMP_DIR
+  rm -f -R "$dirraw"/ballgown/"$sample"/tmp.XX*/ #DELETE TMP_DIR
 fi
 } # deletes any temp directories created in error from stringtie
 run_tools() {
@@ -441,8 +312,40 @@ echo "'$DATE_WITH_TIME' $echo1
 ___________________________________________________________________________"
 new_dir="$dirqc"/time_check
 create_dir
-echo "'$DATE_WITH_TIME',"$run","$file_in","$tool"" >> "$dirqc"/time_check/"$run"time_check.csv
+echo "'$DATE_WITH_TIME',"$file_name","$file_in","$tool"" >> "$dirqc"/time_check/"$file_name"time_check.csv
 }
+add_conditions() {
+ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
+count_matrix="$dirres"/"$name"_count_matrix.csv
+Rtool=finalmerge
+Rtype=single2f
+GOI_file="$dirres"/"$name"_count_matrixANOVA.csv
+file_out="$dirres"/"$name"_count_matrixANOVA.csv
+mergefile="$dirres"/"$name"_count_matrix.csv
+phenofile="$dir_path"/PHENO_DATA.csv
+level_name=$(echo "samp_name")
+echo1=$(echo "CREATING "$file_out"")
+mes_out
+mergeR
+}
+filter_impact() {
+#any_no= # count how many lines contain no "$filecheckVC"/filecheck"$snptype"2.csv
+#if [ "$any_no" == "0" ];
+#then
+addcondition=$(echo ""$con_name1"_"$condition"_"$con_name2"_"$condition2"_"$con_name3"_"$condition3"_"$con_name4"_"$condition4"")
+  cat "$raw_input4" | sed '1,2d' | sed 's/	/,/g' | sed 's/    /,/g' | sed 's/  /,/g' | sed 's/ /,/g' | cut -d',' -f"$col_num" | sed '/,0$/d'  | sed 's/ /,/g' | awk '{a[$1]+=$2}END{for(k in a)print k,a[k]}' FS=, OFS=, | sort | sed '1i id,'$run'' >> "$VC_dir"/"$level"/"$impact"/"$run""$snptype""$addcondition".csv
+count=$(cat "$VC_dir"/"$level"/"$impact"/"$run""$snptype""$addcondition".csv | wc -l)
+  new_dir="$VC_dir"/final
+  create_dir
+  if [ ! -s "$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv ];
+  then
+    echo "run,"$level""$impact""$snptype",readdepth" >> "$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv
+  fi
+  echo ""$run","$count","$readdepth"" >> "$VC_dir"/final/"$level""$impact""$snptype"_count_matrix.csv
+#else
+  #echo "Can't find files for GVEX" ; exit ;
+#fi
+} # this will create impact files for each sample
 DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
 TIME_HOUR=$(date +%H)
 TIME_MIN=$(date +%M)
@@ -458,34 +361,10 @@ dirqc="$dir_path"/quality_control; # qc directory
 dirqcalign="$dirqc"/alignment_metrics
 dirres="$dir_path"/Results; #
 dirraw="$dir_path"/raw_data;
+rdbam="$dirraw"/bam_files
 dirVC="$dirres"/variant_calling;
 dirVCsubs="$dirVC"/substitutions;
-summaryfile="$dir_path"/quality_control/alignment_metrics/all_summaryPF_READS_ALIGN.csv
-matrix_file="$dirres"/gene_count_matrix.csv; 
-matrix_file2="$dirres"/transcript_count_matrix.csv; 
-matrix_fileedit="$dirres"/gene_count_matrixeditedDESeq2.csv;
-matrix_fileedit2="$dirres"/transcript_count_matrixeditedDESeq2.csv;
-matrix_file3="$dirres"/"$level"ofinterest_count_matrix.csv;
-matrix_file3a="$dirres"/geneofinterest_count_matrix.csv;
-matrix_file3b="$dirres"/transcriptofinterest_count_matrix.csv;
-matrix_file4="$dirres"/excitome_count_matrix.csv;
-matrix_file5="$dirres"/genetrans_count_matrix.csv;
-matrix_file6="$dirres"/GTEX_count_matrix.csv;
-matrix_file7="$dirres"/nucleotide_count_matrix.csv; 
-matrix_file8="$dirres"/amino_acid_count_matrix.csv;
-matrix_file9="$dirres"/subs_count_matrix.csv;
-matrix_file10="$dirres"/impact_count_matrix.csv;
-matrix_file11="$dirres"/VEX_count_matrix.csv;
 matrix_filefinal="$dirres"/all_count_matrix.csv;
-data_summary_file1="$dirres"/geneofinterest/geneofinterestallsummaries.csv;
-data_summary_file2="$dirres"/transcriptofinterest/transcriptofinterest.csv;
-data_summary_file3="$dirres"/excitome/excitomeallsummaries.csv;
-data_summary_file3a="$dirres"/GTEXallsummaries.csv;
-data_summary_file4="$dirres"/nucleotide/nucleotideallsummaries.csv;
-data_summary_file5="$dirres"/amino_acid/amino_acidallsummaries.csv;
-data_summary_file6="$dirres"/impact/impactallsummaries.csv;
-data_summary_file6a="$dirres"/VEXallsummaries.csv;
-data_summary_filefinal="$dirres"/allsummaries.csv;
 LOG_LOCATION="$dir_path"/quality_control/logs
 new_dir="$LOG_LOCATION"
 create_dir
@@ -505,9 +384,9 @@ create_dir # creates new directory to store results
 new_dir="$dirres"
 #add in move matrix files 
 create_dir # creates Results directory
-new_dir="$dir_path"/raw_data # creates directories for raw data
+new_dir="$dirraw" # creates directories for raw data
 create_dir
-new_dir="$dir_path"/raw_data/vcf_files # creates directories for vcf files 
+new_dir="$dirraw"/vcf_files # creates directories for vcf files 
 create_dir
 new_dir="$dirqc" # creates directories for quality control
 create_dir
@@ -612,263 +491,157 @@ temp_file
 INPUT="$dir_path"/PHENO_DATA.csv
 OLDIFS=$IFS
 {
-[ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+[ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
 read
 while IFS=, read -r samp_name run condition sample condition2 condition3
 do
-  source config.shlib;
-  home_dir=$(config_get home_dir);
-  dir_path=$(config_get dir_path); 
-  dirqc=$(config_get dirqc);
-  dirraw=$(config_get dirraw);
-  dirVC=$(config_get dirVC);
-  dirVCsubs=$(config_get dirVCsubs);
-  human=$(config_get human);
-  raw_input1="$dir_path"/raw_data/ballgown/"$sample"/"$sample".gtf
-  raw_input2="$dirqc"/alignment_metrics/"$run"_alignment_metrics.txt
-  new_dir="$dirqc"
-  create_dir
-  new_dir="$dirqc"/filecheck
-  create_dir
-  new_dir="$dirqc"/filecheckVC
-  create_dir
-  filecheckVC="$dirqc"/filecheck
-  type1="$raw_input1"
-  type2=none
-  type3=none
-  snptype=gtf
-  temp_dir # delete temp directories if present
-  create_filecheck
-  type1=none
-  type2="$raw_input2"
-  type3=none
-  snptype=summary
-  create_filecheck
-  for snptype in ADARediting APOBECediting AllNoSnpsediting ;
-  do
-    filecheckVC="$dirqc"/filecheckVC
-    raw_input3="$dirraw"/snpEff/snpEff"$run""$snptype".csv
-    type1="$raw_input3"
-    type2=none
-    type3=none
-    create_filecheck
-    filecheckVC="$dirqc"/filecheckVC
-    raw_input4="$dir_path"/raw_data/snpEff/snpEff"$run""$snptype".genes.txt
-    type2="$raw_input4"
-    type1=none
-    type3=none
-    create_filecheck
-    filecheckVC="$dirqc"/filecheckVC
-    raw_input5="$dir_path"/raw_data/snpEff/"$run"filtered_snps_finalAnn"$snptype".vcf
-    type2=none
-    type1=none
-    type3="$raw_input5"
-    create_filecheck
-  done
-done 
+  file_name="$run"
+  if [ -d "$files" ]; then
+    echo "$files is a directory"
+  else
+    name_files
+    filecheck="$dirqc"/filecheck
+    new_dir="$dirqc"/filecheck
+    create_dir
+    raw_input="$dirqcalign"/"$run"_alignment_metrics.txt
+    checktype=alignment_metrics
+    out_put="$filecheck"/filecheck"$checktype".csv
+    file_check
+    raw_input="$dirraw"/ballgown/"$sample"/"$sample".gtf
+    checktype=gtf
+    out_put="$filecheck"/filecheck"$checktype".csv
+    file_check
+    raw_input="$rdbam"/"$run".bam
+    checktype=bam
+    out_put="$filecheck"/filecheck"$checktype".csv
+    file_check
+    for snptype in raw_snps raw_snps_recal ;
+    do
+      raw_input="$dirraw"/vcf_files/raw/"$run""$snptype".vcf
+      checktype="$snptype"vcf
+      out_put="$filecheck"/filecheck"$checktype".csv
+      file_check
+    done
+    raw_input="$dirraw"/vcf_files/filtered/"$run"filtered_snps.vcf
+    checktype=filteredvcf
+    out_put="$filecheck"/filecheck"$checktype".csv
+    file_check
+    for snptype in ADARediting APOBECediting AllNoSnpsediting ;
+    do
+      raw_input="$dirraw"/snpEff/snpEff"$run""$snptype".csv
+      checktype="$snptype"_csv
+      out_put="$filecheck"/filecheck"$checktype".csv
+      file_check
+      raw_input="$dirraw"/snpEff/snpEff"$run""$snptype".genes.txt
+      checktype="$snptype"_genes_txt
+      out_put="$filecheck"/filecheck"$checktype".csv
+      file_check
+      raw_input="$dirraw"/snpEff/"$run"filtered_snps_finalAnn"$snptype".vcf
+      checktype="$snptype"_snpEff_vcf
+      out_put="$filecheck"/filecheck"$checktype".csv
+      file_check
+      raw_input="$dirraw"/vcf_files/final/"$run"filtered_snps_final"$snptype".vcf
+      checktype="$snptype"_final_vcf
+      out_put="$filecheck"/filecheck"$checktype".csv
+      file_check
+    done
+  fi
+done
 } < $INPUT
 IFS=$OLDIFS
-raw_check1="$dirqc"/filecheck/filecheckgtf1.csv #gtf
-raw_check2="$dirqc"/filecheck/filechecksummary2.csv #align
-for in_file in "$raw_check1" "$raw_check2" ;
+for files in "$dirqc"/filecheck/* ;
 do
-  checkfile
-done
-for snptype in ADARediting APOBECediting AllNoSnpsediting ;
-do
-  raw_check3="$dirqc"/filecheckVC/filecheck"$snptype"1.csv #snpeff.csv
-  for in_file in "$raw_check3" ;
-  do
-    checkfile
-  done
-done
-for snptype in ADARediting APOBECediting AllNoSnpsediting ;
-do
-  raw_check4="$dirqc"/filecheckVC/filecheck"$snptype"2.csv #snpeff.txt
-  for in_file in "$raw_check4" ;
-  do
-    checkfile
-  done
-done
-for snptype in ADARediting APOBECediting AllNoSnpsediting ;
-do
-  raw_check5="$dirqc"/filecheckVC/filecheck"$snptype"3.csv #Ann.vcf
-  for in_file in "$raw_check5" ;
-  do
-    checkfile
-  done
-done
+  if [ -d "$files" ]; then
+    echo "$files is a directory"
+  else
+    name_files
+    missing=$(grep -o 'no' "$files" | wc -l)
+    if [ ! "$missing" == "0" ];
+    then
+      echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$files" FOR MORE DETAILS")
+      mes_out
+    else
+      echo1=$(echo "RAW DATA FILES FOR "$files" FOUND")
+      mes_out
+    fi
+  fi 
+done 
+cur_wkd="$dirqc"/filecheck;
+file_out="$dirqc"/filecheck_missing.csv
+cd "$dirqc"/filecheck
+Rtool=G_VEX
+Rtype=multi
+GOI_file="$dirqc"/filecheck_missing.csv
+names=$(echo "sample")
+mergefile=none
+phenofile=none
+temp_file1="$dirqc"/temp2.csv
+echo1=$(echo "CREATING "$file_out"")
+mes_out
+mergeR
 ###############################################################################################################################################################
 # CREATE ALIGNMENT SUMMARY FILE FOR NORMALIZATION IN EXTOOLSET                                                                                 *TESTED
 ###############################################################################################################################################################
 echo1=$(echo "COLLECTING ALIGNMENT SUMMARIES")
 mes_out
-if [ ! -s "$matrix_file" ]; # can't find edited matrix
+summaryfile="$dirqcalign"/all_summaryPF_READS_ALIGN.csv
+if [ ! -s "$summaryfile" ]; # can't find edited matrix
 then
   cd "$dir_path"/AIDD
-  INPUT="$dir_path"/PHENO_DATA.csv
-  OLDIFS=$IFS
-  {
-  [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-  read
-  while IFS=, read -r samp_name run condition sample condition2 condition3
+  dir_count="$rdbam"
+  for files in "$dir_count"/* ;
   do
-    source config.shlib;
-    home_dir=$(config_get home_dir);
-    dir_path=$(config_get dir_path);
-    dirqc=$(config_get dirqc);
-    human=$(config_get human);
-    filecheck="$dirqc"/filecheck
-    in_file="$filecheck"/filechecksummary2.csv
-    missing=$(grep -o 'no' "$in_file" | wc -l)
-    if [ ! "$missing" == "0" ];
+    if [ -d "$files" ];
     then
-      echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
-      mes_out
+      echo ""$files" is a directory"
     else
-      #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
-      #mes_out
-      summary_split
+      name_files
+      filecheck="$dirqc"/filecheck
+      in_file="$filecheck"/filecheckalignment_metrics.csv
+      missing=$(grep -o 'no' "$in_file" | wc -l)
+      if [ ! "$missing" == "0" ];
+      then
+        echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
+        mes_out
+      else
+        #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
+        #mes_out
+        summary_split
+      fi
     fi
   done
-  } < $INPUT
-  IFS=$OLDIFS
   sum_combine
   sum_divid
   cd "$dir_path"/AIDD
 else
-  echo1=$(echo "found "$matrix_file" moving on")
+  echo1=$(echo "found "$summaryfile" moving on")
   mes_out
 fi
-###############################################################################################################################################################
-# Creates graphs showing vcf filtering results and removal of known snps                                                                     *TESTED
-###############################################################################################################################################################
-VarQC="$dir_path"/quality_control/variant_filtering
-new_dir="$VarQC"
-create_dir 
-INPUT="$dir_path"/PHENO_DATA.csv
-OLDIFS=$IFS
-{
-[ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
-read
-while IFS=, read -r samp_name run condition sample condition2 condition3
-do
-  VarQC="$dir_path"/quality_control/variant_filtering
-  for name in filtered_snps_finalAll raw_snps filtered_snps raw_snps_recal ;
-  do
-    if [ "$name" == "filtered_snps_finalAll" ];
-    then
-      rdvcf="$dir_path"/raw_data/vcf_files/final
-    fi
-    if [ "$name" == "filtered_snps" ];
-    then
-      rdvcf="$dir_path"/raw_data/vcf_files/filtered
-    fi
-    if [[ "$name" == "raw_snps" || "$name" == "raw_snps_recal" ]];
-    then
-      rdvcf="$dir_path"/raw_data/vcf_files/raw
-    fi
-    file_vcf_finalAll="$rdvcf"/"$run""$name".vcf
-    if [ -s "$file_vcf_finallAll" ];
-    then
-      echo "Running analysis for visualizing variant filtration for "$run" and variant filtering type "$name""
-      ACcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "C")) { print } }' | wc -l)
-      ATcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "T")) { print } }' | wc -l)
-      AGcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "G")) { print } }' | wc -l)
-      CAcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "A")) { print } }' | wc -l)
-      CGcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "G")) { print } }' | wc -l)
-      CTcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "T")) { print } }' | wc -l)
-      GAcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "A")) { print } }' | wc -l)
-      GCcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "C")) { print } }' | wc -l)
-      GTcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "T")) { print } }' | wc -l)
-      TAcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "A")) { print } }' | wc -l)
-      TGcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "G")) { print } }' | wc -l)
-      TCcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "C")) { print } }' | wc -l)
-      ACcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "C") && ($3 == ".")) { print } }' | wc -l)
-      ATcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "T") && ($3 == ".")) { print } }' | wc -l)
-      AGcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "G") && ($3 == ".")) { print } }' | wc -l)
-      CAcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "A") && ($3 == ".")) { print } }' | wc -l)
-      CGcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "G") && ($3 == ".")) { print } }' | wc -l)
-      CTcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "T") && ($3 == ".")) { print } }' | wc -l)
-      GAcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "A") && ($3 == ".")) { print } }' | wc -l)
-      GCcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "C") && ($3 == ".")) { print } }' | wc -l)
-      GTcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "T") && ($3 == ".")) { print } }' | wc -l)
-      TAcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "A") && ($3 == ".")) { print } }' | wc -l)
-      TGcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "G") && ($3 == ".")) { print } }' | wc -l)
-      TCcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "C") && ($3 == ".")) { print } }' | wc -l)
-      final_file="$VarQC"/VariantFilteringVisual.csv
-      if [ ! -s "$final_file" ];
-      then
-        echo "samp_name,condition,condition2,name,type,ACcount,AGcount,ATcount,CAcount,CGcount,CTcount,GAcount,GCcount,GTcount,TAcount,TCcount,TGcount" >> "$final_file"
-      fi
-      echo ""$samp_name","$condition","$condition2","$name",total,"$ACcount","$AGcount","$ATcount","$CAcount","$CGcount","$CTcount","$GAcount","$GCcount","$GTcount","$TAcount","$TCcount","$TGcount"" >> "$final_file"
-      echo ""$samp_name","$condition","$condition2","$name",nonsnps,"$ACcountsnps","$AGcountsnps","$ATcountsnps","$CAcountsnps","$CGcountsnps","$CTcountsnps","$GAcountsnps","$GCcountsnps","$GTcountsnps","$TAcountsnps","$TCcountsnps","$TGcountsnps"" >> "$final_file"
-      ACsnp=$(expr "$ACcount" - "$ACcountsnps")
-      ATsnp=$(expr "$ATcount" - "$ATcountsnps")
-      AGsnp=$(expr "$AGcount" - "$AGcountsnps")
-      CAsnp=$(expr "$CAcount" - "$CAcountsnps")
-      CGsnp=$(expr "$CGcount" - "$CGcountsnps")
-      CTsnp=$(expr "$CTcount" - "$CTcountsnps")
-      GAsnp=$(expr "$GAcount" - "$GAcountsnps")
-      GCsnp=$(expr "$GCcount" - "$GCcountsnps")
-      GTsnp=$(expr "$GTcount" - "$GTcountsnps")
-      TAsnp=$(expr "$TAcount" - "$TAcountsnps")
-      TGsnp=$(expr "$TGcount" - "$TGcountsnps")
-      TCsnp=$(expr "$TCcount" - "$TCcountsnps")
-      echo ""$samp_name","$condition","$condition2","$name",withsnps,"$ACsnp","$AGsnp","$ATsnp","$CAsnp","$CGsnp","$CTsnp","$GAsnp","$GCsnp","$GTsnp","$TAsnp","$TCsnp","$TGsnp"" >> "$final_file"
-      ACsnps=$(echo "scale=4 ; "$ACcountsnps"/"$ACcount"" | bc)
-      ATsnps=$(echo "scale=4 ; "$ATcountsnps"/"$ATcount"" | bc)
-      AGsnps=$(echo "scale=4 ; "$AGcountsnps"/"$AGcount"" | bc)
-      CAsnps=$(echo "scale=4 ; "$CAcountsnps"/"$CAcount"" | bc)
-      CGsnps=$(echo "scale=4 ; "$CGcountsnps"/"$CGcount"" | bc)
-      CTsnps=$(echo "scale=4 ; "$CTcountsnps"/"$CTcount"" | bc)
-      GAsnps=$(echo "scale=4 ; "$GAcountsnps"/"$GAcount"" | bc)
-      GCsnps=$(echo "scale=4 ; "$GCcountsnps"/"$GCcount"" | bc)
-      GTsnps=$(echo "scale=4 ; "$GTcountsnps"/"$GTcount"" | bc)
-      TAsnps=$(echo "scale=4 ; "$TAcountsnps"/"$TAcount"" | bc)
-      TGsnps=$(echo "scale=4 ; "$TGcountsnps"/"$TGcount"" | bc)
-      TCsnps=$(echo "scale=4 ; "$TCcountsnps"/"$TCcount"" | bc)
-      echo ""$samp_name","$condition","$condition2","$name",percent,"$ACsnps","$AGsnps","$ATsnps","$CAsnps","$CGsnps","$CTsnps","$GAsnps","$GCsnps","$GTsnps","$TAsnps","$TCsnps","$TGsnps"" >> "$final_file"
-    done
-  done
-} < $INPUT
-IFS=$OLDIFS
-file_in <- "$VarQC"/VariantFilteringVisual.csv
-file_out <- "$VarQC"/VariantFilteringVisualSummary.csv
-image_out1 <- "$VarQC"/VariantFilteringVisualfiltered_snps_finalAllTotal.tiff
-image_out2 <- "$VarQC"/VariantFilteringVisualfiltered_snps_finalAllNoSnps.tiff
-image_out3 <- "$VarQC"/VariantFilteringVisualNoSnps.tiff
-image_out4 <- "$VarQC"/VariantFilteringVisualTotal.tiff
-image_out5 <- "$VarQC"/VariantFilteringVisualfiltered_snps_finalTotalNoSnps.tiff
-image_out6 <- "$VarQC"/VariantFilteringVisualraw_snpsTotalNoSnps.tiff
-image_out7 <- "$VarQC"/VariantFilteringVisualAll.tiff
-image_out8 <- "$VarQC"/VariantFilteringVisualAll2.tiff
-tool=varfilter
-run_tools
 ###############################################################################################################################################################
 # CREATES GTEX                                                                                                                                    *TESTED
 ###############################################################################################################################################################
 echo1=$(echo "CREATING GTEX MATRIX")
 mes_out
+matrix_file="$dirres"/gene_count_matrix.csv
+matrix_file2="$dirres"/transcript_count_matrix.csv
+matrix_fileedit="$dirres"/gene__count_matrixeditedDESeq2.csv
+matrix_fileedit2="$dirres"/transcript_count_matrixeditedDESeq2.csv
 if [[ ! -s "$matrix_file" || ! -s "$matrix_file2" ]]; # can't find edited matrix
 then
   filecheck="$dirqc"/filecheck
-  in_file="$filecheck"/filecheckgtf1.csv
+  in_file="$filecheck"/filecheckgtf.csv
   missing=$(grep -o 'no' "$in_file" | wc -l)
   if [ ! "$missing" == "0" ];
   then
     echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
     mes_out
   else
-    #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
-    #mes_out
     creatematrix
   fi
 else
   echo1=$(echo "ALREADY FOUND "$matrix_file" AND "$matrix_file2"")
   mes_out
 fi # THIS WILL CREATE GENE_COUNT_MATRIX AND TRANSCRIPT_COUNT_MATRIX
-
 cd "$dir_path"/AIDD
 for level in gene transcript ;
 do
@@ -877,7 +650,7 @@ do
     if [[ ! -s "$matrix_fileedit" || ! -s "$matrix_fileedit2" ]];
     then
       filecheck="$dirqc"/filecheck
-      in_file="$filecheck"/filecheckgtf1.csv
+      in_file="$filecheck"/filecheckgtf.csv
       missing=$(grep -o 'no' "$in_file" | wc -l)
       if [ ! "$missing" == "0" ];
       then
@@ -893,7 +666,7 @@ do
         pheno_file="$dir_path"/PHENO_DATA.csv
         Rtool=GTEX
         level_id=$(echo ""$level"_id");
-        level_name=$(echo ""$level"_name");
+        level_name=$(echo ""$level"_id");
         filter_type=$(echo "protein_coding");
         level="$level"
         tempf1="$dir_path"/tempR1.csv
@@ -907,12 +680,10 @@ do
         echo1=$(echo "CREATING "$file_out"")
         mes_out
         matrixeditor
-        header=$(head -n 1 "$file_out")
-        cat "$file_out" | awk -F',' 'NR > 1{s=0; for (i=3;i<=NF;i++) s+=$i; if (s!=0)print}' | sort -u -k1 | sed '1i '$level'_name',$header'' >> "$dir_path"/temp.csv
+        header=$(cat "$file_out" | head -n 1 | cut -d"," -f1 --complement)
+        cat "$file_out" | awk -F',' 'NR > 1{s=0; for (i=3;i<=NF;i++) s+=$i; if (s!=0)print}' | sort -u -k1 | sed '1d' | sed '1i '$level'_name',$header'' | awk -F',' '!a[$1]++' >> "$dir_path"/temp.csv
         file_in="$dirres"/"$level"_count_matrixeditedDESeq2.csv
         temp_file
-        #cat "$file_in" | awk -F',' '!a[$1]++' >> "$dir_path"/temp.csv
-        #Stemp_file
       fi
     else
       echo1=$(echo "ALREADY FOUND "$matrix_fileedit" OR "$matrix_fileedit2"")
@@ -923,77 +694,12 @@ do
     mes_out
   fi
 done # NOW HAVE GENE AND TRANSCRIPT OF INTEREST FILES AND EDITED COUNT_MATRIX FILES
-if [ ! "$missing" == "0" ];
-then
-  echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
-  mes_out
-else
-  #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
-  #mes_out
-  INPUT="$dir_path"/PHENO_DATA.csv
-  OLDIFS=$IFS
-  {
-  [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-  read
-  while IFS=, read -r samp_name run condition sample condition2 condition3
-  do
-    source config.shlib;
-    home_dir=$(config_get home_dir);
-    dir_path=$(config_get dir_path);
-    dirres=$(config_get dirres);
-    human=$(config_get human);
-    for level in gene transcript ;
-    do
-      file_out="$dirres"/"$level"_count_matrixeditedDESeq2.csv
-      header=$(head -n 1 "$file_out")
-      cat "$file_out" | sed '1d' | sed 's/'$sample'/'$samp_name'/g' | sed '1i '$level'_name,'$header'' >> "$dir_path"/temp.csv
-      file_in="$file_out"
-      temp_file
-    done
-  done 
-  } < $INPUT
-  IFS=$OLDIFS
-fi
-## combine all the files in desktop folder
-## add them to the bottom of "$home_dir"/insert_"$level"_of_interest/"$level"ofinterest.csv
-for level in gene transcript ;
-do
-  if [[ -s "$matrix_fileedit" && -s "$matrix_fileedit2" ]];
-  then
-    if [[ ! -s "$matrix_file3" && ! -s "$matrix_file3b" ]];
-    then
-      cur_wkd="$dirres"
-      summaryfile=none
-      Rtool=transpose
-      Rtype=single2f
-      file_out="$dirres"/"$level"ofinterest_count_matrix.csv #3
-      ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
-      mergefile="$ExToolsetix"/"$human"/"$level"ofinterest.csv #7
-      phenofile="$dirres"/"$level"_count_matrixeditedDESeq2.csv #8
-      GOI_file="$dirres"/temp.csv #10
-      level_name=$(echo ""$level"_name")
-      file_in="$mergefile"
-      cat "$file_in" | sed 's/-/_/g' >> "$dir_path"/temp.csv
-      temp_file
-      echo1=$(echo "CREATING "$file_out"")
-      mes_out
-      mergeR
-      name="$level"ofinterest
-      add_conditions
-      rm "$dirres"/temp.csv
-      file_in="$file_out"
-      cat "$file_in" | sed 's/   //g' | sed 's/  //g' >> "$dir_path"/temp.csv
-      temp_file
-    else
-      echo1=$(echo "ALREADY FOUND "$matrix_file3"")
-      mes_out
-    fi
-  else
-    echo1=$(echo "CANT FIND "$matrix_fileedit" OR "$matrix_fileedit2"")
-    mes_out
-  fi
-done
-
+matrix_file3="$dirres"/"$level"ofinterest_count_matrix.csv;
+matrix_file3a="$dirres"/geneofinterest_count_matrix.csv;
+matrix_file3b="$dirres"/transcriptofinterest_count_matrix.csv;
+matrix_file4="$dirres"/excitome_count_matrix.csv;
+matrix_file5="$dirres"/genetrans_count_matrix.csv;
+matrix_file6="$dirres"/GTEX_count_matrix.csv;
 if [ -s "$matrix_file" ];
 then
   if [ ! -s "$matrix_file4" ];
@@ -1030,7 +736,7 @@ then
       dir_name=$(echo "$files" | sed 's/\//./g' | cut -f 6 -d '.')
       file_name=$(echo "$dir_name" | cut -f 1 -d '.')
       echo "$file_name"
-      echo ""$file_name"" >> "$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_"$level"list.csv
+      #echo ""$file_name"" >> "$dir_path"/AIDD/ExToolset/indexes/"4huma""$level"_list/user_input_"$level"list.csv
       matrix_file4a="$dirres"/"$file_name"_count_matrix.csv
       if [ ! -s "$matrix_file4a" ];
       then
@@ -1120,10 +826,10 @@ then
       dir_name=$(echo "$files" | sed 's/\//./g' | cut -f 6 -d '.')
       file_name=$(echo "$dir_name" | cut -f 1 -d '.')
       echo "$file_name"
-      echo ""$file_name"" >> "$dir_path"/AIDD/ExToolset/indexes/"$level"_list/user_input_pathway_"$level"list.csv
+      echo ""$file_name"" >> "$dir_path"/AIDD/ExToolset/indexes/"$human"/"$level"_list/user_input_pathway_"$level"list.csv
       #echo ""$file_name"" >> "$dir_path"/AIDD/ExToolset/indexes/user_input_pathway_"$level"list.csv
-      matrix_file4a="$dirres"/"$file_name"_count_matrix.csv
-      if [ ! -s "$matrix_file4a" ];
+      matrix_file="$dirres"/"$file_name"_count_matrix.csv
+      if [ ! -s "$matrix_file" ];
       then
         cur_wkd="$dirres"
         summaryfile=none
@@ -1141,7 +847,7 @@ then
         name="$file_name"pathway
         add_conditions ###CHECK THIS
       else
-        echo1=$(echo "ALREADY FOUND "$matrix_file4a"")
+        echo1=$(echo "ALREADY FOUND "$matrix_file"")
         mes_out
       fi
     done
@@ -1150,7 +856,112 @@ else
   echo1=$(echo "CANT FIND "$matrix_file"") 
   mes_out
 fi # NOW HAVE USE SUPPLIED GENE OR TRANSCRIPT PATHWAY MATRIX
-
+###############################################################################################################################################################
+# Creates graphs showing vcf filtering results and removal of known snps                                                                     *TESTED
+###############################################################################################################################################################
+VarQC="$dir_path"/quality_control/variant_filtering
+new_dir="$VarQC"
+create_dir 
+INPUT="$dir_path"/PHENO_DATA.csv
+OLDIFS=$IFS
+{
+[ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
+read
+while IFS=, read -r samp_name run condition sample condition2 condition3
+do
+  VarQC="$dir_path"/quality_control/variant_filtering
+  for name in filtered_snps_finalAll raw_snps filtered_snps raw_snps_recal ;
+  do
+    if [ "$name" == "filtered_snps_finalAll" ];
+    then
+      rdvcf="$dir_path"/raw_data/vcf_files/final
+    fi
+    if [ "$name" == "filtered_snps" ];
+    then
+      rdvcf="$dir_path"/raw_data/vcf_files/filtered
+    fi
+    if [[ "$name" == "raw_snps" || "$name" == "raw_snps_recal" ]];
+    then
+      rdvcf="$dir_path"/raw_data/vcf_files/raw
+    fi
+    file_vcf_finalAll="$rdvcf"/"$run""$name".vcf
+    if [ -s "$file_vcf_finallAll" ];
+    then
+      echo "Running analysis for visualizing variant filtration for "$run" and variant filtering type "$name""
+      ACcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "C")) { print } }' | wc -l)
+      ATcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "T")) { print } }' | wc -l)
+      AGcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "G")) { print } }' | wc -l)
+      CAcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "A")) { print } }' | wc -l)
+      CGcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "G")) { print } }' | wc -l)
+      CTcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "T")) { print } }' | wc -l)
+      GAcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "A")) { print } }' | wc -l)
+      GCcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "C")) { print } }' | wc -l)
+      GTcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "T")) { print } }' | wc -l)
+      TAcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "A")) { print } }' | wc -l)
+      TGcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "G")) { print } }' | wc -l)
+      TCcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "C")) { print } }' | wc -l)
+      ACcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "C") && ($3 == ".")) { print } }' | wc -l)
+      ATcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "T") && ($3 == ".")) { print } }' | wc -l)
+      AGcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "G") && ($3 == ".")) { print } }' | wc -l)
+      CAcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "A") && ($3 == ".")) { print } }' | wc -l)
+      CGcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "G") && ($3 == ".")) { print } }' | wc -l)
+      CTcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "C") && ($5 == "T") && ($3 == ".")) { print } }' | wc -l)
+      GAcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "A") && ($3 == ".")) { print } }' | wc -l)
+      GCcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "C") && ($3 == ".")) { print } }' | wc -l)
+      GTcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "G") && ($5 == "T") && ($3 == ".")) { print } }' | wc -l)
+      TAcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "A") && ($3 == ".")) { print } }' | wc -l)
+      TGcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "G") && ($3 == ".")) { print } }' | wc -l)
+      TCcountsnps=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "T") && ($5 == "C") && ($3 == ".")) { print } }' | wc -l)
+      final_file="$VarQC"/VariantFilteringVisual.csv
+      if [ ! -s "$final_file" ];
+      then
+        echo "samp_name,condition,condition2,name,type,ACcount,AGcount,ATcount,CAcount,CGcount,CTcount,GAcount,GCcount,GTcount,TAcount,TCcount,TGcount" >> "$final_file"
+      fi
+      echo ""$samp_name","$condition","$condition2","$name",total,"$ACcount","$AGcount","$ATcount","$CAcount","$CGcount","$CTcount","$GAcount","$GCcount","$GTcount","$TAcount","$TCcount","$TGcount"" >> "$final_file"
+      echo ""$samp_name","$condition","$condition2","$name",nonsnps,"$ACcountsnps","$AGcountsnps","$ATcountsnps","$CAcountsnps","$CGcountsnps","$CTcountsnps","$GAcountsnps","$GCcountsnps","$GTcountsnps","$TAcountsnps","$TCcountsnps","$TGcountsnps"" >> "$final_file"
+      ACsnp=$(expr "$ACcount" - "$ACcountsnps")
+      ATsnp=$(expr "$ATcount" - "$ATcountsnps")
+      AGsnp=$(expr "$AGcount" - "$AGcountsnps")
+      CAsnp=$(expr "$CAcount" - "$CAcountsnps")
+      CGsnp=$(expr "$CGcount" - "$CGcountsnps")
+      CTsnp=$(expr "$CTcount" - "$CTcountsnps")
+      GAsnp=$(expr "$GAcount" - "$GAcountsnps")
+      GCsnp=$(expr "$GCcount" - "$GCcountsnps")
+      GTsnp=$(expr "$GTcount" - "$GTcountsnps")
+      TAsnp=$(expr "$TAcount" - "$TAcountsnps")
+      TGsnp=$(expr "$TGcount" - "$TGcountsnps")
+      TCsnp=$(expr "$TCcount" - "$TCcountsnps")
+      echo ""$samp_name","$condition","$condition2","$name",withsnps,"$ACsnp","$AGsnp","$ATsnp","$CAsnp","$CGsnp","$CTsnp","$GAsnp","$GCsnp","$GTsnp","$TAsnp","$TCsnp","$TGsnp"" >> "$final_file"
+      ACsnps=$(echo "scale=4 ; "$ACcountsnps"/"$ACcount"" | bc)
+      ATsnps=$(echo "scale=4 ; "$ATcountsnps"/"$ATcount"" | bc)
+      AGsnps=$(echo "scale=4 ; "$AGcountsnps"/"$AGcount"" | bc)
+      CAsnps=$(echo "scale=4 ; "$CAcountsnps"/"$CAcount"" | bc)
+      CGsnps=$(echo "scale=4 ; "$CGcountsnps"/"$CGcount"" | bc)
+      CTsnps=$(echo "scale=4 ; "$CTcountsnps"/"$CTcount"" | bc)
+      GAsnps=$(echo "scale=4 ; "$GAcountsnps"/"$GAcount"" | bc)
+      GCsnps=$(echo "scale=4 ; "$GCcountsnps"/"$GCcount"" | bc)
+      GTsnps=$(echo "scale=4 ; "$GTcountsnps"/"$GTcount"" | bc)
+      TAsnps=$(echo "scale=4 ; "$TAcountsnps"/"$TAcount"" | bc)
+      TGsnps=$(echo "scale=4 ; "$TGcountsnps"/"$TGcount"" | bc)
+      TCsnps=$(echo "scale=4 ; "$TCcountsnps"/"$TCcount"" | bc)
+      echo ""$samp_name","$condition","$condition2","$name",percent,"$ACsnps","$AGsnps","$ATsnps","$CAsnps","$CGsnps","$CTsnps","$GAsnps","$GCsnps","$GTsnps","$TAsnps","$TCsnps","$TGsnps"" >> "$final_file"
+    fi    
+  done
+done
+} < $INPUT
+IFS=$OLDIFS
+file_in <- "$VarQC"/VariantFilteringVisual.csv
+file_out <- "$VarQC"/VariantFilteringVisualSummary.csv
+image_out1 <- "$VarQC"/VariantFilteringVisualfiltered_snps_finalAllTotal.tiff
+image_out2 <- "$VarQC"/VariantFilteringVisualfiltered_snps_finalAllNoSnps.tiff
+image_out3 <- "$VarQC"/VariantFilteringVisualNoSnps.tiff
+image_out4 <- "$VarQC"/VariantFilteringVisualTotal.tiff
+image_out5 <- "$VarQC"/VariantFilteringVisualfiltered_snps_finalTotalNoSnps.tiff
+image_out6 <- "$VarQC"/VariantFilteringVisualraw_snpsTotalNoSnps.tiff
+image_out7 <- "$VarQC"/VariantFilteringVisualAll.tiff
+image_out8 <- "$VarQC"/VariantFilteringVisualAll2.tiff
+tool=varfilter
+run_tools
 ###############################################################################################################################################################
 # Global substitution variant matrix G_VEX matrix                                                                                            *TESTED
 ###############################################################################################################################################################
@@ -1160,101 +971,100 @@ new_dir="$dirVC"
 create_dir
 new_dir="$dirVCsubs"
 create_dir
-if [[ ! -s "$matrix_file7"  && ! -s "$matrix_file8" ]]; # can't find edited matrix
+matrix_file="$dirres"/nucleotide_count_matrix.csv; 
+matrix_file2="$dirres"/amino_acid_count_matrix.csv;
+if [[ ! -s "$matrix_file"  && ! -s "$matrix_file2" ]]; # can't find edited matrix
 then
-  cd "$dir_path"/AIDD
-  INPUT="$dir_path"/PHENO_DATA.csv
-  OLDIFS=$IFS
-  {
-  [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-  read
-  while IFS=, read -r samp_name run condition sample condition2 condition3
+  dir_count="$rdbam"
+  for files in "$dir_count"/* ;
   do
-    source config.shlib;
-    home_dir=$(config_get home_dir);
-    dir_path=$(config_get dir_path); 
-    dirqc=$(config_get dirqc);
-    dirraw=$(config_get dirraw);
-    dirVC=$(config_get dirVC);
-    dirVCsubs=$(config_get dirVCsubs);
-    human=$(config_get human);
-    echo1="STARTING G_VEX FOR "$run" VARIANTS"
-    mes_out
-    for snptype in ADARediting APOBECediting AllNoSnpsediting ;
-    do
-      filecheck="$dirqc"/filecheckVC
-      in_file="$filecheck"/filecheck"$snptype"1.csv
+    if [ -d "$files" ];
+    then
+      echo ""$files" is a directory"
+    else
+      name_files
+      filecheck="$dirqc"/filecheck
+      in_file="$filecheck"/filecheckfilteredvcf.csv
       missing=$(grep -o 'no' "$in_file" | wc -l)
       if [ ! "$missing" == "0" ];
       then
         echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
         mes_out
       else
-        #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
-        #mes_out
-        raw_input3="$dirraw"/snpEff/snpEff"$run""$snptype".csv
-        count=$(echo "Count by effects")
-        count2=$(echo "Count by genomic")
-        cat "$raw_input3" | sed '1d' | sed 's/# />/g' | sed 's/\//_/g' | sed '/^\s*$/d' | sed 's/Base/'$run'nucleotide_count_matrixprep/g' | sed 's/Amino/'$run'amino_acid_count_matrixprep/g' >> "$dirVCsubs"/"$run""$snptype".csv
-        new_dir="$dirVCsubs"/raw/
-        create_dir
-        new_dir="$dirVCsubs"/raw/"$run""$snptype"
-        create_dir
-        cd "$dirVCsubs"/raw/"$run""$snptype"
-        csplit -s -z "$dirVCsubs"/"$run""$snptype".csv '/>/' '{*}' # take the sample new csv file and split"
-        for i in xx* ; do \
-          n=$(sed 's/>// ; s/ .*// ; 1q' "$i") ; \
-          mv "$i" "$n.csv" ; \
-          file_in="$n".csv
-          cat "$file_in" | sed '1d' >> "$dir_path"/temp.csv
-          temp_file
-        done # now you have split files for each sample in the folder
-        cd "$dir_path"/AIDD/
-        for level in nucleotide amino_acid ;
+        for snptype in ADARediting APOBECediting AllNoSnpsediting ;
         do
-          new_dir="$dirVC"/"$level"
-          create_dir
-          file_in="$dirVCsubs"/raw/"$run""$snptype"/"$run""$level"_count_matrixprep.csv # this has the raw matrix for need to vector
-          new_wkd="$dirVC"/"$level"/merge"$snptype"
-          new_dir="$new_wkd"
-          create_dir
-          cat "$file_in" | sed 's/  //g' | sed 's/ //g' >> "$dir_path"/temp.csv
-          temp_file
-          index_file="$ExToolsetix"/index/"$level"_names.csv
-          pheno_file="$new_wkd"/"$run""$level"_count_matrixprep.csv # output file directory name
-          Rtool=G_VEX
-          tempf1="$dir_path"/tempR1.csv
-          tempf2="$dir_path"/tempR2.csv
-          tempf3="$dir_path"/tempR3.csv
-          matrixeditor 
-          cat "$pheno_file" | cut -d',' -f2,3 | sed '1d' | sed '1i sub_names,'$run'' >> "$dir_path"/temp.csv
-          if [ -s ""$dir_path"/temp.csv" ];
+          filecheck="$dirqc"/filecheck
+          in_file="$filecheck"/filecheck"$snptype"_csv.csv
+          missing=$(grep -o 'no' "$in_file" | wc -l)
+          if [ ! "$missing" == "0" ];
           then
-            rm "$pheno_file"
+            echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
+            mes_out
+          else
+            #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
+            #mes_out
+            raw_input="$dirraw"/snpEff/snpEff"$file_name""$snptype".csv
+            count=$(echo "Count by effects")
+            count2=$(echo "Count by genomic")
+            cat "$raw_input" | sed '1d' | sed 's/# />/g' | sed 's/\//_/g' | sed '/^\s*$/d' | sed 's/Base/'$file_name'nucleotide_count_matrixprep/g' | sed 's/Amino/'$file_name'amino_acid_count_matrixprep/g' >> "$dirVCsubs"/"$file_name""$snptype".csv
+            new_dir="$dirVCsubs"/raw/
+            create_dir
+            new_dir="$dirVCsubs"/raw/"$file_name""$snptype"
+            create_dir
+            cd "$dirVCsubs"/raw/"$file_name""$snptype"
+            csplit -s -z "$dirVCsubs"/"$file_name""$snptype".csv '/>/' '{*}' # take the sample new csv file and split"
+            for i in xx* ; do \
+              n=$(sed 's/>// ; s/ .*// ; 1q' "$i") ; \
+              mv "$i" "$n.csv" ; \
+              file_in="$n".csv
+              cat "$file_in" | sed '1d' >> "$dir_path"/temp.csv
+             temp_file
+            done # now you have split files for each sample in the folder
+            cd "$dir_path"/AIDD/
+            for level in nucleotide amino_acid ;
+            do
+              new_dir="$dirVC"/"$level"
+              create_dir
+              file_in="$dirVCsubs"/raw/"$file_name""$snptype"/"$file_name""$level"_count_matrixprep.csv # this has the raw matrix for need to vector
+              new_wkd="$dirVC"/"$level"/merge"$snptype"
+              new_dir="$new_wkd"
+              create_dir
+              cat "$file_in" | sed 's/  //g' | sed 's/ //g' >> "$dir_path"/temp.csv
+              temp_file
+              index_file="$ExToolsetix"/index/"$level"_names.csv
+              pheno_file="$new_wkd"/"$file_name""$level"_count_matrixprep.csv # output file directory name
+              Rtool=G_VEX
+              tempf1="$dir_path"/tempR1.csv
+              tempf2="$dir_path"/tempR2.csv
+              tempf3="$dir_path"/tempR3.csv
+              matrixeditor 
+              cat "$pheno_file" | cut -d',' -f2,3 | sed '1d' | sed '1i sub_names,'$file_name'' >> "$dir_path"/temp.csv
+              if [ -s ""$dir_path"/temp.csv" ];
+              then
+                rm "$pheno_file"
+              fi
+              mv "$dir_path"/temp.csv "$pheno_file"
+              rm "$dirVCsubs"/raw/"$file_name""$snptype"/"$file_name""$level"_count_matrixprep.csv
+            done
+            current_dir="$dirVCsubs"/raw/"$file_name""$snptype"
+            for file in "$current_dir"/* ;
+            do
+              file_in="$file"
+              namefiles=$(echo "${file_in##*/}")
+              name=$(echo "${namefiles%%.*}")
+              new_dir="$dirVC"/"$name"
+              create_dir
+              new_wkd="$dirVC"/"$name"/merge"$snptype"
+              new_dir="$new_wkd"
+              create_dir
+              cat "$file_in" | sed 's/  //g' | sed 's/ //g'  >> "$new_dir"/"$file_name""$name"
+             # cat "$file_out" | cut -d',' -f1,2 | sed '1d' >> "$dir_path"/temp.csv
+            done
           fi
-          mv "$dir_path"/temp.csv "$pheno_file"
-          rm "$dirVCsubs"/raw/"$run""$snptype"/"$run""$level"_count_matrixprep.csv
-        done
-        current_dir="$dirVCsubs"/raw/"$run""$snptype"
-        for file in "$current_dir"/* ;
-        do
-          file_in="$file"
-          namefiles=$(echo "${file_in##*/}")
-          name=$(echo "${namefiles%%.*}")
-          new_dir="$dirVC"/"$name"
-          create_dir
-          new_wkd="$dirVC"/"$name"/merge"$snptype"
-          new_dir="$new_wkd"
-          create_dir
-          cat "$file_in" | sed 's/  //g' | sed 's/ //g'  >> "$new_dir"/"$run""$name"
-
-         # cat "$file_out" | cut -d',' -f1,2 | sed '1d' >> "$dir_path"/temp.csv
         done
       fi
-    done
+    fi
   done 
-  } < $INPUT
-  IFS=$OLDIFS
   summaryfile="$dir_path"/quality_control/alignment_metrics/all_summaryPF_READS_ALIGN.csv
   run=$(awk -F',' 'NR==2 { print $2 }' "$dir_path"/PHENO_DATA.csv)
   file_in="$summaryfile"
@@ -1327,17 +1137,19 @@ then
     fi
   done
 else
-  echo1=$(echo "ALREADY FOUND "$matrix_file7" OR "$matrix_file7"")
+  echo1=$(echo "ALREADY FOUND "$matrix_file" OR "$matrix_file2"")
   mes_out
 fi # NOW YOU HAVE AMINO_ACID AND NUCLEOTIDE MATRIX  
-if [[ -s "$matrix_file7" && -s "$matrix_file8" ]];
+if [[ -s "$matrix_file" && -s "$matrix_file2" ]];
 then
-  if [ ! -s "$matrix_file9" ]; # can't find edited matrix
+  matrix_file3="$dirres"/subs_count_matrix.csv;
+  if [ ! -s "$matrix_file3" ]; # can't find edited matrix
   then
     cur_wkd="$dirVC"
     summaryfile="$dirres"/amino_acid_count_matrix.csv #
     Rtool=none
     Rtype=single
+    level_name=$(echo "Category")
     file_out="$dirres"/subs_count_matrix.csv
     mergefile="$dirres"/nucleotide_count_matrix.csv #file_in
     phenofile="$dir_path"/PHENO_DATA.csv
@@ -1348,28 +1160,27 @@ then
     cat "$file_in" | sed 's/\n//g' >> "$dir_path"/temp.csv
     temp_file
   else
-    echo1=$(echo "ALREADY FOUND "$matrix_file9"")
+    echo1=$(echo "ALREADY FOUND "$matrix_file3"")
     mes_out
   fi
 else
-  echo1=$(echo "CANT FIND "$matrix_file7" OR "$matrix_file8"")
+  echo1=$(echo "CANT FIND "$matrix_file" OR "$matrix_file2"")
   mes_out
 fi
-
-
-
-
 ###############################################################################################################################################################
 # Impact of RNA editing matrix I_VEX matrix                                                                                                        *TESTED
 ###############################################################################################################################################################
 echo1=$(echo "CREATING I_VEX MATRIX")
 mes_out
 cd "$dir_path"/AIDD
+source config.shlib;
 summaryfile="$dir_path"/quality_control/alignment_metrics/all_summaryPF_READS_ALIGN.csv
 file_in="$summaryfile"
 cat "$file_in" | sed 's/name/CATEGORY/g' >> "$dir_path"/temp.csv
 temp_file
-if [ ! -s "$matrix_file10" ]; # can't find edited matrix
+matrix_file="$dirres"/impact_count_matrix.csv;
+matrix_file2="$dirres"/VEX_count_matrix.csv;
+if [ ! -s "$matrix_file" ]; # can't find edited matrix
 then 
   if [ -s "$summaryfile" ];
   then
@@ -1393,6 +1204,8 @@ then
     file_in="$dir_path"/PHENO_DATAalign.csv
     cat "$file_in" | awk -F',' '!x[$0]++' >> "$dir_path"/temp.csv
     temp_file
+    dir_count="$rdbam"
+    cd "$dir_path"/AIDD
     INPUT="$dir_path"/PHENO_DATAalign.csv
     OLDIFS=$IFS
     {
@@ -1425,8 +1238,8 @@ then
           create_dir      
           for snptype in ADARediting APOBECediting AllNoSnpsediting ;
           do
-            filecheck="$dirqc"/filecheckVC
-            in_file="$filecheck"/filecheck"$snptype"2.csv
+            filecheck="$dirqc"/filecheck
+            in_file="$filecheck"/filecheck"$snptype"_genes_txt.csv
             missing=$(grep -o 'no' "$in_file" | wc -l)
             if [ ! "$missing" == "0" ];
             then
@@ -1464,10 +1277,6 @@ then
     } < $INPUT
     IFS=$OLDIFS # creates count matrix
     source config.shlib
-    dir_path="$(config_get dir_path)"; # main directory
-    home_dir="$(config_get home_dir)"; # home directory
-    human=$(config_get human);
-    dirres="$dir_path"/Results
     VC_dir="$dirres"/variant_calling/impact
     for level in gene transcript ;
     do
@@ -1516,12 +1325,15 @@ then
     mes_out
   fi
 else
-  echo1=$(echo "ALREADY HAVE "$matrix_file10"")
+  echo1=$(echo "ALREADY HAVE "$matrix_file"")
   mes_out
 fi
 ###############################################################################################################################################################
 # COMBINING MATRICES                                                                                                        *TESTED
 ###############################################################################################################################################################
+matrix_file9="$dirres"/subs_count_matrix.csv
+matrix_file10="$dirres"/impact_count_matrix.csv
+matrix_file11="$dirres"/VEX_count_matrix.csv
 if [ ! -s "$matrix_file11" ];
 then
   if [[ -s "$matrix_file10" && -s "$matrix_file9" ]];
@@ -1549,29 +1361,6 @@ if [ ! -s "$matrix_filefinal" ];
 then
   if [ -s "$matrix_file11" ];
   then
-    cd "$dir_path"/AIDD
-    INPUT="$dir_path"/PHENO_DATA.csv
-    OLDIFS=$IFS
-    {
-    [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-    read
-    while IFS=, read -r samp_name run condition sample condition2 condition3
-    do
-      source config.shlib;
-      home_dir=$(config_get home_dir);
-      dir_path=$(config_get dir_path);
-      dirres=$(config_get dirres);
-      human=$(config_get human);
-      for level in gene transcript ;
-      do
-        file_out="$dirres"/VEX_count_matrix.csv
-        cat "$file_out" | sed 's/'$run'/'$samp_name'/g' >> "$dir_path"/temp.csv
-        file_in="$file_out"
-        temp_file
-      done
-    done 
-    } < $INPUT
-    IFS=$OLDIFS
     cur_wkd="$dirres"/variant_calling
     summaryfile=none
     Rtool=finalmerge
@@ -2054,65 +1843,6 @@ matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
   name=guttexpression
   resdir="$dirresgutt"
   makeDESeq2
-###############################################################################################################################################################
-# Statistical Analysis section:DESeq2                                                                                                   *WORKING ON IT
-###############################################################################################################################################################
-cd "$dir_path"/AIDD
-dirresDE="$dirres"/DESeq2
-new_dir="$dirresDE"
-create_dir
-mv "$dirres"/*DESeq2* "$dirresDE"
-for files in "$dirresDE"/* ;
-do
-  file_in="$files"
-  namefiles=$(echo "${file_in##*/}")
-  count_matrix=$(echo "${namefiles%%.*}")
-  #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetDESeq2.sh "$count_matrix" #run DE with DESEq2 for each gene and transcript count matrix for each condition
-done
-###############################################################################################################################################################
-# Statistical Analysis section:ANOVA                                                                                                         *WORKING ON IT
-###############################################################################################################################################################
-cd "$dir_path"/AIDD
-dirresANOVA="$dirres"/ANOVA
-new_dir="$dirresANOVA"
-create_dir
-mv "$dirres"/*ANOVA* "$dirresANOVA"
-for files in "$dirresANOVA"/* ;
-do
-  file_in="$files"
-  namefiles=$(echo "${file_in##*/}")
-  count_matrix=$(echo "${namefiles%%.*}")
-  #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetANOVA.sh "$count_matrix" #runs ANOVA on each gene in the excitome, each nt and AA substitution, and impact of subs.
-done
-
-bash "$home_dir"/AIDD/AIDD/ExToolset/scripts/basecountsfrombam.sh "$home_dir" "$dir_path"
-###############################################################################################################################################################
-# Statistical Analysis section: Correlaions                                                                                          *WORKING ON IT
-###############################################################################################################################################################
-count_matrix=all_count_matrix
-  #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetcorr.sh "$count_matrix" #runs correlations
-  cd "$dir_path"/AIDD
-  rm
-###############################################################################################################################################################
-# Statistical Analysis section: Guttman and RF                                                                                                  *WORKING ON IT
-###############################################################################################################################################################
-
-#count_matrix="$dir_path"/Results/guttman_count_matrix.csv
-#if [ -f "$count_matrix ];
- # echo1="NOW RUNNING STATISTICS FOR "$count_matrix""
- # mes_out
-  #bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetML.sh #this will 
-#else
-#  echo1="NOW RUNNING STATISTICS FOR "$count_matrix""
-#  mes_out
-#fi
-###############################################################################################################################################################
-# Option to split matrix to re-run AIDD with a subset                                                                                         *WORKING ON IT
-###############################################################################################################################################################
-if [ ! "$4" == "" ];
-then
-    bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetsplit.sh "$count_matrix" "$4" # this will split the matrices by a certain condition and create new pheno-data files and matrices by condition supplied by the user.
-fi
 ####################################################################################################################
 # CLEAN UP AND EXIT
 ####################################################################################################################
@@ -2128,3 +1858,6 @@ END_TIME_MIN=$(date +%M)
 END_TIME_SEC=$(date +%S)
 echo "EXTOOLSET STARTED "$DATE_WITH_TIME" AND ENDED "$END_DATE_WITH_TIME""
 smart_script
+
+
+
