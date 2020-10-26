@@ -57,7 +57,7 @@ then
   AIDD_tools="$home_dir"/AIDD/AIDDtoolscompressed
   cd "$AIDD_tools"
   cat "$AIDD_tools"/* > AIDDtools.tar.gz
-  tar -zxf AIDDtools.tar.gz
+  tar -zxvf AIDDtools.tar.gz
   rm AIDDtools.tar.gz*
   mv "$AIDD_tools"/AIDDtools/* "$tool_dir"
   rm -R "$AIDD_tools"
@@ -98,8 +98,20 @@ then
   mv "$home_dir"/AIDD/Desktop/* "$home_dir"/Desktop
   for perDesktop in AIDDParts Download_AIDDrefset ExToolset ExToolsetBaseCounts ExToolsetGuttmanMatrix Run_AIDD Run_AIDD_VC Setup_AIDD updateAIDDscripts ;
   do
-    chmod u+rwx "$home_dir"/Desktop/"$perDesktop".desktop
+    chmod u +x "$home_dir"/Desktop/"$perDesktop".desktop #makes icons executable
   done
+  sudo usermod -G vboxsf -a user
+  Rscript "$home_dir"/AIDD/Instancesetup/set_up.R
+  for perDesktop in AIDDParts AIDD AIDDpipeline AIDDpipelineVC updateAIDDscripts AIDDrefset ;
+  do
+    chmod u +x "$home_dir"/AIDD/AIDD/"$perDesktop".sh #makes AIDD scripts executable
+  done
+  for perDesktop in ExToolset ExToolsetall_globalEditing ExToolsetbasecountsfrombam ExToolsetgetreaddepth ExToolsetGuttman ExToolsetGuttmanMatrix ExToolsetguttmansplit ExToolsetrandomforest ;
+  do
+    chmod u +x "$home_dir"/AIDD/AIDD/ExToolset/"$perDesktop".sh #makes ExToolset scripts executable
+  done
+  sudo usermod -G vboxsf -a user
+  Rscript "$home_dir"/AIDD/Instancesetup/set_up.R
   sudo usermod -G vboxsf -a user
   Rscript "$home_dir"/AIDD/Instancesetup/set_up.R
 else
