@@ -507,11 +507,11 @@ do
     file_out="$wd"/"$file_name"filtered_indels.vcf
     run_tools
     tool=filter1G
-    file_in="$wd"/"$file_name"_dup.bam
+    file_in="$wd"/"$file_name"_dedup_reads.bam
     file_out="$wd"/"$file_name"recal_data.table
     run_tools
     tool=filter1H
-    file_in="$wd"/"$file_name"_dup.bam
+    file_in="$wd"/"$file_name"_dedup_reads.bam
     file_out="$wd"/"$file_name"post_recal_data.table
     run_tools
     tool=filter1I
