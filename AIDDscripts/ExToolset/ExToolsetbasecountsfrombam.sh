@@ -49,7 +49,7 @@ AIDDtool="$main_dir"/AIDD/AIDD_tools
 count_tool="$AIDDtool"/bam-readcount #define where bam-readcount folder is located 
 tool="$count_tool"/bin/bam-readcount
 download="$main_dir"/Downloads
-LOG_LOCATION="$dir_path"/quality_control/logs
+LOG_LOCATION="$out_dir"/quality_control/logs
 new_dir="$LOG_LOCATION"
 create_dir
 exec > >(tee -i $LOG_LOCATION/ExToolsetBaseCounts.log)
