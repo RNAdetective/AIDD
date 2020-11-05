@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Exec=bash /home/user/AIDD/AIDD/AIDDParts.sh /media/sf_AIDD/AIDD_data
+Name=AIDDParts
+GenericName=AIDDParts
+Comment=Run AIDDParts
+Icon=/home/user/AIDD/AIDD.gif
+Terminal=true
+Type=Application
+Name[en_US]=AIDDParts

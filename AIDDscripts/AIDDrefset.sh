@@ -50,6 +50,13 @@ home_dir="$1"
 dir_path="$2"
 new_dir="$dir_path"
 create_dir
+LOG_LOCATION="$dir_path"/quality_control/logs
+new_dir="$LOG_LOCATION"
+create_dir
+exec > >(tee -i $LOG_LOCATION/AIDDRefSet.log)
+exec 2>&1
+
+echo "Log Location will be: [ $LOG_LOCATION ]"
 ref_dir_path="$home_dir"/AIDD/references
 ref_dir_old="$dir_path"/oldreferences
 echo "Would you like to download references at this time? Please respond yes or no" # do you want to download references now

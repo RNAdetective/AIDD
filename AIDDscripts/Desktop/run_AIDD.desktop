@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Exec=bash /home/user/AIDD/AIDD/AIDD.sh /home/user /media/sf_AIDD/AIDD_data human
+Name=Run_AIDD
+GenericName=AIDD
+Comment=Run AIDD
+Icon=/home/user/AIDD/AIDD.gif
+Terminal=true
+Type=Application
