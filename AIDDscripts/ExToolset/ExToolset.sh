@@ -885,7 +885,7 @@ do
       rdvcf="$dir_path"/raw_data/vcf_files/raw
     fi
     file_vcf_finalAll="$rdvcf"/"$run""$name".vcf
-    if [ -s "$file_vcf_finallAll" ];
+    if [ ! -s "$file_vcf_finallAll" ];
     then
       echo "Running analysis for visualizing variant filtration for "$run" and variant filtering type "$name""
       ACcount=$(cat "$file_vcf_finalAll" | awk -F "\t" ' { if (($4 == "A") && ($5 == "C")) { print } }' | wc -l)
@@ -1843,6 +1843,7 @@ matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
   name=guttexpression
   resdir="$dirresgutt"
   makeDESeq2
+  bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetbasecountsfrombam.sh "$home_dir" "$dir_path"
 ####################################################################################################################
 # CLEAN UP AND EXIT
 ####################################################################################################################
