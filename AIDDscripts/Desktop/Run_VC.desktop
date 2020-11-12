@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Exec=bash /home/user/AIDD/AIDD/AIDDpipelineVC.sh /home/user /media/sf_AIDD/AIDD_data
+Name=Run_AIDD_VC
+GenericName=AIDD
+Comment=Run AIDD
+Icon=/home/user/AIDD/AIDD.gif
+Terminal=true
+Type=Application
+Name[en_US]=Run_VC
