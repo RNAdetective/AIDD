@@ -23,12 +23,12 @@ then
   echo "Would you like to save intermediate fastq files? Please choose from the following:"
   echo "yes or no" # save fastq files
   read savefastq
-  echo "Do you have bulk RNAseq data or single cell RNAseq data? Please choose from the following:"
-  echo "bulk single" # do you have bulk or single reads
-  read scRNA 
-  echo "Do you have standard mRNA library prep selecting for poly-A tails (mRNA) or microRNA library prep (miRNA)? Please choose one of the following:"
-  echo "mRNA or miRNA" # mRNA or miRNA data
-  read miRNA
+  #echo "Do you have bulk RNAseq data or single cell RNAseq data? Please choose from the following:"
+  #echo "bulk single" # do you have bulk or single reads
+  #read scRNA 
+  #echo "Do you have standard mRNA library prep selecting for poly-A tails (mRNA) or microRNA library prep (miRNA)? Please choose one of the following:"
+  #echo "mRNA or miRNA" # mRNA or miRNA data
+  #read miRNA
   if [ "$miRNA" == "miRNA" ];
   then
     echo "Would you like to align to whole genome, just hairpin miRNA or just the mature miRNA? Please choose one of the following:"
@@ -44,6 +44,8 @@ echo "HISAT2, STAR or BOWTIE2" # which alignment tool
   echo "Which assembler would you like to use? Please choose one of the following: (note that if you are using HISAT2 stringtie is suggested and with STAR and BOWTIE2 cufflinks is recommended)"
   echo "stringtie or cufflinks" # which assembly tool
   read assembler 
+  echo "Which organism are you using?"
+  read human
 else
   sra=$"yes";
   scRNA=$"bulk";
@@ -55,6 +57,7 @@ else
   savesra=$"no";
   savefastq=$"no";
   bamvcf=$"yes";
+  human=$"human";
 fi
 ####################################################################################################################
 #THIS DEFINES FUNCTIONS 
@@ -154,17 +157,17 @@ cp "$home_dir"/Desktop/"$j"/* "$dir_path"/indexes/"$i"_list/"$dp"/ # moves exper
 config_text() {
 echo "home_dir=$home_dir
 dir_path=$dir_path
-sra="yes"
-scRNA="bulk"
-miRNA="mRNA"
-miRNAtype="whole"
-library="paired"
-aligner="HISAT2"
-assembler="stringtie"
-savesra="no"
-savefastq="no"
-human="human"
-bamvcf="yes"
+sra="$sra"
+scRNA="$scRNA"
+miRNA="$mRNA"
+miRNAtype="$miRNAtype"
+library="$library"
+aligner="$aligner"
+assembler="$stringtie"
+savesra="$savesra"
+savefastq="$savefastq"
+human="$human"
+bamvcf="$bamvcf"
 DATE_WITH_TIME="$DATE_WITH_TIME"
 TIME_HOUR="$TIME_HOUR"
 TIME_MIN="$TIME_MIN"
