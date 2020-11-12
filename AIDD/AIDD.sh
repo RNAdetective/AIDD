@@ -54,6 +54,7 @@ else
   assembler=$"stringtie";
   savesra=$"no";
   savefastq=$"no";
+  bamvcf=$"yes";
 fi
 ####################################################################################################################
 #THIS DEFINES FUNCTIONS 
@@ -160,9 +161,10 @@ miRNAtype="whole"
 library="paired"
 aligner="HISAT2"
 assembler="stringtie"
-savesra="yes"
+savesra="no"
 savefastq="no"
 human="human"
+bamvcf="yes"
 DATE_WITH_TIME="$DATE_WITH_TIME"
 TIME_HOUR="$TIME_HOUR"
 TIME_MIN="$TIME_MIN"
@@ -180,7 +182,8 @@ aligner=Default Value;
 assembler=Default Value;
 savesra=Default Value;
 savefastq=Default Value;
-human=Default Value" >> "$dir_path"/AIDD/config.cfg.defaults
+human=Default Value;
+bamvcf=Default Value" >> "$dir_path"/AIDD/config.cfg.defaults
 } 
 downloaded_ref() {
 wget "$ftpsite" -O "$ref_name".gz

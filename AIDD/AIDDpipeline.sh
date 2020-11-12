@@ -18,15 +18,16 @@ rdsnp="$dir_path"/raw_data/snpEff #directory for snp files
 javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M ulimit -c unlimited -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
 fastq_dir_path="$(config_get fastq_dir_path)"; # directory for local fastq files
 sra="$(config_get dir_path)";
-scRNA="$(config_get dir_path)";
-miRNA="$(config_get dir_path)";
-miRNAtype="$(config_get dir_path)";
-library="$(config_get dir_path)";
-aligner="$(config_get dir_path)";
-assembler="$(config_get dir_path)";
-variant="$(config_get dir_path)";
-savesra="$(config_get dir_path)";
-savefastq="$(config_get dir_path)";
+scRNA="$(config_get scRNA)";
+miRNA="$(config_get miRNA)";
+miRNAtype="$(config_get miRNAtype)";
+library="$(config_get library)";
+aligner="$(config_get aligner)";
+assembler="$(config_get assembler)";
+variant="$(config_get variant)";
+savesra="$(config_get savesra)";
+savefastq="$(config_get savefastq)";
+bamvcf="$(config_get bamvcf)";
 start=12;
 end=400;
 ####################################################################################################################
@@ -461,21 +462,20 @@ done
 dir_count="$fastq_dir_path"
 for files in "$dir_count"/* ;
 do
-
-    if [[ "$sra" == "no" && "$library" == "paired" ]];
+  if [[ "$sra" == "no" && "$library" == "paired" ]];
+  then
+    if [ -d "$files" ];
     then
-      if [ -d "$files" ];
-      then
-        echo ""$files" is a directory"
-      else
-        tool=movefastqpaired
-        file_in=$fastq_dir_path/"$file_name"_1.fastq
-        file_in2=$fastq_dir_path/"$file_name"_2.fastq
-        file_out="$wd"/fastq/"$file_name"_1.fastq
-        file_out2="$wd"/fastq/"$file_name"_2.fastq
-        run_tools2i2o
-      fi
+      echo ""$files" is a directory"
+    else
+      tool=movefastqpaired
+      file_in=$fastq_dir_path/"$file_name"_1.fastq
+      file_in2=$fastq_dir_path/"$file_name"_2.fastq
+      file_out="$wd"/fastq/"$file_name"_1.fastq
+      file_out2="$wd"/fastq/"$file_name"_2.fastq
+      run_tools2i2o
     fi
+  fi
 ####################################################################################################################
 #  MOVEFASTQSINGLE
 ####################################################################################################################
@@ -539,9 +539,8 @@ do
       echo ""$files" is a directory" 
     else
       tool=fastqcsingle
-      file_in="$wd"/$file_fastq    
+      file_in="$wd"/"$file_name"    
       file_out=$dirqc/fastqc/"$file_name"_fastqc.html
-      rm -f "$wd"/"$file_sra"
       JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
       version=11
       setjavaversion
@@ -568,30 +567,30 @@ do
       #check=$(echo ">>Per base sequence content")
       #pass=$(cat "$dirqc"/fastqc/"$file_name"_1_fastqc/fastqc_data.txt '{if (/'$check'/) print NR}');
       #missing=$(grep -o 'pass' "$pass" | wc -l)
-        tool=trimpaired
-        file_in="$wd"/fastq/"$file_name"_1.fastq
-        file_in2="$wd"/fastq/"$file_name"_2.fastq
-        file_out="$wd"/trim/"$file_name"trim_1.fastq 
-        file_out2="$wd"/trim/"$file_name"trim_2.fastq
-        if [ ! -f "$file_out" ];
-        then
-          JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
-          version=11
-          setjavaversion 
-          setreadlength
-          echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND ENDING AT "$end"")
-          mes_out 
-          run_tools2i2o
-          JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/
-          version=8 
-         setjavaversion
-        else
-          echo "Already trimmed "$file_name""
-          rm -f "$file_in" 
-          rm -f "$file_in2"
-          mv "$file_out" "$file_in"
-          mv "$file_out2" "$file_in2"
-        fi
+      tool=trimpaired
+      file_in="$wd"/fastq/"$file_name"_1.fastq
+      file_in2="$wd"/fastq/"$file_name"_2.fastq
+      file_out="$wd"/trim/"$file_name"trim_1.fastq 
+      file_out2="$wd"/trim/"$file_name"trim_2.fastq
+      if [ ! -f "$file_out" ];
+      then
+        JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
+        version=11
+        setjavaversion 
+        setreadlength
+        echo1=$(echo "RUNNING TRIMMER CUTTING "$start" OFF THE BEGINNING AND ENDING AT "$end"")
+        mes_out 
+        run_tools2i2o
+        JDK8=/usr/lib/jvm/java-1.8.0_221/jdk1.8.0_221/
+        version=8 
+       setjavaversion
+      else
+        echo "Already trimmed "$file_name""
+        rm -f "$file_in" 
+        rm -f "$file_in2"
+        mv "$file_out" "$file_in"
+        mv "$file_out2" "$file_in2"
+      fi
     fi
   fi
 ####################################################################################################################
@@ -603,14 +602,14 @@ do
     then
       echo ""$files" is a directory"
     else
-      check=$(echo ">>Per base sequence content")
-      pass=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt '{if (/'$check'/) print NR}');
-      missing=$(grep -o 'pass' "$pass" | wc -l)
-      if [ "$missing" == "0" ];
+      #check=$(echo ">>Per base sequence content")
+      #pass=$(cat "$dirqc"/fastqc/"$file_name"_1_fastqc/fastqc_data.txt '{if (/'$check'/) print NR}');
+      #missing=$(grep -o 'pass' "$pass" | wc -l)
+      tool=trimsingle
+      file_in="$wd"/fastq/"$file_name".fastq    
+      file_out="$wd"/trim/"$file_name"trim.fastq
+      if [ ! -f "$file_out" ];
       then
-        tool=trimsingle
-        file_in="$wd"/fastq/"$file_name".fastq    
-        file_out="$wd"/trim/"$file_name"trim.fastq
         JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
         version=11
         setjavaversion
@@ -622,10 +621,10 @@ do
         version=8
         setjavaversion
       else
-         echo "Already trimmed "$file_name""
-         rm -f "$file_in"
-         mv "$file_out" "$file_in" 
-      mes_out
+        echo "Already trimmed "$file_name""
+        rm -f "$file_in"
+        mv "$file_out" "$file_in" 
+        mes_out
       fi
     fi
   fi
@@ -811,33 +810,3 @@ do
    fi
  fi
 done
-filecheckVC="$dirqc"/filecheck
-type1="$dir_path"/raw_data/ballgown/"$sample"/"$sample".gtf
-snptype=gtf
-temp_dir # delete temp directories if present
-create_filecheck
-echo1=$(echo "CREATING GTEX MATRIX")
-mes_out
-new_dir="$dir_path"/Results
-create_dir
-dirres="$dir_path"/Results
-matrix_file="$dirres"/gene_count_matrix.csv; 
-matrix_file2="$dirres"/transcript_count_matrix.csv;
-if [[ ! -s "$matrix_file" || ! -s "$matrix_file2" ]]; # can't find edited matrix
-then
-  filecheck="$dirqc"/filecheck
-  in_file="$filecheck"/filecheckgtf1.csv
-  missing=$(grep -o 'no' "$in_file" | wc -l)
-  if [ ! "$missing" == "0" ];
-  then
-    echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
-    mes_out
-  else
-    #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
-    #mes_out
-    creatematrix
-  fi
-else
-  echo1=$(echo "ALREADY FOUND "$matrix_file" AND "$matrix_file2"")
-  mes_out
-fi # THIS WILL CREATE GENE_COUNT_MATRIX AND TRANSCRIPT_COUNT_MATRIX

@@ -426,6 +426,14 @@ echo "Which step would you like to start with?
 Please choose one of the following:
 fastqdumpsingle, fastqdumppaired trimsingle, trimpaired, alignsingle, alignpaired, alignsingleSTAR, alignpairedSTAR, alignsingleBOWTIE2, alignpairedBOWTIE2, samtobam, assemble, prep_bam, haplotype1, haplotype2, excitomevcf, excitomesnpEff"
 read AIDDstep
+LOG_LOCATION="$dir_path"/quality_control/logs
+new_dir="$LOG_LOCATION"
+create_dir
+exec > >(tee -i $LOG_LOCATION/AIDDParts.log)
+exec 2>&1
+
+echo "Log Location will be: [ $LOG_LOCATION ]"
+  export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
 INPUT="$dir_path"/PHENO_DATA.csv
 OLDIFS=$IFS  
 {
@@ -478,14 +486,6 @@ do
   fastq_dir_path=/home/user; # directory for local fastq files
   file_tab="$run".tab;
   file_name_gtf="$sample".gtf;
-LOG_LOCATION="$dir_path"/quality_control/logs
-new_dir="$LOG_LOCATION"
-create_dir
-exec > >(tee -i $LOG_LOCATION/AIDDParts.log)
-exec 2>&1
-
-echo "Log Location will be: [ $LOG_LOCATION ]"
-  export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
   if [ "$AIDDstep" == "fastqdumpsingle" ];
   then
     fastqdumpsingle

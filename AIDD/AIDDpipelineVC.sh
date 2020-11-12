@@ -13,8 +13,8 @@ wd="$dir_path"/working_directory
 dirres="$dir_path"/Results; #
 dirraw="$dir_path"/raw_data;
 rdbam="$dirraw"/bam_files
-rdvcf="$dirraw"/final
-rdvcf_final="$dirraw"/vcf_files
+rdvcf="$dirraw"/vcf_files
+rdvcf_final="$dirraw"/vcf_files/final
 rdsnp="$dirraw"/snpEff
 source config.shlib; # load the config library functions
 export PATH=$PATH:"$home_dir"/AIDD/AIDD_tools/bin
@@ -296,7 +296,7 @@ filter1C() {
 java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$file_in" -selectType INDEL -o "$file_out" ##starting filtering steps
 }
 filter1D() {
-java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$file_in" --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$file_name" ##moves and converts vcf filtered snp file into table
+java -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantFiltration -R "$ref_dir_path"/ref2.fa -V "$file_in" --filterExpression 'QD < 2.0 || FS > 60.0 || MQ < 40.0 || SOR > 4.0' --filterName "basic_snp_filter" -o "$file_out" ##moves and converts vcf filtered snp file into table
 }
 filter1E() {
 java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$file_in" -F CHROM -F POS -F ID -F QUAL -F AC -o "$file_out" ##more filtering
@@ -323,7 +323,7 @@ setjavaversion
 java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$file_in" --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$file_out"
 }
 haplotype2B() {
-java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$file_in" -F CHROM -F POS -F ID -F QUAL -F AC -o "$file_iout"   
+java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$file_in" -F CHROM -F POS -F ID -F QUAL -F AC -o "$file_out"   
 }
 filter2() {
 java -jar $AIDDtool/GenomeAnalysisTK.jar -T SelectVariants -R "$ref_dir_path"/ref2.fa -V "$file_in" -selectType SNP -o "$file_out"
@@ -382,7 +382,7 @@ cat "$rdvcf_final"/"$file_name"filtered_snps_finalinfo.vcf "$rdvcf_final"/"$file
 }
 snpEff() {
 snpEff_out="$file_name"filtered_snps_finalAnn;
-java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf_final"/"$file_name"filtered_snps_final"$snptype".vcf -stats "$rdsnp"/"$file_name""$snptype" -csvStats "$rdsnp"/"$snp_csv""$snptype".csv > "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf     ##converts final annotationed vcf to table for easier processing
+java $javaset -jar $AIDDtool/snpEff.jar -v GRCh37.75 "$rdvcf_final"/"$file_name"filtered_snps_final"$snptype".vcf -stats "$rdsnp"/"$file_name""$snptype" -csvStats "$rdsnp"/snpEff"$file_name""$snptype".csv > "$dir_path"/raw_data/snpEff/"$snpEff_out""$snptype".vcf     ##converts final annotationed vcf to table for easier processing
 java "$javaset"  -jar "$AIDDtool"/GenomeAnalysisTK.jar -T VariantsToTable -R "$ref_dir_path"/ref2.fa -V "$rdsnp"/"$snpEff_out""$snptype".vcf -F CHROM -F POS -F ID -F REF -F ALT -F QUAL -F AC -F ANN -o "$rdsnp"/"$snpEff_out""$snptype".table
 }
 AllsnpEff() {
@@ -429,7 +429,7 @@ do
 ####################################################################################################################
     tool=prep_align_sum
     file_in="$wd"/"$file_name"_3.bam   
-    file_out="$file_name"_alignment_metrics.txt
+    file_out="$dirqc"/alignment_metrics/"$file_name"_alignment_metrics.txt
     run_tools
     tool=prep_align_sum2
     file_in="$wd"/"$file_name"_3.bam
@@ -489,7 +489,7 @@ do
     tool=filter1B
     file_in="$wd"/"$file_name"raw_snps.vcf    
     file_out="$rdvcf"/"$file_name"raw_snps.table
-    run_tools
+    #run_tools
     tool=filter1C
     file_in="$wd"/"$file_name"raw_variants.vcf 
     file_out="$wd"/"$file_name"raw_indels.vcf
@@ -501,17 +501,17 @@ do
     tool=filter1E
     file_in="$wd"/"$file_name"filtered_snps.vcf
     file_out="$rdvcf"/"$file_name"filtered_snps.table
-    run_tools
+    #run_tools
     tool=filter1F
     file_in="$wd"/"$file_name"raw_indels.vcf
     file_out="$wd"/"$file_name"filtered_indels.vcf
     run_tools
     tool=filter1G
-    file_in="$wd"/"$file_name"_dup.bam
+    file_in="$wd"/"$file_name"_dedup_reads.bam
     file_out="$wd"/"$file_name"recal_data.table
     run_tools
     tool=filter1H
-    file_in="$wd"/"$file_name"_dup.bam
+    file_in="$wd"/"$file_name"_dedup_reads.bam
     file_out="$wd"/"$file_name"post_recal_data.table
     run_tools
     tool=filter1I
@@ -520,7 +520,7 @@ do
     file_out="$wd"/"$file_name"recalibration_plots.pdf
     run_tools2i
     tool=filter1J
-    file_in="$file_name"_dedup_reads.bam
+    file_in="$wd"/"$file_name"_dedup_reads.bam
     file_out="$wd"/"$file_name"recal_reads.bam
     run_tools
     move_vcf
@@ -540,7 +540,7 @@ do
     tool=haplotype2
     file_in="$wd"/"$file_name"recal_reads.bam    
     file_out="$wd"/"$file_name"raw_variants_recal.vcf
-    rm -f "$wd"/"$file_name"_dedup_reads.bam
+   # rm -f "$wd"/"$file_name"_dedup_reads.bam
     run_tools
     tool=haplotype2B
     file_in="$wd"/"$file_name"raw_variants_recal.vcf
@@ -603,7 +603,7 @@ do
 #  EXCITOME FILTERING
 ####################################################################################################################
     tool=excitome_vcf
-    file_in="$rdvcf_final"/"$file_name"filtered_snps_finalAllNoSnpsediting.vcf
+    file_in="$rdvcf_final"/"$file_name"filtered_snps_finalAll.vcf
     file_out="$rdvcf_final"/*ADARediting.vcf
     run_tools
 ####################################################################################################################
@@ -620,7 +620,7 @@ do
   fi
 done
 step1=$(echo "VARIANT_CALLING_4_IMPACT_PREDICTION")
-step2=$(echo "RUNNING_EXTOOLSET")
+step2=$(echo "RUNNING_BASECOUNTS_EDITING_SITES")
 steps
 ####################################################################################################################
 # RUN EXTOOLSET
@@ -636,26 +636,4 @@ compress_AIDD
 step1=$(echo "CLEANING_UP_FILES")
 step2=$(echo "NOW_DONE_WITH_AIDD_PLEASE_CHECK_AND_CLEAN_OUT_sf_media_BEFORE_YOU_CAN_RUN_AIDD_AGAIN")
 steps
-####################################################################################################################
-####################################################################################################################
-####################################################################################################################
-# EDITING FREQUENCY IMPACT PREDICTION
-####################################################################################################################
-####################################################################################################################
-####################################################################################################################
-new_dir=$dir_path
-create_dir
-dir_count="$rdbam"
-for files in "$dir_count"/* ;
-do
-  if [ -d "$files" ];
-  then
-    echo ""$files" is a directory"
-  else
-    name_files
-    file_in="$rdbam"/"$file_name".bam
-    file_out="$dir_path"/frequency_counts/"$file_name".csv
-    tool=basecounts
-    run_tools
-  fi
-done
+
