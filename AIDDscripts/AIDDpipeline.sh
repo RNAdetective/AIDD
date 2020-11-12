@@ -541,7 +541,6 @@ do
       tool=fastqcsingle
       file_in="$wd"/"$file_name"    
       file_out=$dirqc/fastqc/"$file_name"_fastqc.html
-      rm -f "$wd"/"$file_sra"
       JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
       version=11
       setjavaversion
@@ -811,33 +810,3 @@ do
    fi
  fi
 done
-filecheckVC="$dirqc"/filecheck
-type1="$dir_path"/raw_data/ballgown/"$sample"/"$sample".gtf
-snptype=gtf
-temp_dir # delete temp directories if present
-create_filecheck
-echo1=$(echo "CREATING GTEX MATRIX")
-mes_out
-new_dir="$dir_path"/Results
-create_dir
-dirres="$dir_path"/Results
-matrix_file="$dirres"/gene_count_matrix.csv; 
-matrix_file2="$dirres"/transcript_count_matrix.csv;
-if [[ ! -s "$matrix_file" || ! -s "$matrix_file2" ]]; # can't find edited matrix
-then
-  filecheck="$dirqc"/filecheck
-  in_file="$filecheck"/filecheckgtf1.csv
-  missing=$(grep -o 'no' "$in_file" | wc -l)
-  if [ ! "$missing" == "0" ];
-  then
-    echo1=$(echo "MISSING RAW DATA FILES PLEASE CHECK "$in_file" FOR MORE DETAILS")
-    mes_out
-  else
-    #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
-    #mes_out
-    creatematrix
-  fi
-else
-  echo1=$(echo "ALREADY FOUND "$matrix_file" AND "$matrix_file2"")
-  mes_out
-fi # THIS WILL CREATE GENE_COUNT_MATRIX AND TRANSCRIPT_COUNT_MATRIX

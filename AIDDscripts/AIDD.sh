@@ -44,8 +44,6 @@ echo "HISAT2, STAR or BOWTIE2" # which alignment tool
   echo "Which assembler would you like to use? Please choose one of the following: (note that if you are using HISAT2 stringtie is suggested and with STAR and BOWTIE2 cufflinks is recommended)"
   echo "stringtie or cufflinks" # which assembly tool
   read assembler 
-  echo "Would you like to do variant calling at this time?"
-  read bamvcf
 else
   sra=$"yes";
   scRNA=$"bulk";
@@ -163,7 +161,7 @@ miRNAtype="whole"
 library="paired"
 aligner="HISAT2"
 assembler="stringtie"
-savesra="yes"
+savesra="no"
 savefastq="no"
 human="human"
 bamvcf="yes"

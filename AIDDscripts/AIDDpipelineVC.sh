@@ -429,7 +429,7 @@ do
 ####################################################################################################################
     tool=prep_align_sum
     file_in="$wd"/"$file_name"_3.bam   
-    file_out="$file_name"_alignment_metrics.txt
+    file_out="$dirqc"/alignment_metrics/"$file_name"_alignment_metrics.txt
     run_tools
     tool=prep_align_sum2
     file_in="$wd"/"$file_name"_3.bam
@@ -603,7 +603,7 @@ do
 #  EXCITOME FILTERING
 ####################################################################################################################
     tool=excitome_vcf
-    file_in="$rdvcf_final"/"$file_name"filtered_snps_finalAllNoSnpsediting.vcf
+    file_in="$rdvcf_final"/"$file_name"filtered_snps_finalAll.vcf
     file_out="$rdvcf_final"/*ADARediting.vcf
     run_tools
 ####################################################################################################################
@@ -620,7 +620,7 @@ do
   fi
 done
 step1=$(echo "VARIANT_CALLING_4_IMPACT_PREDICTION")
-step2=$(echo "RUNNING_EXTOOLSET")
+step2=$(echo "RUNNING_BASECOUNTS_EDITING_SITES")
 steps
 ####################################################################################################################
 # RUN EXTOOLSET
@@ -636,26 +636,4 @@ compress_AIDD
 step1=$(echo "CLEANING_UP_FILES")
 step2=$(echo "NOW_DONE_WITH_AIDD_PLEASE_CHECK_AND_CLEAN_OUT_sf_media_BEFORE_YOU_CAN_RUN_AIDD_AGAIN")
 steps
-####################################################################################################################
-####################################################################################################################
-####################################################################################################################
-# EDITING FREQUENCY IMPACT PREDICTION
-####################################################################################################################
-####################################################################################################################
-####################################################################################################################
-new_dir=$dir_path
-create_dir
-dir_count="$rdbam"
-for files in "$dir_count"/* ;
-do
-  if [ -d "$files" ];
-  then
-    echo ""$files" is a directory"
-  else
-    name_files
-    file_in="$rdbam"/"$file_name".bam
-    file_out="$dir_path"/frequency_counts/"$file_name".csv
-    tool=basecounts
-    run_tools
-  fi
-done
+
