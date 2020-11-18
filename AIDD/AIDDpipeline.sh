@@ -265,7 +265,7 @@ cd "$dir_path"/AIDD
 }
 fastqcsingle() { 
 cd "$dir_path"/AIDD
-fastqc "$file_in" --outdir=$dirqc/fastqc
+fastqc "$wd"/fastq/"$file_name".fastq --outdir=$dirqc/fastqc
 cd "$dir_path"/AIDD
 }
 setreadlength() {
@@ -529,9 +529,14 @@ do
       setjavaversion
     fi
   fi
+done
 ####################################################################################################################
 #  SINGLE QUALITY CONTROL
 ####################################################################################################################
+dir_count="$wd"/fastq
+for files in "$dir_count"/* ;
+do
+  name_files 
   if [ "$library" == "single" ];
   then
     if [ -d "$files" ];
@@ -539,7 +544,7 @@ do
       echo ""$files" is a directory" 
     else
       tool=fastqcsingle
-      file_in="$wd"/"$file_name"    
+      file_in="$wd"/fastq/"$file_name".fastq    
       file_out=$dirqc/fastqc/"$file_name"_fastqc.html
       JDK11=/usr/lib/jvm/java-11-openjdk-amd64/
       version=11
@@ -593,18 +598,20 @@ do
       fi
     fi
   fi
+done
 ####################################################################################################################
 # TRIMMING SINGLE
-####################################################################################################################
+#################################################################################################################### 
+dir_count="$wd"/fastq
+for files in "$dir_count"/* ;
+do
+  name_files 
   if [ "$library" == "single" ];
   then
     if [ -d "$files" ];
     then
-      echo ""$files" is a directory"
+      echo ""$files" is a directory" 
     else
-      #check=$(echo ">>Per base sequence content")
-      #pass=$(cat "$dirqc"/fastqc/"$file_name"_1_fastqc/fastqc_data.txt '{if (/'$check'/) print NR}');
-      #missing=$(grep -o 'pass' "$pass" | wc -l)
       tool=trimsingle
       file_in="$wd"/fastq/"$file_name".fastq    
       file_out="$wd"/trim/"$file_name"trim.fastq
@@ -657,9 +664,20 @@ do
       run_tools2i
     fi
   fi
+done
 ####################################################################################################################
 # ALIGNMENT HISAT2 SINGLE
 ####################################################################################################################
+dir_count="$wd"/fastq
+for files in "$dir_count"/* ;
+do
+  name_files 
+  if [ "$library" == "single" ];
+  then
+    if [ -d "$files" ];
+    then 
+      echo ""$files" is a directory"
+    else
   if [[ "$library" == "single" && "$aligner" == "HISAT2" ]];
   then
     if [ -d "$files" ];
@@ -673,6 +691,7 @@ do
       run_tools
     fi
   fi
+done
 ####################################################################################################################
 # ALIGNMENT STAR PAIRED
 ####################################################################################################################
