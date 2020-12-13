@@ -42,21 +42,16 @@ These are the directions to download the premade AIDD virtualbox or to create a 
 
 1. Download and set up oracle virtual box machine 
 ```
-https://www.virtualbox.org/wiki/Downloads 
+https://www.virtualbox.org 
 ```
 2. Download and install the extension pack as well.
-
-```
-https://download.virtualbox.org/virtualbox/5.2.6/Oracle_VM_VirtualBox_Extension_Pack-5.2.6-120293.vbox-extpack
-
-```
 
 ### Installing
 
 3. Download our ready to go AIDD virtualbox from the following link.
 
 ```
-https://drive.google.com/open?id=1bhSZdNznZtQcx8VNlaiysnIoLhVGtfJA
+https://drive.google.com/file/d/1rsM44ZVKyj-RDUiX-am4eFRd_KF7PqiP/view?usp=sharing
 
 ```
 
