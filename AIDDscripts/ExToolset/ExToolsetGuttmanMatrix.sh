@@ -5,14 +5,97 @@ then
   mkdir "$new_dir"
 fi
 } # this creates directories $new_dir
+name_files() {
+  temp=$(echo "$dir_count" | sed 's/\//,/g')
+  dirnum=$(echo "$temp" | grep -o "," | wc -l)
+  filenum=$(expr "$dirnum" + 2)
+  extnum=$(expr "$dirnum" + 3) 
+  dir_name=$(echo "$files" | sed 's/\//./g' | cut -f "$filenum" -d '.')
+  res="${dir_name//[^_]}"
+  if [ "$res" == "" ];
+  then
+    file_name=$(echo "$dir_name" | cut -f 1 -d '.') 
+    #sample=$(echo "$file_name" | cut -f 1 -d ':')
+  else
+    file_name=$(echo "$dir_name" | cut -f 1 -d '.' | cut -f 1-"${#res}" -d '_' )
+    #sample=$(echo "$file_name" | cut -f 1 -d ':')
+  fi
+  file_ext=$(echo "$files" | sed 's/\//./g' | cut -f "$extnum" -d '.') 
+}
+temp_file() {
+if [ -s "$dir_path"/temp.csv ];
+then
+  rm "$file_in"
+  mv "$dir_path"/temp.csv "$file_in"
+fi
+}
+mes_out() {
+dirqc="$dir_path"/quality_control
+DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
+echo "'$DATE_WITH_TIME' $echo1
+___________________________________________________________________________"
+new_dir="$dirqc"/time_check
+create_dir
+echo "'$DATE_WITH_TIME',"$file_name","$file_in","$tool"" >> "$dirqc"/time_check/"$file_name"time_check.csv
+}
+matrixeditor() {
+Rscript "$ExToolset"/matrixedit.R "$file_out" "$file_in" "$index_file" "$pheno_file" "$Rtool" "$level_id" "$level_name" "$filter_type" "$level" "$tempf1" "$tempf2" "$tempf3"
+} # creates matrix counts with names instead of ids and checks to make sure they are there
+mergeR() {
+Rscript "$ExToolset"/multimerge.R "$cur_wkd" "$names" "$file_out" "$Rtool" "$Rtype" "$summaryfile" "$mergefile" "$phenofile" "$level_name" "$GOI_file" "$temp_file1" "$temp_file2" "$temp_file3" "$rename" #creates level of interest files
+} # Runs multimerge R
+run_tools() {
+if [ ! -f "$file_out" ]; # IF OUTPUT FILE IS NOT THERE
+then
+  if [ -f "$file_in" ]; # IF INPUT THERE
+  then
+    echo1=$(echo "FOUND $file_in STARTING $tool");
+    mes_out
+    $tool # TOOL
+  else
+    echo1=$(echo "CANNOT FIND "$file_in" FOR "$sample"");
+  fi
+  if [[ -f "$file_out" ]]; # IF OUTPUT IS THERE
+  then
+    echo1=$(echo "FOUND $file_out FINISHED $tool");
+    mes_out # ERROR OUTPUT IS THERE
+  else 
+    echo1=$(echo "CANNOT FIND $file_out FOR THIS "$sample"");
+    mes_out # ERROR INPUT NOT THERE
+  fi
+else
+  echo1=$(echo "FOUND $file_out FINISHED $tool")
+  mes_out # ERROR OUTPUT IS THERE
+fi
+}
+add_conditions() {
+ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
+count_matrix="$dirres"/"$name"_count_matrix.csv
+Rtool=finalmerge
+Rtype=single2f
+GOI_file="$dirres"/"$name"_count_matrixANOVA.csv
+file_out="$dirres"/"$name"_count_matrixANOVA.csv
+mergefile="$dirres"/"$name"_count_matrix.csv
+phenofile="$dir_path"/PHENO_DATA.csv
+level_name=$(echo "samp_name")
+echo1=$(echo "CREATING "$file_out"")
+mes_out
+mergeR
+}
+basecount() {
+Rscript "$dir_path"/tempbasecount.R "$file_in" "$temp_file"
+rm "$dir_path"/tempbasecount.R
+}
 ##############################################################################################################################################################
 # CREATE FREQUENCY MATRIX FROM BAM FILES FOR EXCTIOME EDITING SITES                                                                      *Working
 ###############################################################################################################################################################
-cd "$dir_path"/AIDD
-source config.shlib;
-home_dir=$(config_get home_dir);
-dir_path=$(config_get dir_path);
-dirres=$(config_get dirres);
+home_dir=$1;
+dir_path=$2;
+human="$3";
+dirres="$dir_path"/Results;
+new_dir="$dirres"
+create_dir
+ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
 matrix_file_out="$dirres"/excitomefreq_count_matrix.csv
 LOG_LOCATION="$dir_path"/quality_control/logs
@@ -22,17 +105,90 @@ exec > >(tee -i $LOG_LOCATION/ExToolsetGuttmanMatrix.log)
 exec 2>&1
 
 echo "Log Location will be: [ $LOG_LOCATION ]"
+matrix_file="$dirres"/gene_count_matrix.csv
+matrix_file2="$dirres"/transcript_count_matrix.csv
+matrix_fileedit="$dirres"/gene__count_matrixeditedDESeq2.csv
+matrix_fileedit2="$dirres"/transcript_count_matrixeditedDESeq2.csv
+level=$(echo "gene")
+if [ -s "$matrix_file" ];
+then
+  if [ ! -s "$matrix_fileedit" ];
+  then
+    #echo1=$(echo "RAW DATA FILES FOR "$in_file" FOUND")
+    #mes_out
+    file_out="$dirres"/"$level"_count_matrixeditedDESeq2.csv
+    file_in="$dirres"/"$level"_count_matrix.csv
+    ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
+    index_file="$ExToolsetix"/"$human"/"$level"_names.csv
+    pheno_file="$dir_path"/PHENO_DATA.csv
+    Rtool=GTEX
+    level_id=$(echo ""$level"_id");
+    level_name=$(echo ""$level"_id");
+    filter_type=$(echo "protein_coding");
+    level="$level"
+    tempf1="$dir_path"/tempR1.csv
+    tempf2="$dir_path"/tempR2.csv
+    tempf3="$dir_path"/tempR3.csv
+    file_in="$index_file"
+    cat "$index_file" | sed 's/-/_/g' >> "$dir_path"/temp.csv
+    temp_file
+    file_in="$dirres"/"$level"_count_matrix.csv
+    file_out="$dirres"/"$level"_count_matrixeditedDESeq2.csv
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    matrixeditor
+    header=$(cat "$file_out" | head -n 1 | cut -d"," -f1 --complement)
+    cat "$file_out" | awk -F',' 'NR > 1{s=0; for (i=3;i<=NF;i++) s+=$i; if (s!=0)print}' | sort -u -k1 | sed '1d' | sed '1i '$level'_name',$header'' | awk -F',' '!a[$1]++' >> "$dir_path"/temp.csv
+    file_in="$dirres"/"$level"_count_matrixeditedDESeq2.csv
+    temp_file
+  else
+    echo1=$(echo "ALREADY FOUND "$matrix_fileedit" OR "$matrix_fileedit2"")
+    mes_out
+  fi
+else
+  echo1=$(echo "CANT FIND "$matrix_file" OR "$matrix_file2"")
+  mes_out
+fi
+matrix_file="$dirres"/gene_count_matrixeditedDESeq2.csv
+matrix_file4="$dirres"/excitome_count_matrix.csv
+if [ -s "$matrix_file" ];
+then
+  if [ ! -s "$matrix_file4" ];
+  then
+    cur_wkd="$dirres"
+    summaryfile=none
+    Rtool=transpose
+    Rtype=single2f
+    GOI_file="$dirres"/excitome_count_matrixDESeq2.csv
+    file_out="$dirres"/excitome_count_matrix.csv
+    mergefile="$ExToolsetix"/"$human"/excitome.csv
+    phenofile="$dirres"/gene_count_matrixeditedDESeq2.csv
+    level_name=$(echo "gene_name")
+    echo1=$(echo "CREATING "$file_out"")
+    mes_out
+    mergeR
+    name=excitome
+    add_conditions
+  else
+    echo1=$(echo "ALREADY FOUND "$matrix_file4"")
+    mes_out
+  fi
+else
+  echo1=$(echo "ALREADY FOUND "$matrix_file"")
+  mes_out
+fi
   INPUT="$ExToolsetix"/"$human"/excitome_loc.csv
   {
   [ ! -f $INPUT ] && { echo "$INPUT file not found #16"; exit 99; }
   read
   while IFS=, read -r excitome_gene gene_id snp_database chrome coord strand annotation AAsubstitution AAposition exon codon_position express_value edit_value
   do
-    source config.shlib;
-    home_dir=$(config_get home_dir);
-    dir_path=$(config_get dir_path);
-    dirres=$(config_get dirres);
-    human=$(config_get human);
+    home_dir=$1;
+    dir_path=$2;
+    dirres="$dir_path"/Results;
+    new_dir="$dirres"
+    create_dir
+    human=$3;
     ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
     ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
     express_value=$(echo "$express_value")
@@ -273,6 +429,19 @@ echo "Log Location will be: [ $LOG_LOCATION ]"
   tempfile3=transpose
   names=$(echo "excitome_site")
   file_out="$dirresgutt"/guttediting_count_matrixDESeq2.csv
+  echo1=$(echo "CREATING "$file_out"")
+  mes_out
+  mergeR
+  cat "$file_out" | sed 's/edited//g' >> "$dir_path"/temp.csv
+  temp_file
+  Rtool=G_VEX
+  Rtype=multi
+  GOI_file="$file_out"
+  names=$(echo "sample")
+  mergefile=none
+  phenofile=none
+  summaryfile="$dir_path"/PHENO_DATA.csv
+  temp_file1="$dirres"/temp2.csv
   echo1=$(echo "CREATING "$file_out"")
   mes_out
   mergeR
