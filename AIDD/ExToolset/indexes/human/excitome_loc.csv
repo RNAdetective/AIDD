@@ -1,4 +1,4 @@
-﻿gene,gene_id,snp database,chrome,coord,strand,annotation,Aasubstitution,Aaposition,exon,codon position,express_value,edit_value,
+﻿gene_name,gene_id,snp database,chrome,coord,strand,annotation,Aasubstitution,Aaposition,exon,codon position,express_value,edit_value,
 ACACB_1299,ENSG00000076555,?,12,109665188,+,Nonsyn,R/G,1299,27,1,10,10,
 ACP1_106,ENSG00000143727 ,rs79716074,2,277003,+,Nonsyn,Q/R,106,6,2,10,10,
 ADAR1_427,ENSG00000160710,rs2229857,1,154573967,-,Nonsyn,L/R,427,2,2,10,10,
