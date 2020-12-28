@@ -34,16 +34,16 @@ wget -q --tries=5 ftp://ftp.sra.ebi.ac.uk/vol1/"$runfoldername"/"$runfolder"/0"$
 cd "$dir_path"/AIDD
 }
 fastqdumppaired() { 
-fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/
-mv "$wd"/$file_fastqpaired1pass "$wd"/$file_fastqpaired1 
-mv "$wd"/$file_fastqpaired2pass "$wd"/$file_fastqpaired2
+fastq-dump "$wd"/$file_sra -I --split-files --read-filter pass -O "$wd"/fastq
+mv "$wd"/fastq/$file_fastqpaired1pass "$wd"/fastq/$file_fastqpaired1 
+mv "$wd"/fastq/$file_fastqpaired2pass "$wd"/fastq/$file_fastqpaired2
  }
-fastqdumpsingle() { fastq-dump "$wd"/$file_sra --read-filter pass -O "$wd"/
-mv "$wd"/$file_fastqpass "$wd"/$file_fastq
+fastqdumpsingle() { fastq-dump "$wd"/$file_sra --read-filter pass -O "$wd"/fastq
+mv "$wd"/fastq/$file_fastqpass "$wd"/fastq/$file_fastq
  }
-movefastq() { mv $fastq_dir_path/$file_fastq "$wd"/ ; }
-fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastqpaired1 "$wd"/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
-fastqcsingle() { cd "$dir_path"/AIDD ; fastqc "$wd"/$file_fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
+movefastq() { mv $fastq_dir_path/fastq/$file_fastq "$wd"/fastq ; }
+fastqcpaired() { cd "$dir_path"/AIDD ; fastqc "$wd"/fastq/$file_fastqpaired1 "$wd"/fastq/$file_fastqpaired2 --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
+fastqcsingle() { cd "$dir_path"/AIDD ; fastqc "$wd"/fastq/$file_fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD ; }
 setreadlength() {
 #length=$(echo "Sequence length");
 #seq_length=$(cat "$dirqc"/fastqc/"$run"_1_fastqc/fastqc_data.txt | awk -v search="sequence length" '$0~search{print $0; exit}');
@@ -52,17 +52,16 @@ setreadlength() {
 start=12
 end=400
 }
-trimpaired() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired1 -o "$wd"/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastqpaired2 -o "$wd"/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/$file_fastqpaired1 ; rm -f "$wd"/$file_fastqpaired2 ; mv "$wd"/$file_fastqpaired1trim "$wd"/$file_fastqpaired1 ; mv "$wd"/$file_fastqpaired2trim "$wd"/$file_fastqpaired2 ; }
-trimsingle() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/$file_fastq -o "$wd"/"$run"_trim.fastq ; cd $dirqc/fastqc ; fastqc "$run"_trim.fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f "$wd"/$file_fastq ; mv "$wd"/"$run"_trim.fastq "$wd"/$file_fastq ; }
-HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/"$file_fastqpaired1" -2 "$wd"/"$file_fastqpaired2" -t --summary-file $dirqc/alignment_metrics/"$run".txt -S "$wd"/"$file_sam" ; }
-HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/"$file_fastqpaired1" -2 "$wd"/"$file_fastqpaired2" -t --summary-file $dirqc/alignment_metrics/"$run".txt -S "$wd"/"$file_sam" ; }
+trimpaired() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/fastq/$file_fastqpaired1 -o "$wd"/trim/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/fastq/$file_fastqpaired2 -o "$wd"/trim/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/fastq/$file_fastqpaired1trim "$wd"/fastq/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/fastq/$file_fastqpaired1 ; rm -f "$wd"/fastq/$file_fastqpaired2 ; mv "$wd"/trim/$file_fastqpaired1trim "$wd"/fastq/$file_fastqpaired1 ; mv "$wd"/trim/$file_fastqpaired2trim "$wd"/fastq/$file_fastqpaired2 ; }
+trimsingle() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/fastq/$file_fastq -o "$wd"/trim/"$run"_trim.fastq ; cd $dirqc/fastqc ; fastqc "$run"_trim.fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f "$wd"/fastq/$file_fastq ; mv "$wd"/trim/"$run"_trim.fastq "$wd"/fastq/$file_fastq ; }
+HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/fastq/"$file_fastqpaired1" -2 "$wd"/fastq/"$file_fastqpaired2" -t --summary-file $dirqc/alignment_metrics/"$run".txt -S "$wd"/sam/"$file_sam" ; }
 HISAT2_single() { hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$wd"/"$file_fastq" -t --summary-file "$dir_path"/raw_data/counts/"$run".txt -S "$wd"/"$file_sam" ; }
 STAR_paired() { echo "STAR some text line on how to run" ; } #STAR --genomeDir /n/groups/hbctraining/intro_rnaseq_hpc/reference_data_ensembl38/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn Mov10_oe_1.subset.fq --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard 
  
 STAR_single() { echo "STAR some text line on how to run" ; } #STAR --genomeDir /n/groups/hbctraining/intro_rnaseq_hpc/reference_data_ensembl38/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn Mov10_oe_1.subset.fq --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard
 BOWTIE2_paired() { echo "BOWTIE2 some text line on how to run" ; }
 BOWTIE2_single() { echo "BOWTIE2 some text line on how to run" ; }
-samtobam() { java -Djava.io.tmpdir="$dir_path"/tmp -jar "$AIDDtool"/picard.jar SortSam INPUT="$wd"/"$file_sam" OUTPUT="$rdbam"/$file_bam SORT_ORDER=coordinate ; }
+samtobam() { java -Djava.io.tmpdir="$dir_path"/tmp -jar "$AIDDtool"/picard.jar SortSam INPUT="$wd"/sam/"$file_sam" OUTPUT="$rdbam"/$file_bam SORT_ORDER=coordinate ; }
 assem_string() { stringtie "$rdbam"/"$file_bam" -p3 -G "$ref_dir_path"/ref.gtf -A "$dir_path"/raw_data/counts/"$file_tab" -l -B -b "$dir_path"/raw_data/ballgown_in/"$sample"/"$run" -e -o "$dir_path"/raw_data/ballgown/"$sample"/"$file_name_gtf" ; }
 temp_dir() {
 if [ -d "$dir_path"/raw_data/ballgown/$sample/tmp.XX*/ ]; # IF TEMP_DIR IN SAMPLE FOLDER

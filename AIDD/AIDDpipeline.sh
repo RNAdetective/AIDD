@@ -678,20 +678,21 @@ do
     then 
       echo ""$files" is a directory"
     else
-  if [[ "$library" == "single" && "$aligner" == "HISAT2" ]];
-  then
-    if [ -d "$files" ];
-    then
-      echo ""$files" is a directory"
-    else
-      tool=HISAT2_single
-      file_in="$wd"/fastq/"$file_name".fastq    
-      file_out="$wd"/sam/"$file_name".sam
-      file_out2=$dirqc/alignment_metrics/"$file_name".txt
-      run_tools
+      if [[ "$library" == "single" && "$aligner" == "HISAT2" ]];
+      then
+        if [ -d "$files" ];
+        then
+          echo ""$files" is a directory"
+        else
+          tool=HISAT2_single
+          file_in="$wd"/fastq/"$file_name".fastq    
+          file_out="$wd"/sam/"$file_name".sam
+          file_out2=$dirqc/alignment_metrics/"$file_name".txt
+          run_tools
+        fi
+      fi
     fi
   fi
-done
 ####################################################################################################################
 # ALIGNMENT STAR PAIRED
 ####################################################################################################################
@@ -795,8 +796,8 @@ do
       echo ""$files" is a directory"
     else
       name_files
-      sample="sample${count}"
       count=`expr $count + 1`
+      sample="sample${count}"
       echo1=$(echo "FOUND "$file_name" NOW STARTING "$sample"");
       mes_out
       tool=assem_string
