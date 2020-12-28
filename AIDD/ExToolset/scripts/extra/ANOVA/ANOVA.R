@@ -1,0 +1,47 @@
+##study_number = what the name of the count matrix 
+##define cond_1 cond_2 cond_3
+##define labels for levels in those conditions cond_1.1 cond_1.2 cond_2.1 ...
+##define count_of_interest
+## can do 2-3 conditions two way ANOVA
+library(ggpubr)
+library(dplyr)
+zikv <- read.csv("/media/sf_AIDD/Results/ANOVA/study_number.csv")
+zikv$cond_1 <- factor(zikv$cond_1, levels = c(1,2), labels = c("cond_1.1", "cond_1.2"))
+zikv$cond_2 <- factor(zikv$cond_2, levels = c(1,2), labels = c("cond_2.1","cond_2.2"))
+zikv$cond_3 <- factor(zikv$cond_3, levels = c(1,2,3), labels = c("cond_3.1", "cond_3.2", "cond_3.3"))
+jpeg("/media/sf_AIDD/Results/ANOVA/study_numbercount_of_interest.jpeg")
+ggboxplot(zikv, x= "cond_3", y = "count_of_interest", color = "cond_1")
+dev.off()
+res.aov <- aov(count_of_interest~cond_1*cond_2*cond_3, data=zikv)
+out <- capture.output(summary(res.aov))
+cat("ANOVAstudy_numbercount_of_interest", out, file="summaryANOVAstudy_numbercount_of_interest.txt", sep="n", append=TRUE)
+sumstats <- group_by(zikv, cond_3, cond_1) %>% summarize( count = n(), mean = mean(count_of_interest), sd = sd(count_of_interest))
+out <- capture.output(summary(sumstats))
+cat("summarystatsstudy_numbercount_of_interest", out, file="summarystatsstudy_numbercount_of_interest.txt", sep="n", append=TRUE)
+posthoc <- TukeyHSD(res.aov, which = "cell")
+out <- capture.output(summary(posthoc))
+cat("TukeyHSDstudy_numbercount_of_interest", out, file="TukeyHSDstudy_numbercount_of_interest.txt", sep="n", append=TRUE)
+##oneway ANOVA
+library(ggpubr)
+library(dplyr)
+germ <- read.csv("/media/sf_AIDD/germlayer.csv")
+germ$cond_1 <- factor(germ$cond_1, levels = c(1,2,3,4,5), labels = c("cond_1.1", "cond_1.2", "cond_1.3", "cond_1.4", "cond_1.5"))
+sumstats <- group_by(germ, cell) %>% summarize( count = n(), mean = mean(count_of_interest), sd = sd(count_of_interest))
+out <- capture.output(summary(sumstats))
+cat("summarystatsstudy_numbercount_of_interest", out, file="summarystatsstudy_numbercount_of_interest.txt", sep="n", append=TRUE)
+jpeg("/media/sf_AIDD/study_numbercount_of_interest.jpeg")
+ggboxplot(zikv, x= "cond_1", y = "count_of_interest", color = "cond_1")
+dev.off()
+res.aov <- aov(count_of_interest ~ cond_1, data = germ)
+out <- capture.output(summary(res.aov))
+cat("ANOVAstudy_numbercount_of_interest", out, file="ANOVAstudy_numbercount_of_interest.txt", sep="n", append=TRUE)
+posthoc <- TukeyHSD(res.aov, which = "cell")
+out <- capture.output(summary(posthoc))
+cat("TukeyHSDstudy_numbercount_of_interest", out, file="TukeyHSDstudy_numbercount_of_interest.txt", sep="n", append=TRUE)
+##this will make line graphes and PCA analysis for each 
+##scatterplot
+jpeg("/media/sf_AIDD/Results/ANOVA/study_numbercount_of_interest.jpeg")
+ggplot(table3, aes(x=scatter_x, y=scatter_y)) + geom_point() + geom_smooth(method=lm) + labs(title="study_numbercount_of_interest", x="scatter_x", y = "scatter_y") + theme_classic()
+dev.off()
+out <- capture.output(cor.test( ~ scatter_x + scatter_y, data=germ, method = "pearson", continuity = FALSE, conf.level = 0.95))
+cat("scatterplotstudy_numbercount_of_interest", out, file="scatterplotsstudy_numbercount_of_interest.txt", sep="n", append=TRUE)
