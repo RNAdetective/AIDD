@@ -1,7 +1,0 @@
-file_out <- "/media/sf_AIDD/MDDGuttmanRankGraphMDD.tiff"
-tiff(file_out, units="in", width=15, height=6, res=300)
-my_plot <- ggplot(data, aes(x=Category, y=Change, fill=Category)) + geom_bar(colour="black", stat="identity", position=position_dodge()) + scale_fill_grey(start = 0, end = .9) + facet_wrap(~Direction) + ylab("Change in Rank")
-my_plot2 <- my_plot + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) + theme(legend.position="bottom") + theme(text = element_text(size=14)) + theme(axis.title.x=element_blank(), axis.text.x = element_blank(), axis.ticks = element_blank()) + theme(legend.title = element_blank())
-my_plot2
-dev.off()
-
