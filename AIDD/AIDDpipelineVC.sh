@@ -3,12 +3,12 @@ DATE_WITH_TIME=$(date +%Y-%m-%d_%H-%M-%S)
 TIME_HOUR=$(date +%H)
 TIME_MIN=$(date +%M)
 TIME_SEC=$(date +%S)
-home_dir="$1" # home_dir=/home/user
-dir_path="$2" # dir_path=/home/user/testAIDD 
+home_dir="$1" # home_dir="$home_dir"
+dir_path="$2" # dir_path="$home_dir"/testAIDD 
 ref_dir_path="$home_dir"/AIDD/references  # this is where references are stored
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
-AIDDtool=/home/user/AIDD/AIDD_tools
+AIDDtool="$home_dir"/AIDD/AIDD_tools
 wd="$dir_path"/working_directory
 dirres="$dir_path"/Results; #
 dirraw="$dir_path"/raw_data;
@@ -278,7 +278,7 @@ haplotype1() {
 java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$file_in"
 }
 haplotype1B() {
-AIDDtool=/home/user/AIDD/AIDD_tools
+AIDDtool="$home_dir"/AIDD/AIDD_tools
 version=8
 setjavaversion
 java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$file_in" --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$file_out"
@@ -317,7 +317,7 @@ filter1J() {
 java -jar $AIDDtool/GenomeAnalysisTK.jar -T PrintReads -R "$ref_dir_path"/ref2.fa -I "$file_in" -BQSR "$wd"/"$file_name"recal_data.table --filter_reads_with_N_cigar -o "$file_out"
 }
 haplotype2() {
-AIDDtool=/home/user/AIDD/AIDD_tools
+AIDDtool="$home_dir"/AIDD/AIDD_tools
 version=8
 setjavaversion
 java $javaset  -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$file_in" --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$file_out"
@@ -393,7 +393,7 @@ AllsnpEff() {
   done
 }
 basecounts() {
-bash /home/user/AIDD/AIDD/ExToolset/ExToolsetbasecountsfrombam.sh "$main_dir" $dir_path/frequencies
+bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetbasecountsfrombam.sh "$home_dir" $dir_path/frequencies
 }
 ####################################################################################################################
 ####################################################################################################################

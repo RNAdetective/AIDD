@@ -298,7 +298,7 @@ hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/fastq/"$file_na
 HISAT2_single() { 
 new_dir="$wd"/sam
 create_dir
-hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$file_in" -t "$wd"/fastq/"$file_name".fastq --summary-file $dirqc/alignment_metrics/"$file_name".txt -S "$wd"/sam/"$file_name".sam
+hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$wd"/fastq/"$file_name".fastq -t --summary-file $dirqc/alignment_metrics/"$file_name".txt -S "$wd"/sam/"$file_name".sam
 }
 STAR_paired() { 
 STAR --genomeDir "$home_dir"/AIDD/references/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn 1 "$wd"/fastq/"$file_name"_1.fastq -2 "$wd"/fastq/"$file_name"_2.fastq  --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard 
@@ -444,16 +444,16 @@ do
       file_out2="$wd"/fastq/"$file_name"_2.fastq
       run_tools2o
     fi
-  fi
 ####################################################################################################################
 #  CONVERT SRA TO FASTQ
 ####################################################################################################################
-  if [[ "$sra" == "yes" && "$library" == "single" ]];
-  then
-    tool=fastqdumpsingle
-    file_in="$wd"/$file_sra   
-    file_out="$wd"/fastq/"$file_name".fastq
-    run_tools
+    if [[ "$sra" == "yes" && "$library" == "single" ]];
+    then
+      tool=fastqdumpsingle
+      file_in="$wd"/$file_name   
+      file_out="$wd"/fastq/"$file_name".fastq
+      run_tools
+    fi
   fi 
 done
 ####################################################################################################################

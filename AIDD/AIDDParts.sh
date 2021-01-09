@@ -55,7 +55,7 @@ end=400
 trimpaired() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/fastq/$file_fastqpaired1 -o "$wd"/trim/$file_fastqpaired1trim ; fastx_trimmer -f "$start" -l "$end" -i "$wd"/fastq/$file_fastqpaired2 -o "$wd"/trim/$file_fastqpaired2trim ; cd $dirqc/fastqc ; fastqc "$wd"/fastq/$file_fastqpaired1trim "$wd"/fastq/$file_fastqpaired2trim --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f  "$wd"/fastq/$file_fastqpaired1 ; rm -f "$wd"/fastq/$file_fastqpaired2 ; mv "$wd"/trim/$file_fastqpaired1trim "$wd"/fastq/$file_fastqpaired1 ; mv "$wd"/trim/$file_fastqpaired2trim "$wd"/fastq/$file_fastqpaired2 ; }
 trimsingle() { fastx_trimmer -f "$start" -l "$end" -i "$wd"/fastq/$file_fastq -o "$wd"/trim/"$run"_trim.fastq ; cd $dirqc/fastqc ; fastqc "$run"_trim.fastq --outdir=$dirqc/fastqc ; cd "$dir_path"/AIDD/ ; rm -f "$wd"/fastq/$file_fastq ; mv "$wd"/trim/"$run"_trim.fastq "$wd"/fastq/$file_fastq ; }
 HISAT2_paired() {  hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -1 "$wd"/fastq/"$file_fastqpaired1" -2 "$wd"/fastq/"$file_fastqpaired2" -t --summary-file $dirqc/alignment_metrics/"$run".txt -S "$wd"/sam/"$file_sam" ; }
-HISAT2_single() { hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$wd"/"$file_fastq" -t --summary-file "$dir_path"/raw_data/counts/"$run".txt -S "$wd"/"$file_sam" ; }
+HISAT2_single() { hisat2 -q -x "$ref_dir_path"/genome -p3 --dta-cufflinks -U "$wd"/fastq/"$file_fastq" -t --summary-file "$dir_path"/raw_data/counts/"$run".txt -S "$wd"/sam/"$file_sam" ; }
 STAR_paired() { echo "STAR some text line on how to run" ; } #STAR --genomeDir /n/groups/hbctraining/intro_rnaseq_hpc/reference_data_ensembl38/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn Mov10_oe_1.subset.fq --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard 
  
 STAR_single() { echo "STAR some text line on how to run" ; } #STAR --genomeDir /n/groups/hbctraining/intro_rnaseq_hpc/reference_data_ensembl38/ensembl38_STAR_index/ --runThreadN 3 --readFilesIn Mov10_oe_1.subset.fq --outFileNamePrefix ../results/STAR/Mov10_oe_1_ --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within --outSAMattributes Standard
@@ -102,7 +102,7 @@ pheno_file="$dir_path"/PHENO_DATA
 Rscript "$home_dir"/AIDD/ExToolset/scripts/matrix.R "$dir_path" "$file_in_dir" "$index_file" "$pheno_file" "$Rtool" # creates matrix counts with names instead of ids and checks to make sure they are there
 }
 prep_bam_2() {
-AIDDtool=/home/user/AIDD/AIDD_tools
+AIDDtool="$main_dir"/AIDD/AIDD_tools
 version=8
 setjavaversion
 java $javaset -jar $AIDDtool/picard.jar AddOrReplaceReadGroups I="$rdbam"/$file_bam O="$wd"/$file_bam_2 RGID=4 RGLB=lib1 RGPL=illumina RGPU=unit1 RGSM=20 ##this will set up filtering guidelines in bam files 
@@ -188,7 +188,7 @@ split -d -b 8G "$dir_path"/"$AIDD".tar.gz """$dir_path""/"$AIDD".tar.gz." # REMO
 ##add gdrive command here to upload bam files
 }
 haplotype1() {
-AIDDtool=/home/user/AIDD/AIDD_tools
+AIDDtool="$main_dir"/AIDD/AIDD_tools
 version=8
 setjavaversion
 java -jar $AIDDtool/picard.jar BuildBamIndex INPUT="$wd"/$file_bam_dup
@@ -261,7 +261,7 @@ case $version in
 esac
 }
 haplotype2() {
-AIDDtool=/home/user/AIDD/AIDD_tools
+AIDDtool="$main_dir"/AIDD/AIDD_tools
 version=8
 setjavaversion
 java $javaset -jar $AIDDtool/GenomeAnalysisTK.jar -T HaplotypeCaller -R "$ref_dir_path"/ref2.fa -I "$wd"/$file_bam_recal --dbsnp "$ref_dir_path"/dbsnp.vcf --filter_reads_with_N_cigar -dontUseSoftClippedBases -stand_call_conf 20.0 --max_alternate_alleles 40 -o "$wd"/"$file_vcf_raw_recal"
@@ -420,7 +420,8 @@ else
   mes_out # ERROR OUTPUT IS THERE
 fi
 }
-dir_path="$1"
+main_dir="$1"
+dir_path="$2"
 echo "Which step would you like to start with?
 Please choose one of the following:
 fastqdumpsingle, fastqdumppaired trimsingle, trimpaired, alignsingle, alignpaired, alignsingleSTAR, alignpairedSTAR, alignsingleBOWTIE2, alignpairedBOWTIE2, samtobam, assemble, prep_bam, haplotype1, haplotype2, excitomevcf, excitomesnpEff"
@@ -432,7 +433,7 @@ exec > >(tee -i $LOG_LOCATION/AIDDParts.log)
 exec 2>&1
 
 echo "Log Location will be: [ $LOG_LOCATION ]"
-  export PATH=$PATH:/home/user/AIDD/AIDD_tools/bin
+  export PATH=$PATH:"$main_dir"/AIDD/AIDD_tools/bin
 INPUT="$dir_path"/PHENO_DATA.csv
 OLDIFS=$IFS  
 {
@@ -440,7 +441,8 @@ OLDIFS=$IFS
 read
 while IFS=, read -r samp_name run condition sample condition2 condition3
 do
-  dir_path="$1"
+  main_dir="$1"
+  dir_path="$2"
   rdvcf="$dir_path"/raw_data/vcf_files
   rdvcf_final="$rdvcf"/final
   rdsnp="$dir_path"/raw_data/snpEff
@@ -448,7 +450,7 @@ do
   dirqc="$dir_path"/quality_control
   wd="$dir_path"/working_directory
   javaset=$(echo "-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"); # sets java tools
-  AIDDtool=/home/user/AIDD/AIDD_tools; # AIDD tool directory
+  AIDDtool="$main_dir"/AIDD/AIDD_tools; # AIDD tool directory
   file_vcf_final="$run"filtered_snps_final;
   file_vcf_finalAll="$run"filtered_snps_finalAll.vcf
   file_vcf_finalADAR="$run"filtered_snps_finalADARediting.vcf
@@ -458,7 +460,7 @@ do
   snp_csv=snpEff"$run";
   snp_stats="$run";
   snpEff_in="$run"filtered_snps_final;
-  ref_dir_path=/home/user/AIDD/references;
+  ref_dir_path="$main_dir"/AIDD/references;
   file_sra="$run";
   file_fastq="$run".fastq;
   file_fastq="$run".fastq;
@@ -482,7 +484,7 @@ do
   file_vcf_finalADAR="$run"filtered_snps_finalADARediting.vcf;
   file_vcf_finalAPOBEC="$run"filtered_snps_finalAPOBECediting.vcf;
   sum_file="$dirqc"/alignment_metrics/"$run".txt 
-  fastq_dir_path=/home/user; # directory for local fastq files
+  fastq_dir_path="$main_dir"; # directory for local fastq files
   file_tab="$run".tab;
   file_name_gtf="$sample".gtf;
   if [ "$AIDDstep" == "fastqdumpsingle" ];
