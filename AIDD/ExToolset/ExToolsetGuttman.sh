@@ -69,10 +69,10 @@ temp_file
 #home_dir=$(config_get home_dir);
 #dir_path=$(config_get dir_path);
 #dirres=$(config_get dirres);
-home_dir=/home/user
+home_dir="$1"
 ExToolset="$home_dir"/AIDD/AIDD/ExToolset/scripts
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
-dir_path=/media/sf_AIDD/MDD2
+dir_path="$2"
 resgutt="$dir_path"/Results/guttman
 #file_in="$resgutt"/guttediting_count_matrixDESeq2.csv
 #cat "$file_in" | csvtool transpose >> "$dir_path"/temp.csv
@@ -89,7 +89,7 @@ resgutt="$dir_path"/Results/guttman
 #mes_out
 #mergeR
 # merge with PHENO_DATA.csv by "samp_name" name it guttediting_count_matrixAll.csv
-mainfile="$resgutt"/guttediting_count_matrixANOVAnew2.csv
+mainfile="$resgutt"/guttediting_count_matrixANOVA.csv
 resgutt1="$resgutt"/scores
 new_dir="$resgutt1"
 create_dir
