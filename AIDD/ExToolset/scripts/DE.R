@@ -30,7 +30,7 @@ all(rownames(colData) %in% colnames(countData))
 countData <- countData[, rownames(colData)]
 print("after renaming columns with PHENO_DATA file do they still match")
 all(rownames(colData) == colnames(countData))
-dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition1:condition2:condition3) #add model to this line set to interactions between 3 conditions if you have less then change the model everything after the ~. If you want to test each condition independently then do condition + condition2 and so on.
+dds <- DESeqDataSetFromMatrix(countData = countData, colData = colData, design = ~ condition + condition2 + condition:condition2) #add model to this line set to interactions between 3 conditions if you have less then change the model everything after the ~. If you want to test each condition independently then do condition + condition2 and so on.
 dds <- dds[ rowSums(counts(dds)) > 1, ]
 rlogv <- paste(work_dir,"rlogvar.tiff",sep="/")
 tiff(rlogv, units="in", width=10, height=10, res=600)
@@ -58,12 +58,12 @@ print(p)
 invisible(dev.off()) #save tiff
 sampleDists <- dist(t(assay(rld)))
 sampleDistMatrix <- as.matrix( sampleDists )
-rownames(sampleDistMatrix) <- paste( rld$condition,rld$condition2,rld$condition3) #add all columns of your phenodata file
+rownames(sampleDistMatrix) <- paste( rld$condition2) #add all columns of your phenodata file
 colnames(sampleDistMatrix) <- NULL
 colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 poisd <- PoissonDistance(t(counts(dds)))
 samplePoisDistMatrix <- as.matrix( poisd$dd )
-rownames(samplePoisDistMatrix) <- paste(rld$condition,rld$condition2,rld$condition3) #add all columns of your phenodata file
+rownames(samplePoisDistMatrix) <- paste(rld$condition2) #add all columns of your phenodata file
 colnames(samplePoisDistMatrix) <- NULL
 PoisHeatmap <- paste(work_dir,"PoisHeatmap.tiff", sep="/")
 tiff(PoisHeatmap, units="in", width=10, height=10, res=600)
@@ -71,23 +71,23 @@ pheatmap(samplePoisDistMatrix, clustering_distance_rows = poisd$dd, clustering_d
 invisible(dev.off()) #save tiff
 PCAplot <- paste(work_dir, "PCAplot.tiff", sep="/")
 tiff(PCAplot, units="in", width=10, height=10, res=600)
-plotPCA(rld, intgroup = c("condition","condition2","condition3")) #this is set for three conditions change to yours
+plotPCA(rld, intgroup = c("condition2")) #this is set for three conditions change to yours
 invisible(dev.off()) #save tiff
-pcaData <- plotPCA(rld, intgroup = c("condition","condtion2","condition3"), returnData = TRUE) #this is set for three conditions change to yours
+pcaData <- plotPCA(rld, intgroup = c("condition2"), returnData = TRUE) #this is set for three conditions change to yours
 percentVar <- round(100 * attr(pcaData, "percentVar"))
 PCAplot2 <- paste(work_dir, "PCAplot2.tiff", sep="/")
 tiff(PCAplot2, units="in", width=10, height=10, res=600)
-ggplot(pcaData, aes(x = PC1, y = PC2, color = condition, group = condition, label=rownames(pcaData))) + geom_point() + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed() + geom_text_repel(aes(label=rownames(pcaData)),position = position_dodge(width=0.9)) + theme(legend.position="bottom") # this is set to color by condition if you would like to change it to condition2 or condition3. If you want multiple then change your pheno_Data file to combine which ever conditions you want to label by. for example KO_Veh KO_treatment WT_Veh and WT_treatment in stead of just coloring by WT and KO just don't put "." or "-" in your names R does not like them.
+ggplot(pcaData, aes(x = PC1, y = PC2, color = condition2, group = condition2, label=rownames(pcaData))) + geom_point() + xlab(paste0("PC1: ", percentVar[1], "% variance")) + ylab(paste0("PC2: ", percentVar[2], "% variance")) + coord_fixed() + geom_text_repel(aes(label=rownames(pcaData)),position = position_dodge(width=0.9)) + theme(legend.position="bottom") # this is set to color by condition if you would like to change it to condition2 or condition3. If you want multiple then change your pheno_Data file to combine which ever conditions you want to label by. for example KO_Veh KO_treatment WT_Veh and WT_treatment in stead of just coloring by WT and KO just don't put "." or "-" in your names R does not like them.
 invisible(dev.off()) #save tiff
 mds <- as.data.frame(colData(rld))  %>% cbind(cmdscale(sampleDistMatrix))
 MDSplot <- paste(work_dir, "MDSplot.tiff", sep="/")
 tiff(MDSplot, units="in", width=10, height=10, res=600)
-ggplot(mds, aes(x = `1`, y = `2`, color = condition, label=rownames(pcaData))) + geom_point(size = 3) + coord_fixed() # again it is set to color by condition but you can change this just as before
+ggplot(mds, aes(x = `1`, y = `2`, color = condition2, label=rownames(pcaData))) + geom_point(size = 3) + coord_fixed() # again it is set to color by condition but you can change this just as before
 invisible(dev.off()) #save tiff
 mdsPois <- as.data.frame(colData(dds)) %>% cbind(cmdscale(samplePoisDistMatrix))
 MDSpois <- paste(work_dir,"MDSpois.tiff",sep="/")
 tiff(MDSpois, units="in", width=10, height=10, res=600)
-ggplot(mdsPois, aes(x = `1`, y = `2`, color = condition)) + geom_point(size = 3) + coord_fixed()# again it is set to color by condition but you can change this just as before
+ggplot(mdsPois, aes(x = `1`, y = `2`, color = condition2)) + geom_point(size = 3) + coord_fixed()# again it is set to color by condition but you can change this just as before
 invisible(dev.off()) #save tiff
 print("RUNNING DESEQ2 COMMAND MAY TAKE AWHILE")
 dds <- DESeq(dds)
@@ -135,7 +135,7 @@ write.csv(table4, downregGlist, row.names=FALSE, quote=FALSE)
 topVarlevels <- head(order(rowVars(assay(rld)), decreasing = TRUE), 60)
 mat  <- assay(rld)[ topVarlevels, ]
 mat  <- mat - rowMeans(mat)
-anno <- as.data.frame(colData(rld)[, c("condition")]) # again it is set to color by condition but you can change this just as before
+anno <- as.data.frame(colData(rld)[, c("condition2")]) # again it is set to color by condition but you can change this just as before
 rownames(anno) <- colData[,3]
 colnames(anno) <- level_name
 heatmap <- paste(work_dir,"heatmap.tiff",sep="/")
