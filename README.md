@@ -252,6 +252,9 @@ R packages
 * [GenomicAllignments] (https://bioconductor.org/packages/release/bioc/manuals/GenomicAlignments/man/GenomicAlignments.pdf)
 * [sirt] (https://cran.r-project.org/web/packages/sirt/sirt.pdf)
 
+If you use our tool please site our publication
+Plonski, N-M., Johnson, E., Frederick, M. et al. Automated Isoform Diversity Detector (AIDD): a pipeline for investigating transcriptome diversity of RNA-seq data. BMC Bioinformatics 21, 578 (2020). https://doi.org/10.1186/s12859-020-03888-6
+
 ___
 
 ## References for tools.
