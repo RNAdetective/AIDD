@@ -33,6 +33,32 @@ ___
 * multivariate analysis, dimension reduction, ANOVA, correlation analysis, and random forest of the excitome
 
 ___
+	
+#### **AIDDv2.0.0 now allows for** 
+
+* options of aligners, assemblers, and DE tools.
+* defining your own directories as well as setup scripts for instance setup.
+* analysis of mouse data and more human reference set options.
+* analysis of scRNA-seq, miRNAseq, and lcRNAseq in addition to bulk RNAseq.
+* normalization of editing sites, multivariate analysis and demension reduction as well as ANOVA and correlation analysis of the excitome. 
+
+___
+
+___
+
+#### **AIDDv3.0.0 now allows for** 
+
+* options to run AIDD DE analysis seperate from variant calling steps. The user can start with bam files and perform variant calling without having to run DE alignment steps.
+* .
+* analysis of mouse data with variant calling along with rat, drosphila, and C. elegans.
+* seperate option to create final expression matrices along with substituttions counts and expression matrices for user defined pathways.
+* scripts for manual statistical analysis including guttman scale with matrices to design figures describing editing relationships in the excitome, random forest modeling with figures automated within the script, and scripts for ANOVA analysis including designing best multivariate models.
+* scripts for venn diagrams, upset plots, violin and bar charts and pie charts with detailed annotations to customize to user experimental conditions. 
+* User can define multivariate models for DESeq2 differential expression analysis with detailed annotations in the script to also change charts to user specifications.
+* analysis of scRNA is still under revisions to do downstream statistical analysis but AIDD is capable of alignment and matrices generation for user use in their own downstream analysis.
+
+___
+
 
 ## Getting Started
 
