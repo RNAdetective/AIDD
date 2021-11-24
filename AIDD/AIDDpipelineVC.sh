@@ -9,6 +9,7 @@ ref_dir_path="$home_dir"/AIDD/references  # this is where references are stored
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
 AIDDtool="$home_dir"/AIDD/AIDD_tools
+javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
 wd="$dir_path"/working_directory
 dirres="$dir_path"/Results; #
 dirraw="$dir_path"/raw_data;
