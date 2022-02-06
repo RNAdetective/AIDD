@@ -39,12 +39,13 @@ echo "whole, hairpin or mature"
   echo "paired or single" # this allows for selection between paired and single end data
   read library
   echo "Which aligner would you like to use? Please choose one of the following: (note that if you are using STAR or BOWTIE2 you need to make sure you download the correct reference sets before you run AIDD by double clicking on the AIDDrefset icon on the desktop."
-echo "HISAT2, STAR or BOWTIE2" # which alignment tool
+echo "HISAT2, STAR" # which alignment tool
   read aligner 
   echo "Which assembler would you like to use? Please choose one of the following: (note that if you are using HISAT2 stringtie is suggested and with STAR and BOWTIE2 cufflinks is recommended)"
   echo "stringtie or cufflinks" # which assembly tool
   read assembler 
   echo "Which organism are you using?"
+  echo "human. mouse"
   read human
 else
   sra=$"yes";
@@ -163,7 +164,7 @@ miRNA="$mRNA"
 miRNAtype="$miRNAtype"
 library="$library"
 aligner="$aligner"
-assembler="$stringtie"
+assembler="$assembler"
 savesra="$savesra"
 savefastq="$savefastq"
 human="$human"

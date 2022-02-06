@@ -9,7 +9,6 @@ ref_dir_path="$home_dir"/AIDD/references  # this is where references are stored
 ExToolset="$dir_path"/AIDD/ExToolset/scripts
 ExToolsetix="$home_dir"/AIDD/AIDD/ExToolset/indexes
 AIDDtool="$home_dir"/AIDD/AIDD_tools
-javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
 wd="$dir_path"/working_directory
 dirres="$dir_path"/Results; #
 dirraw="$dir_path"/raw_data;
@@ -396,6 +395,8 @@ AllsnpEff() {
 basecounts() {
 bash "$home_dir"/AIDD/AIDD/ExToolset/ExToolsetbasecountsfrombam.sh "$home_dir" $dir_path/frequencies
 }
+javaset="-Xmx20G -XX:-UseGCOverheadLimit -XX:ParallelGCThreads=2 -XX:ReservedCodeCacheSize=1024M -Djava.io.tmpdir="$dir_path"/tmp"; # sets java tools
+
 ####################################################################################################################
 ####################################################################################################################
 ####################################################################################################################
@@ -417,37 +418,37 @@ do
     tool=prep_bam_2
     file_in="$rdbam"/$file_name.bam    
     file_out="$wd"/"$file_name"_2.bam
-    run_tools
+    #run_tools
 ####################################################################################################################
 #  prep_bam_3
 ####################################################################################################################
     tool=prep_bam_3    
     file_in="$wd"/"$file_name"_2.bam
     file_out="$wd"/"$file_name"_3.bam
-    run_tools
+    #run_tools
 ####################################################################################################################
 #  prep_align_sum
 ####################################################################################################################
     tool=prep_align_sum
     file_in="$wd"/"$file_name"_3.bam   
     file_out="$dirqc"/alignment_metrics/"$file_name"_alignment_metrics.txt
-    run_tools
+    #run_tools
     tool=prep_align_sum2
     file_in="$wd"/"$file_name"_3.bam
     file_out=$dirqc/insert_metrics/"$file_name"_insert_metrics.txt
-    run_tools
+    #run_tools
     tool=prep_align_sum3
     file_in="$wd"/"$file_name"_3.bam
     file_out="$wd"/"$file_name"depth_out.txt
     rm -f "$wd"/"$file_name"_2.bam ##add option here donot remove files
-    run_tools
+    #run_tools
 ####################################################################################################################
 #  markduplicates
 ####################################################################################################################
     tool=markduplicates
     file_in="$wd"/"$file_name"_3.bam    
     file_out="$wd"/"$file_name"_dedup_reads.bam
-    run_tools
+    #run_tools
   fi
 ####################################################################################################################
 #  DISPLAY MESSAGES
@@ -490,7 +491,7 @@ do
     tool=filter1B
     file_in="$wd"/"$file_name"raw_snps.vcf    
     file_out="$rdvcf"/"$file_name"raw_snps.table
-    #run_tools
+    run_tools
     tool=filter1C
     file_in="$wd"/"$file_name"raw_variants.vcf 
     file_out="$wd"/"$file_name"raw_indels.vcf
@@ -502,7 +503,7 @@ do
     tool=filter1E
     file_in="$wd"/"$file_name"filtered_snps.vcf
     file_out="$rdvcf"/"$file_name"filtered_snps.table
-    #run_tools
+    run_tools
     tool=filter1F
     file_in="$wd"/"$file_name"raw_indels.vcf
     file_out="$wd"/"$file_name"filtered_indels.vcf
@@ -541,7 +542,7 @@ do
     tool=haplotype2
     file_in="$wd"/"$file_name"recal_reads.bam    
     file_out="$wd"/"$file_name"raw_variants_recal.vcf
-   # rm -f "$wd"/"$file_name"_dedup_reads.bam
+    rm -f "$wd"/"$file_name"_dedup_reads.bam
     run_tools
     tool=haplotype2B
     file_in="$wd"/"$file_name"raw_variants_recal.vcf

@@ -250,12 +250,15 @@ mv "$wd"/"$file_name"_pass.fastq "$file_out"
 movefastqpaired() {
 new_dir="$wd"/fastq
 create_dir
+mv "$dir_path"/"$file_name"_1.fastq "$wd"/fastq
+mv "$dir_path"/"$file_name"_2.fastq "$wd"/fastq
 cp "$file_in" "$file_out"
 cp "$file_in2" "$file_out2"
 }
 movefastqsingle() {
 new_dir="$wd"/fastq
 create_dir
+mv "$dir_path"/"$file_name".fastq "$wd"/fastq
 cp "$file_in" "$file_out"
 }
 fastqcpaired() { 
